@@ -23,7 +23,51 @@ def _predict_with_retries(laya_agent, state: dict, questions: dict) -> dict:
     raise RuntimeError(f"Laya batch failed after retries: {last_error}")
 
 
-def validate_with_laya(blueprint: JDBlueprint, resume: ResumeJSON, laya_agent) -> ValidatorResult:
+def build_laya_responsibility_payload(
+    blueprint: JDBlueprint,
+    *,
+    uncovered_ids: list[str] | None = None,
+    max_items: int | None = None,
+) -> dict:
+    """
+    Gate 2: feed Laya structured responsibilities with a budget.
+
+    Prefer uncovered responsibility IDs (from keyword validator) first, then
+    remaining entries in JD order. Never silently hard-cap at 8.
+    """
+    budget = max_items if max_items is not None else thresholds.LAYA_RESPONSIBILITY_MAX
+    entries = blueprint.responsibility_entries()
+    total = len(entries)
+    uncovered = set(uncovered_ids or [])
+
+    ordered: list[dict[str, str]] = []
+    if uncovered:
+        for entry in entries:
+            if entry["id"] in uncovered:
+                ordered.append(entry)
+    for entry in entries:
+        if entry not in ordered:
+            ordered.append(entry)
+
+    selected = ordered[: max(0, budget)] if budget >= 0 else ordered
+    truncated = len(selected) < total
+    return {
+        "responsibilities": [item["text"] for item in selected],
+        "responsibility_entries": selected,
+        "responsibilities_total": total,
+        "responsibilities_in_state": len(selected),
+        "responsibilities_truncated": truncated,
+        "uncovered_responsibility_ids": sorted(uncovered),
+    }
+
+
+def validate_with_laya(
+    blueprint: JDBlueprint,
+    resume: ResumeJSON,
+    laya_agent,
+    *,
+    uncovered_responsibility_ids: list[str] | None = None,
+) -> ValidatorResult:
     bullets = all_bullets(resume)
     if not bullets:
         return ValidatorResult(
@@ -39,6 +83,10 @@ def validate_with_laya(blueprint: JDBlueprint, resume: ResumeJSON, laya_agent) -
             ],
         )
 
+    responsibility_payload = build_laya_responsibility_payload(
+        blueprint,
+        uncovered_ids=uncovered_responsibility_ids,
+    )
     state = {
         "target_role": blueprint.job.target_title,
         "primary_family": blueprint.job.primary_family,
@@ -46,7 +94,8 @@ def validate_with_laya(blueprint: JDBlueprint, resume: ResumeJSON, laya_agent) -
         "seniority": blueprint.job.seniority,
         "p1": blueprint.priority_skills.get("P1", []),
         "p2": blueprint.priority_skills.get("P2", []),
-        "responsibilities": blueprint.responsibilities[:8],
+        "responsibilities": responsibility_payload["responsibilities"],
+        "responsibility_entries": responsibility_payload["responsibility_entries"],
     }
 
     batch_size = max(1, thresholds.LAYA_BULLET_BATCH_SIZE)
@@ -140,5 +189,9 @@ def validate_with_laya(blueprint: JDBlueprint, resume: ResumeJSON, laya_agent) -
             "batch_count": batch_count,
             "batch_size": batch_size,
             "failed_batch": False,
+            "responsibilities_total": responsibility_payload["responsibilities_total"],
+            "responsibilities_in_state": responsibility_payload["responsibilities_in_state"],
+            "responsibilities_truncated": responsibility_payload["responsibilities_truncated"],
+            "uncovered_responsibility_ids": responsibility_payload["uncovered_responsibility_ids"],
         },
     )

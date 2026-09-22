@@ -30,6 +30,36 @@ def _keywords(text: str) -> set[str]:
     return {word for word in words if len(word) > 3 and word not in STOPWORDS}
 
 
+def _bigrams(text: str) -> set[str]:
+    words = [w for w in normalize_text(text).replace("/", " ").replace("-", " ").split() if w]
+    return {" ".join(words[i : i + 2]) for i in range(len(words) - 1)}
+
+
+def _responsibility_score(required: set[str], required_text: str, bullet_text: str, technologies: list[str]) -> float:
+    """Keyword overlap with bigram boost and technology evidence (Gate 2)."""
+    bullet_words = _keywords(bullet_text)
+    if not required:
+        base = 0.5
+    else:
+        base = len(required & bullet_words) / len(required)
+
+    bigram_boost = 0.0
+    req_bigrams = _bigrams(required_text)
+    bullet_bigrams = _bigrams(bullet_text)
+    if req_bigrams:
+        bigram_boost = 0.25 * (len(req_bigrams & bullet_bigrams) / len(req_bigrams))
+
+    tech_boost = 0.1 * len(
+        [
+            tech
+            for tech in technologies
+            if normalize_text(tech) in normalize_text(required_text)
+            or tech.lower() in required_text.lower()
+        ]
+    )
+    return min(1.0, base + bigram_boost + tech_boost)
+
+
 def _ensure_bullet_meta(blueprint: JDBlueprint, resume: ResumeJSON) -> ResumeJSON:
     needs = any(not exp.bullet_meta for exp in resume.experience) or any(
         not project.bullet_meta for project in resume.projects
@@ -42,7 +72,9 @@ def _ensure_bullet_meta(blueprint: JDBlueprint, resume: ResumeJSON) -> ResumeJSO
 def validate_responsibilities(blueprint: JDBlueprint, resume: ResumeJSON) -> ValidatorResult:
     """
     Map each JD responsibility (R001...) to the best aligned bullet.
-    Deterministic overlap + technology match first.
+
+    Gate 2: keyword overlap + bigram phrase boost + technology evidence.
+    Semantic Laya assist consumes uncovered_responsibility_ids separately.
     """
     resume = _ensure_bullet_meta(blueprint, resume)
     bullets = []
@@ -63,29 +95,15 @@ def validate_responsibilities(blueprint: JDBlueprint, resume: ResumeJSON) -> Val
         best_score = 0.0
 
         for bullet in bullets:
+            score = _responsibility_score(
+                required,
+                text,
+                bullet.text,
+                list(bullet.technologies or []),
+            )
+            # Prefer bullets already tagged with this R id (slight boost).
             if rid in bullet.responsibility_ids:
-                # Prefer explicit mapping score recomputed
-                bullet_words = _keywords(bullet.text)
-                overlap = (
-                    1.0
-                    if not required
-                    else len(required & bullet_words) / max(1, len(required))
-                )
-                tech_boost = 0.1 * len(
-                    [
-                        tech
-                        for tech in bullet.technologies
-                        if normalize_text(tech) in normalize_text(text)
-                        or tech.lower() in text.lower()
-                    ]
-                )
-                score = min(1.0, overlap + tech_boost)
-            else:
-                bullet_words = _keywords(bullet.text)
-                if not required:
-                    score = 0.5
-                else:
-                    score = len(required & bullet_words) / len(required)
+                score = min(1.0, score + 0.05)
             if score > best_score:
                 best_score = score
                 best_id = bullet.id
@@ -125,6 +143,9 @@ def validate_responsibilities(blueprint: JDBlueprint, resume: ResumeJSON) -> Val
     total = max(1, len(mapping))
     ratio = covered_count / total
     passed = ratio >= thresholds.RESPONSIBILITY_COVERAGE_MIN
+    uncovered_ids = [
+        rid for rid, info in mapping.items() if info.get("status") == "FAIL"
+    ]
 
     report_lines = [
         f"{rid} -> {info['bullet_id'] or 'NONE'} {info['status']} {info['score']:.2f}"
@@ -141,5 +162,7 @@ def validate_responsibilities(blueprint: JDBlueprint, resume: ResumeJSON) -> Val
             "mapping_report": report_lines,
             "covered": covered_count,
             "total": len(mapping),
+            "uncovered_responsibility_ids": uncovered_ids,
+            "match_method": "keyword_overlap_v2",
         },
     )

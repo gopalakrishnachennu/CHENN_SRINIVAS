@@ -1135,13 +1135,23 @@ def test_attempt_01_and_attempt_02_reports_both_exist():
 def test_final_selected_attempt_is_identifiable():
     bp = _monster_blueprint()
     paths = create_run_paths(bp.jd_hash, run_id=_uid("imm-sel"))
-    save_validated_resume_artifact(paths, "V01", _good_resume("V01"), attempt_no=1)
-    path2 = save_validated_resume_artifact(paths, "V01", _good_resume("V01"), attempt_no=2)
+    first = _good_resume("V01")
+    first.summary = "ATTEMPT ONE SUMMARY UNIQUE"
+    save_validated_resume_artifact(paths, "V01", first, attempt_no=1)
+    second = _good_resume("V01")
+    second.summary = "ATTEMPT TWO SUMMARY UNIQUE"
+    path2 = save_validated_resume_artifact(paths, "V01", second, attempt_no=2)
     marker = paths.validated_dir / "V01_final_selected_attempt.json"
     assert marker.exists()
     data = json.loads(marker.read_text(encoding="utf-8"))
     assert data["attempt_no"] == 2
     assert data["artifact"] == "V01_attempt_02_final.json"
-    assert path2.name == "V01_attempt_02_final.json"
+    # Gate 2: stable pointer syncs to selected attempt content.
+    assert path2.name == "V01_final.json"
+    stable = paths.validated_dir / "V01_final.json"
+    assert "ATTEMPT TWO SUMMARY UNIQUE" in stable.read_text(encoding="utf-8")
     assert (paths.validated_dir / "V01_attempt_01_final.json").exists()
-    assert (paths.validated_dir / "V01_final.json").exists()  # first attempt pointer preserved
+    assert "ATTEMPT ONE SUMMARY UNIQUE" in (
+        paths.validated_dir / "V01_attempt_01_final.json"
+    ).read_text(encoding="utf-8")
+    assert (paths.validated_dir / "V01_attempt_02_final.json").exists()

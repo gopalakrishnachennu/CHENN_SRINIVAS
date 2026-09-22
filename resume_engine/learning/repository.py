@@ -8,9 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from resume_engine.config import thresholds
 from resume_engine.config.settings import (
-    LEARNING_STORAGE_DIR,
     SQLITE_DB_PATH,
     ensure_storage_dirs,
     portable_path,

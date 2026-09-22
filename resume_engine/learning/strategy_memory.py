@@ -18,10 +18,40 @@ from resume_engine.models.jd_blueprint import JDBlueprint
 
 
 def load_outcome_records(path: Path | None = None) -> list[dict]:
-    outcomes_path = path or OUTCOMES_FILE
+    """
+    Load learning outcomes.
+
+    Gate 2: SQLite LearningRepository is the source of truth for the default path.
+    Explicit `path` (tests/tooling) still reads that JSONL file.
+    Falls back to legacy OUTCOMES_FILE JSONL when SQLite is empty/unavailable.
+    """
+    if path is not None:
+        outcomes_path = path
+        if not outcomes_path.exists():
+            return []
+        records: list[dict] = []
+        with open(outcomes_path, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.strip():
+                    records.append(json.loads(line))
+        return records
+
+    try:
+        from resume_engine.learning.repository import get_default_repository
+
+        sqlite_records = get_default_repository().get_strategy_history(
+            eligible_only=False,
+            limit=5000,
+        )
+        if sqlite_records:
+            return sqlite_records
+    except Exception:
+        pass
+
+    outcomes_path = OUTCOMES_FILE
     if not outcomes_path.exists():
         return []
-    records: list[dict] = []
+    records = []
     with open(outcomes_path, "r", encoding="utf-8") as f:
         for line in f:
             if line.strip():

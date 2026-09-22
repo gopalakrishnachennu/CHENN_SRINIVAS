@@ -206,30 +206,50 @@ def save_validated_resume_artifact(
     attempt_no: int = 1,
     versioned_if_exists: bool = True,
 ) -> Path:
-    # Final selected artifact keeps stable name; attempt copy preserved separately when regenerating.
+    """
+    Persist attempt-scoped final plus a stable V{id}_final.json pointer.
+
+    Gate 2: regeneration updates the stable pointer to the selected attempt
+    content while preserving immutable attempt_* files and a selection marker.
+    """
     attempt_name = f"{variant_id}_attempt_{attempt_no:02d}_final.json"
     save_resume_artifact(paths.validated_dir, attempt_name, resume)
 
-    name = f"{variant_id}_final.json"
-    path = paths.validated_dir / name
-    if path.exists():
-        if not versioned_if_exists:
-            raise FileExistsError(f"Refusing to overwrite existing artifact: {portable_path(path)}")
-        # Move prior final aside is not needed — attempt files already preserve history.
-        # Replace symlink-like pointer by writing a selection marker instead of overwrite.
-        marker = paths.validated_dir / f"{variant_id}_final_selected_attempt.json"
-        with open(marker, "w", encoding="utf-8") as f:
-            json.dump(
-                {
-                    "variant_id": variant_id,
-                    "attempt_no": attempt_no,
-                    "artifact": attempt_name,
-                },
-                f,
-                indent=2,
-            )
-        return paths.validated_dir / attempt_name
-    return save_resume_artifact(paths.validated_dir, name, resume)
+    stable_name = f"{variant_id}_final.json"
+    stable_path = paths.validated_dir / stable_name
+    marker = paths.validated_dir / f"{variant_id}_final_selected_attempt.json"
+    marker_payload = {
+        "variant_id": variant_id,
+        "attempt_no": attempt_no,
+        "artifact": attempt_name,
+        "stable_artifact": stable_name,
+    }
+    with open(marker, "w", encoding="utf-8") as f:
+        json.dump(marker_payload, f, indent=2)
+
+    # Sync stable pointer to selected attempt (attempt files remain immutable).
+    with open(stable_path, "w", encoding="utf-8") as f:
+        json.dump(resume.model_dump(), f, indent=2, ensure_ascii=False)
+    return stable_path
+
+
+def resolve_validated_final(paths: RunPaths, variant_id: str) -> Path | None:
+    """Resolve the currently selected final resume for a variant."""
+    marker = paths.validated_dir / f"{variant_id}_final_selected_attempt.json"
+    if marker.exists():
+        try:
+            data = json.loads(marker.read_text(encoding="utf-8"))
+            artifact = data.get("artifact")
+            if artifact:
+                candidate = paths.validated_dir / artifact
+                if candidate.exists():
+                    return candidate
+        except (json.JSONDecodeError, OSError):
+            pass
+    stable = paths.validated_dir / f"{variant_id}_final.json"
+    if stable.exists():
+        return stable
+    return None
 
 
 def save_rejected_resume_artifact(

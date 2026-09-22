@@ -316,10 +316,17 @@ def update_registry_from_jd(extraction: JDExtraction, registry: dict) -> dict:
 
 
 def make_compact_laya_state(extraction: JDExtraction) -> dict:
+    # Gate 2: align with Phase 2 Laya budget (was hard-coded [:8]).
+    from resume_engine.config import thresholds
+
+    budget = max(1, thresholds.LAYA_RESPONSIBILITY_MAX)
+    responsibilities = list(extraction.responsibilities or [])
     return {
         "title": extraction.target_title or "",
         "skills": [e.name for e in extraction.entities[:35]],
-        "responsibilities": extraction.responsibilities[:8],
+        "responsibilities": responsibilities[:budget],
+        "responsibilities_total": len(responsibilities),
+        "responsibilities_truncated": len(responsibilities) > budget,
         "domain": extraction.domain_terms[:8],
     }
 

@@ -146,7 +146,23 @@ def run_validators(
         results.append(validate_cross_run_uniqueness(resume, blueprint.jd_hash, run_id))
 
     if laya_agent is not None:
-        results.append(validate_with_laya(blueprint, resume, laya_agent))
+        responsibility_result = next(
+            (item for item in results if item.name == "responsibility_validator"),
+            None,
+        )
+        uncovered = []
+        if responsibility_result:
+            uncovered = list(
+                responsibility_result.details.get("uncovered_responsibility_ids") or []
+            )
+        results.append(
+            validate_with_laya(
+                blueprint,
+                resume,
+                laya_agent,
+                uncovered_responsibility_ids=uncovered,
+            )
+        )
 
     optimization_score, subscores = calculate_score(results)
     hard_failed = any(

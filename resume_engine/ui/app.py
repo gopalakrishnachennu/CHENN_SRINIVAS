@@ -148,7 +148,16 @@ def list_validated_resumes(limit: int = 50) -> list[dict]:
     root = RUNS_STORAGE_DIR
     if not root.exists():
         return []
-    files = sorted(root.glob("*/*/validated/*_final.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+    # Stable finals only (Gate 2): ignore attempt_*_final.json clutter.
+    files = sorted(
+        (
+            path
+            for path in root.glob("*/*/validated/*_final.json")
+            if "_attempt_" not in path.name
+        ),
+        key=lambda p: p.stat().st_mtime,
+        reverse=True,
+    )
     items = []
     for path in files[:limit]:
         parts = path.parts
