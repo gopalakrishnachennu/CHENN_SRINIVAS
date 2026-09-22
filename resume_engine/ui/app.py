@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from flask import Flask, abort, render_template_string, request, send_file, url_for
+from flask import Flask, abort, render_template_string, request, send_file
 
 from resume_engine.config.settings import EXPORT_STORAGE_DIR, PROJECT_ROOT, RUNS_STORAGE_DIR, ensure_storage_dirs
 from resume_engine.export.document_model import ContactHeader
@@ -64,6 +64,12 @@ PAGE = """
       cursor: pointer;
     }
     .btn.secondary { background: transparent; color: var(--accent); }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.65rem 1rem;
+    }
+    @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
     pre {
       white-space: pre-wrap;
       background: #f7f2e8;
@@ -100,14 +106,36 @@ PAGE = """
     <p>{{ resume.summary }}</p>
     <form method="post" action="{{ url_for('export_one') }}">
       <input type="hidden" name="resume_path" value="{{ resume_path }}"/>
-      <label>Candidate name (optional)</label>
-      <input type="text" name="candidate_name" placeholder="Name for document header"/>
-      <label>Email (optional)</label>
-      <input type="text" name="email" placeholder="email@example.com"/>
+      <div class="grid-2">
+        <div>
+          <label>Candidate name (optional)</label>
+          <input type="text" name="candidate_name" placeholder="Name for document header"/>
+        </div>
+        <div>
+          <label>Email (optional)</label>
+          <input type="text" name="email" placeholder="email@example.com"/>
+        </div>
+        <div>
+          <label>Phone (optional)</label>
+          <input type="text" name="phone" placeholder="+1 …"/>
+        </div>
+        <div>
+          <label>Location (optional)</label>
+          <input type="text" name="location" placeholder="City, ST"/>
+        </div>
+        <div>
+          <label>LinkedIn (optional)</label>
+          <input type="text" name="linkedin" placeholder="linkedin.com/in/…"/>
+        </div>
+        <div>
+          <label>Website (optional)</label>
+          <input type="text" name="website" placeholder="https://…"/>
+        </div>
+      </div>
       <div class="actions">
         <button class="btn" name="format" value="docx" type="submit">Export DOCX</button>
         <button class="btn" name="format" value="pdf" type="submit">Export PDF</button>
-        <button class="btn secondary" name="format" value="both" type="submit">Export both</button>
+        <button class="btn secondary" name="format" value="both" type="submit">Export both (ZIP)</button>
         <a class="btn secondary" href="{{ url_for('index') }}">Back</a>
       </div>
     </form>
@@ -203,6 +231,9 @@ def view_resume():
 
 @app.post("/export")
 def export_one():
+    import zipfile
+    from io import BytesIO
+
     rel = request.form.get("resume_path", "")
     path = (PROJECT_ROOT / rel).resolve()
     if not str(path).startswith(str(RUNS_STORAGE_DIR.resolve())) or not path.exists():
@@ -213,6 +244,10 @@ def export_one():
     contact = ContactHeader(
         name=request.form.get("candidate_name") or None,
         email=request.form.get("email") or None,
+        phone=request.form.get("phone") or None,
+        location=request.form.get("location") or None,
+        linkedin=request.form.get("linkedin") or None,
+        website=request.form.get("website") or None,
     )
     result = export_resume(
         path,
@@ -221,7 +256,24 @@ def export_one():
         basename=path.stem,
         contact=contact,
     )
-    # Prefer returning the first artifact as a download.
+
+    if fmt == "both":
+        buffer = BytesIO()
+        with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+            for key in ("docx", "pdf"):
+                artifact = result["artifacts"].get(key)
+                if not artifact:
+                    continue
+                file_path = PROJECT_ROOT / artifact
+                zf.write(file_path, arcname=file_path.name)
+        buffer.seek(0)
+        return send_file(
+            buffer,
+            as_attachment=True,
+            download_name=f"{path.stem}_exports.zip",
+            mimetype="application/zip",
+        )
+
     first_fmt = formats[0]
     artifact = result["artifacts"].get(first_fmt)
     if not artifact:

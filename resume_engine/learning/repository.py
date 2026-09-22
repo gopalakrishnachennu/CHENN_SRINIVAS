@@ -99,14 +99,15 @@ class LearningRepository:
     """
     Storage abstraction over SQLite with optional legacy JSONL dual-write.
 
-    JSONL remains for backward compatibility; SQLite is the Wave 4 V1 backend.
+    Gate 3: SQLite is the sole learning write SoT by default.
+    Set dual_write_jsonl=True (or LEARNING_DUAL_WRITE_JSONL=1) for opt-in backup.
     """
 
     def __init__(
         self,
         db_path: Path | None = None,
         *,
-        dual_write_jsonl: bool = True,
+        dual_write_jsonl: bool = False,
     ) -> None:
         ensure_storage_dirs()
         self.db_path = Path(db_path) if db_path else SQLITE_DB_PATH
@@ -365,11 +366,22 @@ _DEFAULT_REPO: LearningRepository | None = None
 
 
 def get_default_repository() -> LearningRepository:
+    """
+    Process-wide LearningRepository.
+
+    Gate 3: SQLite is the sole write SoT by default.
+    Opt into legacy JSONL dual-write with LEARNING_DUAL_WRITE_JSONL=1.
+    """
     global _DEFAULT_REPO
     if _DEFAULT_REPO is None:
-        _DEFAULT_REPO = LearningRepository(
-            dual_write_jsonl=True,
-        )
+        import os
+
+        dual = os.getenv("LEARNING_DUAL_WRITE_JSONL", "").strip().lower() in {
+            "1",
+            "true",
+            "yes",
+        }
+        _DEFAULT_REPO = LearningRepository(dual_write_jsonl=dual)
     return _DEFAULT_REPO
 
 

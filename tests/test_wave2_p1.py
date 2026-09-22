@@ -8,9 +8,6 @@ cross-run uniqueness, and implementation audit honesty.
 from __future__ import annotations
 
 import json
-from types import SimpleNamespace
-
-import pytest
 
 from resume_engine.config import thresholds
 from resume_engine.generation.bullet_enrichment import (

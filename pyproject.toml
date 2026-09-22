@@ -45,3 +45,19 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+
+[tool.coverage.run]
+branch = false
+source = ["resume_engine"]
+omit = [
+  "resume_engine/storage/*",
+]
+
+[tool.coverage.report]
+fail_under = 70
+show_missing = true
+skip_empty = true
+exclude_lines = [
+  "pragma: no cover",
+  "if __name__ == .__main__.:",
+]

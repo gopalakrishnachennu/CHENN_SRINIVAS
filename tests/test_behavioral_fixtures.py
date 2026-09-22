@@ -509,7 +509,8 @@ class TestTargetedRepairPlanner:
             action="PASS",
             validator_results=[cov_result, fw_result, dup_result],
         )
-        plan = build_repair_plan(bundle)
+        # Smoke that repair planning does not raise on a good resume.
+        build_repair_plan(bundle)
         # Only error-severity issues should drive critical repair
         all_error_issues = [
             issue

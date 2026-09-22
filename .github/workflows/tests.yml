@@ -33,13 +33,12 @@ jobs:
           python -c "import resume_engine.llm.client"
           python -c "import resume_engine.learning.repository"
 
-      - name: Unit + behavioral tests (no live OpenAI/Laya)
+      - name: Unit + behavioral tests with coverage floor (no live)
         env:
           RUN_LIVE_TESTS: "0"
         run: |
-          pytest -m "not live" --tb=short
+          pytest -m "not live" --tb=short --cov=resume_engine --cov-report=term-missing --cov-fail-under=70
 
-      - name: Ruff (non-blocking advisory)
-        continue-on-error: true
+      - name: Ruff
         run: |
           ruff check resume_engine tests

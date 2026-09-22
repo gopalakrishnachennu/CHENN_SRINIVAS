@@ -9,8 +9,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import pytest
-
 from resume_engine.config import thresholds
 from resume_engine.learning.eligibility import is_record_eligible_for_learning
 from resume_engine.learning.outcome_builder import build_learning_outcome
