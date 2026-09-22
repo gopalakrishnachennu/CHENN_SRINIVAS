@@ -100,6 +100,9 @@
       "Docker"
     ],
     "usage_ratio": 0.25,
+    "p4_share_of_used_priority": 0.091,
+    "p4_usage_count": 1,
+    "one_p4_floor_applied": true,
     "max_ratio": 0.35,
     "validator_passed": true
   },
@@ -139,21 +142,7 @@
       ],
       "targets": [
         {
-          "location": "technical_skills",
-          "reason_codes": [
-            "FAIL_MISSING_REQUIRED_PLACEMENT"
-          ],
-          "skill": "Databricks"
-        },
-        {
           "location": "experience_responsibilities",
-          "reason_codes": [
-            "FAIL_MISSING_REQUIRED_PLACEMENT"
-          ],
-          "skill": "Databricks"
-        },
-        {
-          "location": "professional_summary",
           "reason_codes": [
             "FAIL_MISSING_REQUIRED_PLACEMENT"
           ],
@@ -171,9 +160,102 @@
           "reason_codes": [
             "FAIL_EXACT_DUPLICATE_BULLET"
           ]
+        },
+        {
+          "location": "technical_skills.Core Technologies",
+          "reason_codes": [
+            "FAIL_MISSING_REQUIRED_SKILL"
+          ],
+          "skill": "Databricks",
+          "operation": "APPEND_SKILL"
         }
       ],
-      "issue_count": 34
+      "operations": [
+        {
+          "operation": "REPLACE_EXPERIENCE_BULLET",
+          "location": "experience[0].bullets[0]",
+          "value": "",
+          "group": null,
+          "experience_index": 0,
+          "project_index": null,
+          "bullet_index": 0
+        },
+        {
+          "operation": "APPEND_SKILL",
+          "location": null,
+          "value": "Databricks",
+          "group": "Core Technologies",
+          "experience_index": null,
+          "project_index": null,
+          "bullet_index": null
+        },
+        {
+          "operation": "APPEND_SKILL",
+          "location": null,
+          "value": "Terraform",
+          "group": "Core Technologies",
+          "experience_index": null,
+          "project_index": null,
+          "bullet_index": null
+        },
+        {
+          "operation": "APPEND_SKILL",
+          "location": null,
+          "value": "OpenAI API",
+          "group": "Core Technologies",
+          "experience_index": null,
+          "project_index": null,
+          "bullet_index": null
+        },
+        {
+          "operation": "APPEND_SKILL",
+          "location": null,
+          "value": "Claude API",
+          "group": "Core Technologies",
+          "experience_index": null,
+          "project_index": null,
+          "bullet_index": null
+        },
+        {
+          "operation": "APPEND_SKILL",
+          "location": null,
+          "value": "CI/CD",
+          "group": "Core Technologies",
+          "experience_index": null,
+          "project_index": null,
+          "bullet_index": null
+        },
+        {
+          "operation": "APPEND_SKILL",
+          "location": null,
+          "value": "Python",
+          "group": "Core Technologies",
+          "experience_index": null,
+          "project_index": null,
+          "bullet_index": null
+        },
+        {
+          "operation": "APPEND_SKILL",
+          "location": null,
+          "value": "Apache Spark",
+          "group": "Core Technologies",
+          "experience_index": null,
+          "project_index": null,
+          "bullet_index": null
+        },
+        {
+          "operation": "APPEND_SKILL",
+          "location": null,
+          "value": "LangChain",
+          "group": "Core Technologies",
+          "experience_index": null,
+          "project_index": null,
+          "bullet_index": null
+        }
+      ],
+      "issue_count": 34,
+      "generation_mode": "TEMPLATE",
+      "unresolved_required_candidate_gaps": []
     },
     "valid_content_preserved": true,
     "patch_only_target_changed": true,

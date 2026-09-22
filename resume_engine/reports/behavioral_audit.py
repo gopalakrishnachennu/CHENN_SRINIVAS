@@ -431,6 +431,11 @@ def run_behavioral_audit() -> dict:
 
     p4_items = blueprint.priority_skills.get("P4", [])
     p4_usage_ratio = float(p4_result.details.get("usage_ratio", 0.0))
+    p4_share = float(p4_result.details.get("p4_share_of_used_priority", p4_usage_ratio))
+    p4_count = int(p4_result.details.get("p4_usage_count", 0))
+    p4_within_policy = bool(p4_result.passed) and (
+        p4_count <= 1 or p4_share <= thresholds.P4_USAGE_MAX
+    )
 
     checks = {
         "template_mode_default": template_context["generation_mode"] == "TEMPLATE",
@@ -447,7 +452,7 @@ def run_behavioral_audit() -> dict:
         "repair_preserves_valid_content": unchanged_valid_content,
         "similar_variants_blocked": not similar_result.passed,
         "distinct_variants_pass": distinct_result.passed,
-        "p4_usage_within_limit": p4_result.passed and p4_usage_ratio <= thresholds.P4_USAGE_MAX,
+        "p4_usage_within_limit": p4_within_policy,
         "p4_optional_semantics": p4_optional_ok and p4_not_in_repair,
         "failed_final_gate": failed_final_gate,
         "raw_artifact_preserved": run_isolation,
@@ -475,6 +480,9 @@ def run_behavioral_audit() -> dict:
             "p4_items": p4_items,
             "p4_used": p4_result.details.get("p4_used", []),
             "usage_ratio": round(p4_usage_ratio, 3),
+            "p4_share_of_used_priority": round(p4_share, 3),
+            "p4_usage_count": p4_count,
+            "one_p4_floor_applied": bool(p4_result.details.get("one_p4_floor_applied")),
             "max_ratio": thresholds.P4_USAGE_MAX,
             "validator_passed": p4_result.passed,
         },
@@ -527,7 +535,7 @@ def run_behavioral_audit() -> dict:
             "Hybrid role detection": blueprint.job.hybrid_probability >= 0.55,
             "Secondary family retention": blueprint.job.secondary_family == "data_engineering",
             "Hybrid family validator": hybrid_result.passed,
-            "P4 limit respected": p4_usage_ratio <= thresholds.P4_USAGE_MAX and p4_result.passed,
+            "P4 limit respected": p4_within_policy,
             "P4 optional semantics": p4_optional_ok and p4_not_in_repair,
             "Targeted repair": repair_plan["required"] and repair_after.passed and patch_only_target_changed,
             "Repair scope guard": out_of_scope_rejected,

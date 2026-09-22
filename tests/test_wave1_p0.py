@@ -17,7 +17,7 @@ from pathlib import Path
 import pytest
 
 from resume_engine.config import thresholds
-from resume_engine.config.settings import PROJECT_ROOT, portable_path
+from resume_engine.config.settings import portable_path
 from resume_engine.generation.provenance import attach_skill_provenance
 from resume_engine.learning.outcome_store import save_learning_outcome
 from resume_engine.models.jd_blueprint import JDBlueprint
@@ -92,19 +92,22 @@ def test_zero_p4_usage_passes(blueprint):
     resume = _resume_with_p4(blueprint, used=[])
     result = validate_p4_usage(blueprint, resume)
     assert result.passed
-    assert result.details["usage_ratio"] == 0.0
+    assert result.details["p4_usage_count"] == 0
+    assert result.details["p4_share_of_used_priority"] == 0.0
 
 
 def test_p4_below_limit_passes(blueprint):
     resume = _resume_with_p4(blueprint, used=["Docker"])
     result = validate_p4_usage(blueprint, resume)
     assert result.passed
-    assert result.details["usage_ratio"] <= thresholds.P4_USAGE_MAX
+    assert result.details["p4_usage_count"] == 1
+    assert result.details["one_p4_floor_applied"] is True
 
 
 def test_p4_exact_limit_passes():
+    """Share-of-used gate: many required + P4 share exactly at max still passes."""
     bp = _monster_blueprint()
-    bp.priority_skills["P4"] = [f"Adj{i}" for i in range(20)]
+    bp.priority_skills["P4"] = [f"Adj{i}" for i in range(5)]
     entity_cls = type(bp.entities[0])
     for name in bp.priority_skills["P4"]:
         bp.entities.append(
@@ -119,18 +122,39 @@ def test_p4_exact_limit_passes():
     bp.generation_contract.allowed_technologies = list(
         dict.fromkeys(bp.generation_contract.allowed_technologies + bp.priority_skills["P4"])
     )
-    used = bp.priority_skills["P4"][:7]  # 7/20 = 0.35
-    resume = _resume_with_p4(bp, used=used)
+    # Use 1 P4 only — floor passes regardless of available ratio.
+    resume = _resume_with_p4(bp, used=["Adj0"])
     result = validate_p4_usage(bp, resume)
-    assert result.details["usage_ratio"] == pytest.approx(thresholds.P4_USAGE_MAX)
     assert result.passed
+    assert result.details["one_p4_floor_applied"] is True
 
 
 def test_p4_above_limit_fails(blueprint):
-    resume = _resume_with_p4(blueprint, used=["Docker", "Helm"])
-    result = validate_p4_usage(blueprint, resume)
+    """P4 dominance: few required skills + multiple P4 → share > max."""
+    bp = blueprint.model_copy(deep=True)
+    bp.priority_skills["P1"] = ["AWS"]
+    bp.priority_skills["P2"] = ["Python"]
+    bp.priority_skills["P3"] = []
+    bp.priority_skills["P4"] = ["Docker", "Helm", "Ansible"]
+    resume = ResumeJSON(
+        target_title="Engineer",
+        summary="AWS Python Docker Helm Ansible engineer.",
+        technical_skills={"Core": ["AWS", "Python", "Docker", "Helm", "Ansible"]},
+        experience=[
+            ResumeExperience(
+                company="A",
+                title="Engineer",
+                bullets=["Delivered AWS Python Docker Helm Ansible platform work."],
+            )
+        ],
+        projects=[],
+        certifications=[],
+        variant_id="VP4",
+    )
+    result = validate_p4_usage(bp, resume)
     assert not result.passed
     assert any(issue.code == "FAIL_P4_OVERUSE" for issue in result.issues)
+    assert result.details["p4_share_of_used_priority"] > thresholds.P4_USAGE_MAX
 
 
 def test_missing_p4_does_not_trigger_required_placement(blueprint):
@@ -282,8 +306,8 @@ def test_repair_artifact_is_separate(blueprint):
     raw_path = save_raw_resume(paths, "V01", _good_resume("V01"))
     repair_path = save_repaired_resume(paths, "V01", _good_resume("V01"))
     assert raw_path != repair_path
-    assert raw_path.name == "V01_raw.json"
-    assert repair_path.name == "V01_repair_01.json"
+    assert raw_path.name == "V01_attempt_01_raw.json"
+    assert repair_path.name == "V01_attempt_01_repair.json"
 
 
 def test_final_artifact_is_separate(blueprint):
@@ -314,8 +338,8 @@ def test_same_jd_two_runs_do_not_collide(blueprint):
     save_raw_resume(a, "V01", _good_resume("V01"))
     save_raw_resume(b, "V01", _good_resume("V01"))
     assert a.root != b.root
-    assert (a.raw_dir / "V01_raw.json").exists()
-    assert (b.raw_dir / "V01_raw.json").exists()
+    assert (a.raw_dir / "V01_attempt_01_raw.json").exists()
+    assert (b.raw_dir / "V01_attempt_01_raw.json").exists()
 
 
 def test_run_id_in_metadata(blueprint):

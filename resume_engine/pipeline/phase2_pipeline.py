@@ -34,6 +34,7 @@ from resume_engine.scoring.score_engine import build_variant_diagnostics, calcul
 from resume_engine.storage.run_store import (
     create_run_paths,
     relative,
+    save_pipeline_error_report,
     save_raw_resume,
     save_rejected_resume_artifact,
     save_repaired_resume,
@@ -125,6 +126,8 @@ def run_validators(
     resume_id: str,
     run_id: str | None = None,
     check_cross_run: bool = True,
+    generation_mode: str = "TEMPLATE",
+    candidate_profile: dict | None = None,
 ) -> ValidationBundle:
     results: list[ValidatorResult] = [
         validate_blueprint_ready(blueprint),
@@ -162,7 +165,13 @@ def run_validators(
         subscores=subscores,
         validator_results=results,
     )
-    return attach_repair_plan(bundle, blueprint=blueprint)
+    return attach_repair_plan(
+        bundle,
+        blueprint=blueprint,
+        generation_mode=generation_mode,
+        candidate_profile=candidate_profile,
+        resume=resume,
+    )
 
 
 def process_variant(
@@ -175,165 +184,281 @@ def process_variant(
     run_paths,
     model: str | None = None,
     repair: bool = True,
+    *,
+    attempt_no: int = 1,
+    persist_learning: bool = False,
+    regen_reason: str | None = None,
 ) -> dict:
-    resume = generate_resume_with_openai(
-        client=client,
-        blueprint=blueprint,
-        strategy=strategy,
-        variant=variant,
-        generation_context=generation_context,
-        model=model,
-        run_id=run_paths.run_id,
-    )
-    resume = _enrich_resume(blueprint, resume, generation_context)
-    raw_path = save_raw_resume(run_paths, variant.variant_id, resume)
-
-    before_id = _resume_id(blueprint, variant.variant_id, "before_repair")
-    before_bundle = run_validators(
-        blueprint,
-        resume,
-        laya_agent,
-        before_id,
-        run_id=run_paths.run_id,
-        check_cross_run=True,
-    )
-    before_report_json, before_report_txt = save_validation_bundle_reports(
-        run_paths, blueprint, before_bundle, "before_repair"
-    )
-
-    repaired_resume = None
-    repaired_path = None
-    after_bundle = None
-    after_report_json = None
-    after_report_txt = None
-
-    if repair and should_repair(before_bundle):
-        repaired_resume = rewrite_targeted_resume_parts(
+    generation_mode = generation_context.get("generation_mode", "TEMPLATE")
+    candidate_profile = generation_context.get("candidate_profile")
+    stage = "generation"
+    try:
+        resume = generate_resume_with_openai(
             client=client,
             blueprint=blueprint,
             strategy=strategy,
             variant=variant,
-            resume=resume,
-            repair_plan=before_bundle.repair_plan,
+            generation_context=generation_context,
             model=model,
             run_id=run_paths.run_id,
         )
-        repaired_resume.variant_id = variant.variant_id
-        repaired_resume.source_blueprint_hash = blueprint.jd_hash
-        repaired_resume = _enrich_resume(blueprint, repaired_resume, generation_context)
-        repaired_path = save_repaired_resume(run_paths, variant.variant_id, repaired_resume)
+        resume = _enrich_resume(blueprint, resume, generation_context)
+        stage = "save_raw"
+        raw_path = save_raw_resume(
+            run_paths, variant.variant_id, resume, attempt_no=attempt_no
+        )
 
-        after_id = _resume_id(blueprint, variant.variant_id, "after_repair")
-        after_bundle = run_validators(
+        stage = "validation_before_repair"
+        before_id = _resume_id(blueprint, variant.variant_id, f"before_repair_a{attempt_no}")
+        before_bundle = run_validators(
             blueprint,
-            repaired_resume,
+            resume,
             laya_agent,
-            after_id,
+            before_id,
             run_id=run_paths.run_id,
             check_cross_run=True,
+            generation_mode=generation_mode,
+            candidate_profile=candidate_profile,
         )
-        after_report_json, after_report_txt = save_validation_bundle_reports(
-            run_paths, blueprint, after_bundle, "after_repair"
+        before_report_json, before_report_txt = save_validation_bundle_reports(
+            run_paths,
+            blueprint,
+            before_bundle,
+            "before_repair",
+            attempt_no=attempt_no,
         )
 
-    selection = select_best_resume_version(
-        raw_resume=resume,
-        raw_bundle=before_bundle,
-        repaired_resume=repaired_resume,
-        repaired_bundle=after_bundle,
-    )
+        repaired_resume = None
+        repaired_path = None
+        after_bundle = None
+        after_report_json = None
+        after_report_txt = None
 
-    final_resume_path = None
-    rejected_resume_path = None
-    status = selection.status
-    passed = selection.status == "VALIDATED" and selection.resume is not None
-    diagnostics = build_variant_diagnostics(
-        selection.resume or resume,
-        variant,
-        selection.bundle.subscores,
-    )
+        if repair and should_repair(before_bundle):
+            stage = "targeted_repair"
+            repaired_resume = rewrite_targeted_resume_parts(
+                client=client,
+                blueprint=blueprint,
+                strategy=strategy,
+                variant=variant,
+                resume=resume,
+                repair_plan=before_bundle.repair_plan,
+                model=model,
+                run_id=run_paths.run_id,
+            )
+            repaired_resume.variant_id = variant.variant_id
+            repaired_resume.source_blueprint_hash = blueprint.jd_hash
+            repaired_resume = _enrich_resume(blueprint, repaired_resume, generation_context)
+            repaired_path = save_repaired_resume(
+                run_paths, variant.variant_id, repaired_resume, attempt_no=attempt_no
+            )
 
-    if passed and selection.resume is not None:
-        final_resume_path = save_validated_resume_artifact(
-            run_paths, variant.variant_id, selection.resume
+            stage = "validation_after_repair"
+            after_id = _resume_id(blueprint, variant.variant_id, f"after_repair_a{attempt_no}")
+            after_bundle = run_validators(
+                blueprint,
+                repaired_resume,
+                laya_agent,
+                after_id,
+                run_id=run_paths.run_id,
+                check_cross_run=True,
+                generation_mode=generation_mode,
+                candidate_profile=candidate_profile,
+            )
+            after_report_json, after_report_txt = save_validation_bundle_reports(
+                run_paths,
+                blueprint,
+                after_bundle,
+                "after_repair",
+                attempt_no=attempt_no,
+            )
+
+        selection = select_best_resume_version(
+            raw_resume=resume,
+            raw_bundle=before_bundle,
+            repaired_resume=repaired_resume,
+            repaired_bundle=after_bundle,
         )
-        final_report_json, final_report_txt = save_validation_bundle_reports(
-            run_paths, blueprint, selection.bundle, "final"
+
+        # Candidate gaps remaining after repair keep the variant from validating.
+        gaps = selection.bundle.repair_plan.get("unresolved_required_candidate_gaps") or []
+        if gaps:
+            selection.bundle.passed = False
+            if selection.status == "VALIDATED":
+                selection.status = "FAILED_VALIDATION"
+
+        final_resume_path = None
+        rejected_resume_path = None
+        status = selection.status
+        passed = selection.status == "VALIDATED" and selection.resume is not None
+        diagnostics = build_variant_diagnostics(
+            selection.resume or resume,
+            variant,
+            selection.bundle.subscores,
         )
-        save_fingerprint(
-            jd_hash=blueprint.jd_hash,
+
+        stage = "finalize"
+        if passed and selection.resume is not None:
+            final_resume_path = save_validated_resume_artifact(
+                run_paths,
+                variant.variant_id,
+                selection.resume,
+                attempt_no=attempt_no,
+            )
+            final_report_json, final_report_txt = save_validation_bundle_reports(
+                run_paths,
+                blueprint,
+                selection.bundle,
+                "final",
+                attempt_no=attempt_no,
+            )
+        else:
+            artifact_for_reject = selection.resume or repaired_resume or resume
+            rejected_resume_path = save_rejected_resume_artifact(
+                run_paths,
+                variant.variant_id,
+                artifact_for_reject,
+                attempt_no=attempt_no,
+            )
+            final_report_json, final_report_txt = save_validation_bundle_reports(
+                run_paths,
+                blueprint,
+                selection.bundle,
+                "rejected",
+                attempt_no=attempt_no,
+            )
+            status = "FAILED_VALIDATION"
+            passed = False
+
+        resolved_model = model or DEFAULT_OPENAI_MODEL
+        learning_record = build_learning_outcome(
+            blueprint=blueprint,
+            variant=variant,
             run_id=run_paths.run_id,
+            strategy_id=strategy.strategy_id,
+            before_bundle=before_bundle,
+            selection_bundle=selection.bundle,
+            passed=passed,
+            status=status,
+            repaired=bool(repaired_path),
+            regression_recorded=selection.regression_recorded,
+            selection_notes=selection.notes,
+            diagnostics=diagnostics,
+            model=resolved_model,
+            prompt_version=PROMPT_VERSION,
+        )
+        learning_record.update(
+            {
+                "attempt_no": attempt_no,
+                "is_final_selection": False,
+                "superseded": False,
+                "regen_reason": regen_reason,
+                "eligible_for_learning": False,
+            }
+        )
+        # Defer eligible learning until regeneration settles unless explicitly requested.
+        if persist_learning:
+            learning_record["is_final_selection"] = True
+            learning_record["superseded"] = False
+            # Clear deferred-ineligible marker before computing eligibility.
+            learning_record.pop("eligible_for_learning", None)
+            from resume_engine.learning.eligibility import is_record_eligible_for_learning
+
+            learning_record["eligible_for_learning"] = is_record_eligible_for_learning(
+                learning_record
+            )
+            save_learning_outcome(learning_record)
+            if passed:
+                save_fingerprint(
+                    jd_hash=blueprint.jd_hash,
+                    run_id=run_paths.run_id,
+                    variant_id=variant.variant_id,
+                    resume=selection.resume,
+                    passed=True,
+                )
+
+        return {
+            "variant_id": variant.variant_id,
+            "variant_positioning": variant.positioning,
+            "run_id": run_paths.run_id,
+            "status": status,
+            "passed": passed,
+            "attempt_no": attempt_no,
+            "is_final_selection": learning_record.get("is_final_selection", False),
+            "superseded": learning_record.get("superseded", False),
+            "regen_reason": regen_reason,
+            "generated_resume": relative(raw_path),
+            "raw_resume": relative(raw_path),
+            "repaired_resume": relative(repaired_path) if repaired_path else None,
+            "final_resume": relative(final_resume_path) if final_resume_path else None,
+            "rejected_resume": relative(rejected_resume_path) if rejected_resume_path else None,
+            "before_validation_json": relative(before_report_json),
+            "before_validation_txt": relative(before_report_txt),
+            "after_validation_json": relative(after_report_json) if after_report_json else None,
+            "after_validation_txt": relative(after_report_txt) if after_report_txt else None,
+            "final_validation_json": relative(final_report_json),
+            "final_validation_txt": relative(final_report_txt),
+            "score_before_repair": before_bundle.optimization_score,
+            "score_after_repair": (
+                after_bundle.optimization_score
+                if after_bundle is not None
+                else before_bundle.optimization_score
+            ),
+            "action": selection.bundle.action,
+            "selection_notes": selection.notes,
+            "repair_score_regression": selection.regression_recorded,
+            "diagnostics": diagnostics,
+            "_resume_object": selection.resume if passed else None,
+            "_variant_object": variant,
+            "_learning_record": learning_record,
+        }
+    except (KeyboardInterrupt, SystemExit):
+        raise
+    except Exception as exc:  # noqa: BLE001 — isolate per-variant failures
+        error_path = save_pipeline_error_report(
+            run_paths,
             variant_id=variant.variant_id,
-            resume=selection.resume,
-            passed=True,
+            stage=stage,
+            error=exc,
+            attempt_no=attempt_no,
         )
-    else:
-        artifact_for_reject = selection.resume or repaired_resume or resume
-        rejected_resume_path = save_rejected_resume_artifact(
-            run_paths, variant.variant_id, artifact_for_reject
-        )
-        final_report_json, final_report_txt = save_validation_bundle_reports(
-            run_paths, blueprint, selection.bundle, "rejected"
-        )
-        status = "FAILED_VALIDATION"
-        passed = False
-
-    failures = [
-        issue.code
-        for result in selection.bundle.validator_results
-        for issue in result.issues
-    ]
-
-    resolved_model = model or DEFAULT_OPENAI_MODEL
-    learning_record = build_learning_outcome(
-        blueprint=blueprint,
-        variant=variant,
-        run_id=run_paths.run_id,
-        strategy_id=strategy.strategy_id,
-        before_bundle=before_bundle,
-        selection_bundle=selection.bundle,
-        passed=passed,
-        status=status,
-        repaired=bool(repaired_path),
-        regression_recorded=selection.regression_recorded,
-        selection_notes=selection.notes,
-        diagnostics=diagnostics,
-        model=resolved_model,
-        prompt_version=PROMPT_VERSION,
-    )
-    save_learning_outcome(learning_record)
-
-    if failures and not passed:
-        save_failure_record(learning_record)
-
-    return {
-        "variant_id": variant.variant_id,
-        "variant_positioning": variant.positioning,
-        "run_id": run_paths.run_id,
-        "status": status,
-        "passed": passed,
-        "generated_resume": relative(raw_path),
-        "raw_resume": relative(raw_path),
-        "repaired_resume": relative(repaired_path) if repaired_path else None,
-        "final_resume": relative(final_resume_path) if final_resume_path else None,
-        "rejected_resume": relative(rejected_resume_path) if rejected_resume_path else None,
-        "before_validation_json": relative(before_report_json),
-        "before_validation_txt": relative(before_report_txt),
-        "after_validation_json": relative(after_report_json) if after_report_json else None,
-        "after_validation_txt": relative(after_report_txt) if after_report_txt else None,
-        "final_validation_json": relative(final_report_json),
-        "final_validation_txt": relative(final_report_txt),
-        "score_before_repair": before_bundle.optimization_score,
-        "score_after_repair": (
-            after_bundle.optimization_score if after_bundle is not None else before_bundle.optimization_score
-        ),
-        "action": selection.bundle.action,
-        "selection_notes": selection.notes,
-        "repair_score_regression": selection.regression_recorded,
-        "diagnostics": diagnostics,
-        "_resume_object": selection.resume if passed else None,
-        "_variant_object": variant,
-    }
+        learning_record = {
+            "run_id": run_paths.run_id,
+            "jd_hash": blueprint.jd_hash,
+            "variant_id": variant.variant_id,
+            "variant_positioning": variant.positioning,
+            "attempt_no": attempt_no,
+            "is_final_selection": True,
+            "superseded": False,
+            "passed": False,
+            "status": "PIPELINE_ERROR",
+            "eligible_for_learning": False,
+            "successful_pattern": False,
+            "failure_codes": [getattr(exc, "code", type(exc).__name__)],
+            "stage": stage,
+            "error_type": type(exc).__name__,
+            "message": str(exc)[:500],
+        }
+        return {
+            "variant_id": variant.variant_id,
+            "variant_positioning": variant.positioning,
+            "run_id": run_paths.run_id,
+            "status": "PIPELINE_ERROR",
+            "passed": False,
+            "attempt_no": attempt_no,
+            "is_final_selection": True,
+            "superseded": False,
+            "final_resume": None,
+            "pipeline_error_report": relative(error_path),
+            "eligible_for_learning": False,
+            "diagnostics": {},
+            "_resume_object": None,
+            "_variant_object": variant,
+            "_learning_record": learning_record,
+            "error_type": type(exc).__name__,
+            "error_message": str(exc)[:500],
+            "stage": stage,
+        }
 
 
 def run_phase2_pipeline(
@@ -388,6 +513,7 @@ def run_phase2_pipeline(
     laya_agent = load_laya_agent() if use_laya else None
 
     variant_by_id = {variant.variant_id: variant for variant in variants}
+    attempt_nos: dict[str, int] = {variant.variant_id: 1 for variant in variants}
     variant_results = []
     for variant in variants:
         variant_results.append(
@@ -401,6 +527,8 @@ def run_phase2_pipeline(
                 run_paths=run_paths,
                 model=model,
                 repair=repair,
+                attempt_no=1,
+                persist_learning=False,
             )
         )
 
@@ -428,8 +556,24 @@ def run_phase2_pipeline(
         if not weaker_ids:
             break
         for weaker_id in weaker_ids:
+            # Mark prior attempt as superseded (diagnostic only; not eligible).
+            for item in variant_results:
+                if item["variant_id"] == weaker_id:
+                    item["superseded"] = True
+                    item["is_final_selection"] = False
+                    prior = item.get("_learning_record") or {}
+                    prior["superseded"] = True
+                    prior["is_final_selection"] = False
+                    prior["eligible_for_learning"] = False
+                    prior["regen_reason"] = "VARIANT_SIMILARITY"
+                    item["_learning_record"] = prior
+                    # Persist superseded diagnostic record once.
+                    save_learning_outcome(prior)
+                    break
+
             variant = variant_by_id[weaker_id]
             regen_counts[weaker_id] += 1
+            attempt_nos[weaker_id] = regen_counts[weaker_id] + 1
             regenerated = process_variant(
                 client=client,
                 blueprint=blueprint,
@@ -440,13 +584,16 @@ def run_phase2_pipeline(
                 run_paths=run_paths,
                 model=model,
                 repair=repair,
+                attempt_no=attempt_nos[weaker_id],
+                persist_learning=False,
+                regen_reason="VARIANT_SIMILARITY",
             )
             regenerated["regenerated"] = True
             regenerated["regen_attempt"] = regen_counts[weaker_id]
             regen_events.append(
                 {
                     "variant_id": weaker_id,
-                    "attempt": regen_counts[weaker_id],
+                    "attempt": attempt_nos[weaker_id],
                     "passed": regenerated.get("passed"),
                 }
             )
@@ -455,15 +602,51 @@ def run_phase2_pipeline(
                 for item in variant_results
             ]
 
+    # After regeneration settles: persist exactly one final learning outcome per variant.
+    from resume_engine.learning.eligibility import is_record_eligible_for_learning
+
+    for item in variant_results:
+        record = item.get("_learning_record") or {
+            "run_id": run_paths.run_id,
+            "jd_hash": blueprint.jd_hash,
+            "variant_id": item["variant_id"],
+            "passed": item.get("passed", False),
+            "status": item.get("status"),
+        }
+        record["attempt_no"] = item.get("attempt_no", 1)
+        record["is_final_selection"] = True
+        record["superseded"] = False  # final settled selection wins
+        record["passed"] = bool(item.get("passed"))
+        # Clear deferred-ineligible marker before computing eligibility.
+        record.pop("eligible_for_learning", None)
+        record["eligible_for_learning"] = is_record_eligible_for_learning(record)
+        item["is_final_selection"] = True
+        item["superseded"] = False
+        item["_learning_record"] = record
+        save_learning_outcome(record)
+        if item.get("passed") and item.get("_resume_object") is not None:
+            save_fingerprint(
+                jd_hash=blueprint.jd_hash,
+                run_id=run_paths.run_id,
+                variant_id=item["variant_id"],
+                resume=item["_resume_object"],
+                passed=True,
+            )
+        if not item.get("passed"):
+            save_failure_record(record)
+
     final_resumes = []
     for item in variant_results:
         item.pop("_resume_object", None)
         item.pop("_variant_object", None)
+        item.pop("_learning_record", None)
         if not item.get("final_resume"):
             continue
         resume_file = Path(item["final_resume"])
         if not resume_file.is_absolute():
             resume_file = PROJECT_ROOT / resume_file
+        if not resume_file.exists():
+            continue
         with open(resume_file, "r", encoding="utf-8") as f:
             final_resumes.append(ResumeJSON.model_validate(json.load(f)))
     variant_similarity_result = (

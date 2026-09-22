@@ -9,9 +9,47 @@ from resume_engine.models.resume_schema import ResumeJSON
 from resume_engine.models.resume_strategy import ResumeStrategy, VariantStrategy
 from resume_engine.repair.patch_applier import (
     PatchApplicationError,
+    RepairOperation,
     RepairPatchResponse,
+    apply_resume_operations,
     apply_resume_patches,
 )
+
+
+def _deterministic_operations(repair_plan: dict) -> list[RepairOperation]:
+    ops: list[RepairOperation] = []
+    for item in repair_plan.get("operations", []):
+        op = RepairOperation.model_validate(item)
+        # Skill append/remove and valued ops are applied in Python without LLM.
+        if op.operation in {"APPEND_SKILL", "REMOVE_SKILL", "REPLACE_SKILL"}:
+            if op.value:
+                ops.append(op)
+        elif op.operation in {
+            "REPLACE_TEXT",
+            "REPLACE_EXPERIENCE_BULLET",
+            "REPLACE_PROJECT_BULLET",
+            "APPEND_EXPERIENCE_BULLET",
+        }:
+            # Only apply if a concrete non-empty value is already provided.
+            if op.value:
+                ops.append(op)
+    return ops
+
+
+def _needs_llm_text(repair_plan: dict) -> bool:
+    for item in repair_plan.get("operations", []):
+        op = RepairOperation.model_validate(item)
+        if op.operation in {
+            "REPLACE_TEXT",
+            "REPLACE_EXPERIENCE_BULLET",
+            "REPLACE_PROJECT_BULLET",
+            "APPEND_EXPERIENCE_BULLET",
+        } and not op.value:
+            return True
+    # Legacy failed bullets without typed ops still need LLM text.
+    if repair_plan.get("failed_bullets") and not repair_plan.get("operations"):
+        return True
+    return False
 
 
 def rewrite_targeted_resume_parts(
@@ -24,41 +62,70 @@ def rewrite_targeted_resume_parts(
     model: str | None = None,
     run_id: str | None = None,
 ) -> ResumeJSON:
-    """Request ONLY patches from the model and apply them in Python."""
+    """Apply deterministic Python operations; optionally request LLM text patches."""
     if not repair_plan.get("required"):
         return resume
+
+    allowed = blueprint.generation_contract.allowed_technologies
+    working = resume
+    deterministic = _deterministic_operations(repair_plan)
+    if deterministic:
+        try:
+            working, scope_issues = apply_resume_operations(
+                working,
+                deterministic,
+                repair_plan=repair_plan,
+                allowed_technologies=allowed,
+            )
+        except PatchApplicationError as exc:
+            raise RuntimeError(f"{exc.code}: {exc.message}") from exc
+        if scope_issues:
+            codes = ", ".join(sorted({issue.code for issue in scope_issues}))
+            raise RuntimeError(f"FAIL_REPAIR_SCOPE_VIOLATION: unrelated fields changed ({codes})")
+
+    if not _needs_llm_text(repair_plan):
+        working.variant_id = resume.variant_id
+        working.source_blueprint_hash = resume.source_blueprint_hash
+        return attach_skill_provenance(blueprint, working)
 
     system = """
 You are a targeted resume repair engine.
 
-Return ONLY a RepairPatchResponse JSON object with a patches list.
-Each patch must include:
-- location: an exact resume path from repair_plan.targets / failed_bullets
-  (example: experience[0].bullets[3] or summary)
-- replacement: the full replacement string for that location only
+Return ONLY a RepairPatchResponse JSON object.
+Prefer typed operations when possible. Legacy patches are also accepted.
 
-STRICT RULES:
-1. Do NOT return a full resume.
-2. Do NOT invent locations that are not in the repair plan targets.
-3. Do NOT modify unrelated sections.
-4. Do not add technologies outside allowed_technologies.
-5. Do not invent candidate history, employers, certifications, metrics, or tools.
-6. Prefer the fewest patches needed to address the listed failures.
+Supported operations:
+- REPLACE_TEXT (location, value)
+- REPLACE_EXPERIENCE_BULLET (experience_index, bullet_index, value)
+- APPEND_EXPERIENCE_BULLET (experience_index, value)
+- REPLACE_PROJECT_BULLET (project_index, bullet_index, value)
+
+Do NOT invent technologies, employers, certifications, or candidate facts.
+Do NOT add skills — Python already applies APPEND_SKILL / REMOVE_SKILL.
+Only supply replacement text for failing bullets/summary listed in the repair plan.
 """
     payload = {
         "jd_blueprint": blueprint.as_prompt_payload(),
         "resume_strategy": strategy.model_dump(),
         "variant_strategy": variant.model_dump(),
-        "current_resume": resume.model_dump(),
+        "current_resume": working.model_dump(),
         "repair_plan": repair_plan,
-        "allowed_technologies": blueprint.generation_contract.allowed_technologies,
+        "allowed_technologies": allowed,
         "output_schema": {
+            "operations": [
+                {
+                    "operation": "REPLACE_EXPERIENCE_BULLET",
+                    "experience_index": 0,
+                    "bullet_index": 0,
+                    "value": "replacement text",
+                }
+            ],
             "patches": [
                 {
                     "location": "experience[0].bullets[0]",
                     "replacement": "replacement text",
                 }
-            ]
+            ],
         },
     }
 
@@ -89,9 +156,11 @@ STRICT RULES:
     patch_response: RepairPatchResponse = response.output_parsed
     try:
         repaired, scope_issues = apply_resume_patches(
-            resume=resume,
+            resume=working,
             patches=patch_response.patches,
+            operations=patch_response.operations,
             repair_plan=repair_plan,
+            allowed_technologies=allowed,
         )
     except PatchApplicationError as exc:
         raise RuntimeError(f"{exc.code}: {exc.message}") from exc

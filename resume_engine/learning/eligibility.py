@@ -38,9 +38,12 @@ def is_hybrid_blueprint(
 
 def is_record_eligible_for_learning(record: dict) -> bool:
     """
-    Eligibility example from Phase 2.6 mission:
+    Strategy-learning eligibility (Phase 2.7 Gate 1):
 
     - passed == true
+    - eligible_for_learning not explicitly false
+    - is_final_selection == true (default true for legacy records)
+    - superseded == false
     - no technology firewall errors
     - no role drift
     - P1 == 100%
@@ -50,6 +53,18 @@ def is_record_eligible_for_learning(record: dict) -> bool:
     if passed is None:
         passed = record.get("successful_pattern")
     if not passed:
+        return False
+
+    if record.get("eligible_for_learning") is False:
+        return False
+
+    if record.get("superseded") is True:
+        return False
+
+    if record.get("is_final_selection") is False:
+        return False
+
+    if record.get("status") == "PIPELINE_ERROR":
         return False
 
     codes = _failure_codes(record)

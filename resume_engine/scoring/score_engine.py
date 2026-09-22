@@ -39,12 +39,18 @@ def calculate_score(results: list[ValidatorResult]) -> tuple[float, dict[str, fl
 
     p4_usage_score = 100.0
     if p4:
-        usage = float(p4.details.get("usage_ratio", 0.0))
+        share = float(
+            p4.details.get(
+                "p4_share_of_used_priority",
+                p4.details.get("usage_ratio", 0.0),
+            )
+        )
         max_ratio = float(p4.details.get("max_ratio", thresholds.P4_USAGE_MAX))
-        if usage > max_ratio:
-            p4_usage_score = max(0.0, 100.0 - (usage - max_ratio) * 200)
-        else:
+        used_count = int(p4.details.get("p4_usage_count", 0))
+        if used_count <= 1 or share <= max_ratio:
             p4_usage_score = 100.0
+        else:
+            p4_usage_score = max(0.0, 100.0 - (share - max_ratio) * 200)
 
     subscores = {
         "p1_coverage": round(p1, 2),
