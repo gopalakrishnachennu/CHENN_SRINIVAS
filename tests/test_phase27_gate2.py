@@ -208,16 +208,17 @@ def test_responsibility_bigram_boost_helps_phrase_match():
 # ---------------------------------------------------------------------------
 
 
-def test_load_outcome_records_prefers_sqlite(tmp_path, monkeypatch):
-    from resume_engine.learning import outcome_store, strategy_memory
+def test_load_outcome_records_prefers_sqlite(tmp_path):
     from resume_engine.learning.repository import LearningRepository, reset_default_repository_for_tests
 
     db = tmp_path / "sot.sqlite3"
-    jsonl = tmp_path / "outcomes.jsonl"
+    orphan = tmp_path / "orphan.jsonl"
+    orphan.write_text(
+        '{"run_id":"jsonl-only","variant_id":"V99","passed":true,"score_after":90}\n',
+        encoding="utf-8",
+    )
     repo = LearningRepository(db_path=db, dual_write_jsonl=False)
     reset_default_repository_for_tests(repo)
-    monkeypatch.setattr(outcome_store, "OUTCOMES_FILE", jsonl)
-    monkeypatch.setattr(strategy_memory, "OUTCOMES_FILE", jsonl)
 
     repo.save_outcome(
         {
@@ -240,11 +241,11 @@ def test_load_outcome_records_prefers_sqlite(tmp_path, monkeypatch):
             "role_drift_passed": True,
         }
     )
-    # JSONL intentionally empty — SoT must still return SQLite rows.
-    assert not jsonl.exists() or jsonl.read_text().strip() == ""
+    # Default load is SQLite-only (no JSONL fallback for orphan file).
     records = load_outcome_records()
     assert len(records) >= 1
     assert records[0]["variant_id"] == "V01"
+    assert all(r.get("run_id") != "jsonl-only" for r in records)
     reset_default_repository_for_tests(None)
 
 

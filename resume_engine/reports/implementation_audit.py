@@ -46,6 +46,8 @@ REQUIRED_MODULES = {
     "pdf_exporter": "resume_engine.export.pdf_exporter",
     "export_service": "resume_engine.export.service",
     "phase3_ui": "resume_engine.ui.app",
+    "ui_auth": "resume_engine.ui.auth",
+    "phase1_live_harness": "resume_engine.live.phase1_harness",
     "resume_validation_report": "resume_engine.reports.resume_validation_report",
     "behavioral_audit": "resume_engine.reports.behavioral_audit",
     "phase2_pipeline": "resume_engine.pipeline.phase2_pipeline",
@@ -71,10 +73,12 @@ UNIT_TEST_HINTS = {
     "pattern_updater": ["tests/test_wave3_learning.py"],
     "learning_repository": ["tests/test_wave4_infra.py"],
     "llm_client": ["tests/test_wave4_infra.py"],
-    "docx_exporter": ["tests/test_phase3_export.py"],
+    "docx_exporter": ["tests/test_phase3_export.py", "tests/test_phase27_gate4.py"],
     "pdf_exporter": ["tests/test_phase3_export.py"],
     "export_service": ["tests/test_phase3_export.py"],
-    "phase3_ui": ["tests/test_phase3_export.py"],
+    "phase3_ui": ["tests/test_phase3_export.py", "tests/test_phase27_gate4.py"],
+    "ui_auth": ["tests/test_phase27_gate4.py"],
+    "phase1_live_harness": ["tests/test_phase27_gate4.py", "tests/test_phase1_offline.py"],
 }
 
 

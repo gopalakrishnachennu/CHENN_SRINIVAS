@@ -71,6 +71,25 @@ def test_blueprint_certification_semantics_from_structured_payload():
 
 @pytest.mark.live
 def test_live_phase1_openai_laya_e2e_opt_in():
-    if os.getenv("RUN_LIVE_TESTS") != "1":
-        pytest.skip("LIVE_TEST_NOT_RUN: set RUN_LIVE_TESTS=1 with credentials to execute.")
-    pytest.fail("Live Phase 1 harness not executed in this Wave 2 offline suite.")
+    """
+    Opt-in live Phase 1 harness.
+
+    Requires:
+      RUN_LIVE_TESTS=1
+      OPENAI_API_KEY set (non-placeholder)
+
+    Without both, reports LIVE_TEST_NOT_RUN and skips (no paid spend).
+    """
+    from resume_engine.live.phase1_harness import preflight_live_harness, run_phase1_live_harness
+
+    ok, reason = preflight_live_harness()
+    if not ok:
+        pytest.skip(reason)
+
+    # Optional: SKIP_LAYA_LIVE=1 to avoid heavy local Laya download in CI-like live runs.
+    skip_laya = os.getenv("SKIP_LAYA_LIVE", "").strip() == "1"
+    result = run_phase1_live_harness(skip_laya=skip_laya)
+    assert result.status == "PASS", result.message
+    assert result.blueprint_path
+    assert result.p1
+    assert any("aws" in t.lower() for t in result.allowed_technologies)

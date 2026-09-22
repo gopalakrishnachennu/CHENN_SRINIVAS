@@ -13,7 +13,6 @@ from resume_engine.learning.eligibility import (
     is_hybrid_blueprint,
     is_record_eligible_for_learning,
 )
-from resume_engine.learning.outcome_store import OUTCOMES_FILE
 from resume_engine.models.jd_blueprint import JDBlueprint
 
 
@@ -21,9 +20,8 @@ def load_outcome_records(path: Path | None = None) -> list[dict]:
     """
     Load learning outcomes.
 
-    Gate 2: SQLite LearningRepository is the source of truth for the default path.
-    Explicit `path` (tests/tooling) still reads that JSONL file.
-    Falls back to legacy OUTCOMES_FILE JSONL when SQLite is empty/unavailable.
+    Gate 4: default path is SQLite-only (no JSONL fallback).
+    Explicit `path=` still reads that JSONL file for tests/tooling.
     """
     if path is not None:
         outcomes_path = path
@@ -36,27 +34,12 @@ def load_outcome_records(path: Path | None = None) -> list[dict]:
                     records.append(json.loads(line))
         return records
 
-    try:
-        from resume_engine.learning.repository import get_default_repository
+    from resume_engine.learning.repository import get_default_repository
 
-        sqlite_records = get_default_repository().get_strategy_history(
-            eligible_only=False,
-            limit=5000,
-        )
-        if sqlite_records:
-            return sqlite_records
-    except Exception:
-        pass
-
-    outcomes_path = OUTCOMES_FILE
-    if not outcomes_path.exists():
-        return []
-    records = []
-    with open(outcomes_path, "r", encoding="utf-8") as f:
-        for line in f:
-            if line.strip():
-                records.append(json.loads(line))
-    return records
+    return get_default_repository().get_strategy_history(
+        eligible_only=False,
+        limit=5000,
+    )
 
 
 def _record_score(record: dict) -> float:
@@ -165,8 +148,12 @@ def historical_boost_for_positioning(insights: dict[str, Any], positioning: str)
     return (average / 100.0) * weight
 
 
-def summarize_strategy_memory(*, eligible_only: bool = True) -> dict:
-    records = load_outcome_records()
+def summarize_strategy_memory(
+    *,
+    eligible_only: bool = True,
+    outcomes_path: Path | None = None,
+) -> dict:
+    records = load_outcome_records(outcomes_path)
     if eligible_only:
         records = [record for record in records if is_record_eligible_for_learning(record)]
 

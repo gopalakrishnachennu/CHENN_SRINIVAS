@@ -12,10 +12,7 @@ from pathlib import Path
 from resume_engine.config import thresholds
 from resume_engine.learning.eligibility import is_record_eligible_for_learning
 from resume_engine.learning.outcome_builder import build_learning_outcome
-from resume_engine.learning.strategy_memory import (
-    retrieve_strategy_insights,
-    summarize_strategy_memory,
-)
+from resume_engine.learning.strategy_memory import retrieve_strategy_insights
 from resume_engine.models.resume_strategy import VariantStrategy
 from resume_engine.models.validation_schema import (
     ValidationBundle,
@@ -351,9 +348,8 @@ def test_strategy_memory_summary_excludes_ineligible(tmp_path: Path, monkeypatch
             _eligible_record(passed=False, positioning="automation_iac", score=99.0),
         ],
     )
-    monkeypatch.setattr(sm, "OUTCOMES_FILE", outcomes)
-    eligible = summarize_strategy_memory(eligible_only=True)
-    all_records = summarize_strategy_memory(eligible_only=False)
+    eligible = sm.summarize_strategy_memory(eligible_only=True, outcomes_path=outcomes)
+    all_records = sm.summarize_strategy_memory(eligible_only=False, outcomes_path=outcomes)
     assert any("cloud_infrastructure" in key for key in eligible)
     assert not any("automation_iac" in key for key in eligible)
     assert any("automation_iac" in key for key in all_records)
