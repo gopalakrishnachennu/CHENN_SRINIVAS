@@ -3,3 +3,29 @@
 resume_engine_data/
 __pycache__/
 .ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+.venv/
+venv/
+
+# Wave 4 — runtime customer artifacts (do not commit new production outputs)
+resume_engine/storage/runs/
+resume_engine/storage/generated/
+resume_engine/storage/validated/
+resume_engine/storage/rejected/
+resume_engine/storage/learning/
+resume_engine/storage/reports/
+resume_engine/storage/strategies/
+resume_engine/storage/db/
+resume_engine/storage/exports/
+*.sqlite3
+*.sqlite
+
+# Keep intentional documentation of ignore policy under docs/
+!docs/

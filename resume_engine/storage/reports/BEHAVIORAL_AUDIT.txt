@@ -20,6 +20,13 @@ CHECKS
 [PASS] repair_preserves_valid_content
 [PASS] similar_variants_blocked
 [PASS] distinct_variants_pass
+[PASS] p4_usage_within_limit
+[PASS] p4_optional_semantics
+[PASS] failed_final_gate
+[PASS] raw_artifact_preserved
+[PASS] run_isolation
+[PASS] targeted_patch_repair
+[PASS] repair_scope_guard
 
 PASS CONDITIONS
 [PASS] P1 coverage
@@ -33,7 +40,12 @@ PASS CONDITIONS
 [PASS] Secondary family retention
 [PASS] Hybrid family validator
 [PASS] P4 limit respected
+[PASS] P4 optional semantics
 [PASS] Targeted repair
+[PASS] Repair scope guard
+[PASS] Failed-final gate
+[PASS] Raw artifact preserved
+[PASS] Run isolation
 [PASS] Variant differentiation
 
 RESULT: PASS

@@ -1,5 +1,5 @@
 {
-  "phase": "Phase 2.5",
+  "phase": "Phase 2.6 Wave 1",
   "audit_type": "BEHAVIORAL_VALIDATION",
   "fixture_inventory": {
     "count": 15,
@@ -22,7 +22,7 @@
     ]
   },
   "fixture_assertions": {
-    "assertion_file": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/tests/fixtures/expected/fixture_assertions.json",
+    "assertion_file": "tests/fixtures/expected/fixture_assertions.json",
     "assertion_count": 15,
     "fixture_count": 15,
     "missing_assertions": [],
@@ -96,13 +96,12 @@
       "Docker",
       "Helm"
     ],
-    "p4_mentions": [
-      "Delta Lake",
-      "PySpark",
-      "Docker",
-      "Helm"
+    "p4_used": [
+      "Docker"
     ],
-    "usage_ratio": 1.0
+    "usage_ratio": 0.25,
+    "max_ratio": 0.35,
+    "validator_passed": true
   },
   "hallucination_firewall": {
     "unauthorized_technologies": 3,
@@ -111,12 +110,12 @@
   "role_drift": false,
   "duplicate_bullets": 1,
   "repair_test": {
-    "failures_before": 38,
-    "failures_after": 0,
+    "failures_before": 34,
+    "failures_after": 9,
     "targeted_plan": {
       "required": true,
       "failed_bullets": [
-        "experience[0].bullets[0] / experience[0].bullets[1]"
+        "experience[0].bullets[0]"
       ],
       "missing_skills": [
         "Databricks",
@@ -126,11 +125,7 @@
         "CI/CD",
         "Python",
         "Apache Spark",
-        "LangChain",
-        "Delta Lake",
-        "PySpark",
-        "Docker",
-        "Helm"
+        "LangChain"
       ],
       "missing_responsibilities": [
         "Manage Databricks platform",
@@ -142,20 +137,63 @@
       "duplicate_locations": [
         "experience[0].bullets[0] / experience[0].bullets[1]"
       ],
-      "issue_count": 38
+      "targets": [
+        {
+          "location": "technical_skills",
+          "reason_codes": [
+            "FAIL_MISSING_REQUIRED_PLACEMENT"
+          ],
+          "skill": "Databricks"
+        },
+        {
+          "location": "experience_responsibilities",
+          "reason_codes": [
+            "FAIL_MISSING_REQUIRED_PLACEMENT"
+          ],
+          "skill": "Databricks"
+        },
+        {
+          "location": "professional_summary",
+          "reason_codes": [
+            "FAIL_MISSING_REQUIRED_PLACEMENT"
+          ],
+          "skill": "Databricks"
+        },
+        {
+          "location": "selected_experience",
+          "reason_codes": [
+            "FAIL_MISSING_REQUIRED_PLACEMENT"
+          ],
+          "skill": "LangChain"
+        },
+        {
+          "location": "experience[0].bullets[0]",
+          "reason_codes": [
+            "FAIL_EXACT_DUPLICATE_BULLET"
+          ]
+        }
+      ],
+      "issue_count": 34
     },
-    "valid_content_preserved": true
+    "valid_content_preserved": true,
+    "patch_only_target_changed": true,
+    "out_of_scope_rejected": true
   },
   "variant_diversity": {
     "similar_pair_blocked": true,
     "distinct_set_passed": true,
     "variant_positions": [
-      "cloud_platform_heavy",
-      "databricks_platform_heavy",
-      "devops_automation_heavy",
-      "cloud_data_engineering_heavy",
-      "ai_enabled_data_platform_heavy"
+      "ai_automation",
+      "ai_enabled_operations",
+      "ai_platform",
+      "cloud_data_engineering",
+      "cloud_infrastructure"
     ]
+  },
+  "wave1_gates": {
+    "failed_final_gate": true,
+    "run_isolation": true,
+    "p4_optional_semantics": true
   },
   "checks": {
     "template_mode_default": true,
@@ -171,7 +209,14 @@
     "repair_after_passes": true,
     "repair_preserves_valid_content": true,
     "similar_variants_blocked": true,
-    "distinct_variants_pass": true
+    "distinct_variants_pass": true,
+    "p4_usage_within_limit": true,
+    "p4_optional_semantics": true,
+    "failed_final_gate": true,
+    "raw_artifact_preserved": true,
+    "run_isolation": true,
+    "targeted_patch_repair": true,
+    "repair_scope_guard": true
   },
   "pass_conditions": {
     "P1 coverage": true,
@@ -185,7 +230,12 @@
     "Secondary family retention": true,
     "Hybrid family validator": true,
     "P4 limit respected": true,
+    "P4 optional semantics": true,
     "Targeted repair": true,
+    "Repair scope guard": true,
+    "Failed-final gate": true,
+    "Raw artifact preserved": true,
+    "Run isolation": true,
     "Variant differentiation": true
   },
   "result": "PASS"

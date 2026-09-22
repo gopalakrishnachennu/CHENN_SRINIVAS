@@ -1,5 +1,6 @@
 import re
 
+from resume_engine.generation.bullet_enrichment import find_unknown_proper_tools
 from resume_engine.models.jd_blueprint import JDBlueprint
 from resume_engine.models.resume_schema import ResumeJSON
 from resume_engine.models.validation_schema import ValidationIssue, ValidatorResult
@@ -47,6 +48,12 @@ def _generated_skill_names(resume: ResumeJSON) -> list[str]:
     skills.extend(resume.certifications)
     for project in resume.projects:
         skills.extend(project.technologies)
+    for experience in resume.experience:
+        for bullet in experience.bullet_meta:
+            skills.extend(bullet.technologies)
+    for project in resume.projects:
+        for bullet in project.bullet_meta:
+            skills.extend(bullet.technologies)
     return list(dict.fromkeys(skill.strip() for skill in skills if skill.strip()))
 
 
@@ -56,8 +63,9 @@ def _contains_tech_term(text: str, term: str) -> bool:
 
 
 def validate_technology_firewall(blueprint: JDBlueprint, resume: ResumeJSON) -> ValidatorResult:
-    allowed = {normalize_text(item) for item in blueprint.generation_contract.allowed_technologies}
-    allowed.update({normalize_text(item) for item in blueprint.certifications})
+    allowed_list = list(blueprint.generation_contract.allowed_technologies)
+    allowed = {normalize_text(item) for item in allowed_list}
+    allowed.update({normalize_text(item.name) for item in blueprint.certifications})
     if "apache spark" in allowed:
         allowed.add("spark")
     if "openai api" in allowed:
@@ -78,10 +86,26 @@ def validate_technology_firewall(blueprint: JDBlueprint, resume: ResumeJSON) -> 
                     code="FAIL_UNAPPROVED_TECHNOLOGY",
                     severity="error",
                     message=f"Generated technology is not allowed by blueprint: {skill}",
-                    location="technical_skills/projects/certifications",
+                    location="technical_skills/projects/certifications/bullets",
                     repair_hint=f"Remove '{skill}' or replace it with an allowed technology.",
                 )
             )
+
+    # Bullet-level subset check when metadata is present.
+    for experience in resume.experience:
+        for bullet in experience.bullet_meta:
+            for tech in bullet.technologies:
+                if normalize_text(tech) not in allowed:
+                    issues.append(
+                        ValidationIssue(
+                            code="FAIL_UNAPPROVED_BULLET_TECHNOLOGY",
+                            severity="error",
+                            message=f"Bullet {bullet.id} uses unapproved technology: {tech}",
+                            location=bullet.id,
+                            repair_hint=f"Remove '{tech}' from bullet or map it to an allowed technology.",
+                            metadata={"bullet_id": bullet.id, "technology": tech},
+                        )
+                    )
 
     for provenance in resume.skill_provenance:
         if provenance.source == "LLM_GENERATED":
@@ -96,7 +120,9 @@ def validate_technology_firewall(blueprint: JDBlueprint, resume: ResumeJSON) -> 
                 )
             )
 
-    full_text = normalize_text(resume.summary + "\n" + "\n".join(b for exp in resume.experience for b in exp.bullets))
+    full_text = normalize_text(
+        resume.summary + "\n" + "\n".join(b for exp in resume.experience for b in exp.bullets)
+    )
     for known in KNOWN_TECH_WORDS:
         if _contains_tech_term(full_text, known) and known not in allowed:
             issues.append(
@@ -109,13 +135,33 @@ def validate_technology_firewall(blueprint: JDBlueprint, resume: ResumeJSON) -> 
                 )
             )
 
-    unauthorized_count = len(issues)
-    score = 100.0 if unauthorized_count == 0 else 0.0
+    # Unknown proper tools in text that are not structured: flag for inspection (warning).
+    unknown_tools = find_unknown_proper_tools(resume, allowed_list)
+    for tool in unknown_tools[:10]:
+        if normalize_text(tool) in allowed:
+            continue
+        issues.append(
+            ValidationIssue(
+                code="WARN_UNKNOWN_PROPER_TOOL",
+                severity="warning",
+                message=f"Possible unknown proper tool mentioned without structured approval: {tool}",
+                location="summary/experience",
+                repair_hint="Inspect and remove if not JD_DIRECT or APPROVED_ADJACENT.",
+                metadata={"tool": tool},
+            )
+        )
+
+    error_count = sum(1 for issue in issues if issue.severity == "error")
+    score = 100.0 if error_count == 0 else 0.0
 
     return ValidatorResult(
         name="technology_firewall",
-        passed=unauthorized_count == 0,
+        passed=error_count == 0,
         score=score,
         issues=issues,
-        details={"checked_generated_skills": checked, "unauthorized_count": unauthorized_count},
+        details={
+            "checked_generated_skills": checked,
+            "unauthorized_count": error_count,
+            "unknown_proper_tools": unknown_tools,
+        },
     )

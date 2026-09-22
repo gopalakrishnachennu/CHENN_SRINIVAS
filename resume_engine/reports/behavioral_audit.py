@@ -1,14 +1,22 @@
 import json
+import uuid
 from pathlib import Path
 
-from resume_engine.config.settings import PROJECT_ROOT, REPORT_STORAGE_DIR, ensure_storage_dirs
+from resume_engine.config import thresholds
+from resume_engine.config.settings import PROJECT_ROOT, REPORT_STORAGE_DIR, ensure_storage_dirs, portable_path
 from resume_engine.generation.provenance import attach_skill_provenance
 from resume_engine.models.jd_blueprint import JDBlueprint
 from resume_engine.models.resume_schema import ResumeJSON
+from resume_engine.models.validation_schema import ValidationBundle
 from resume_engine.pipeline.phase2_pipeline import build_generation_context, run_validators
+from resume_engine.repair.patch_applier import ResumePatch, apply_resume_patches
 from resume_engine.repair.repair_planner import build_repair_plan
+from resume_engine.repair.version_selector import select_best_resume_version
+from resume_engine.storage.run_store import create_run_paths, save_raw_resume, save_repaired_resume
 from resume_engine.strategy.strategy_builder import build_strategy
 from resume_engine.strategy.variant_planner import create_variants
+from resume_engine.validation.coverage_validator import validate_coverage
+from resume_engine.validation.p4_usage_validator import validate_p4_usage
 from resume_engine.validation.technology_firewall import validate_technology_firewall
 from resume_engine.validation.ai_tool_placement_validator import validate_ai_tool_placement
 from resume_engine.validation.hybrid_family_validator import validate_hybrid_family_retention
@@ -104,12 +112,14 @@ def _monster_blueprint() -> JDBlueprint:
 
 
 def _good_resume(variant_id: str = "V01", angle: str = "cloud platform") -> ResumeJSON:
+    # Keep P4 usage within thresholds.P4_USAGE_MAX (1 of 4 = 0.25 <= 0.35).
+    # Only Docker is used as optional adjacent support.
     if "Databricks" in angle:
         bullets = [
             "Owned Databricks workspace reliability on AWS while coordinating Terraform changes with platform release teams.",
-            "Tuned Apache Spark workloads with PySpark and Delta Lake patterns for lakehouse production operations.",
+            "Tuned Apache Spark workloads for lakehouse production operations across Databricks environments.",
             "Built OpenAI API and Claude API automation to assist Databricks runbooks, incident triage, and deployment checks.",
-            "Standardized Kubernetes support services with Helm and Docker for data platform integration paths.",
+            "Standardized Kubernetes support services for data platform integration paths.",
         ]
         second_bullets = [
             "Improved Databricks platform governance while preserving CI/CD release paths for Spark workloads.",
@@ -120,7 +130,7 @@ def _good_resume(variant_id: str = "V01", angle: str = "cloud platform") -> Resu
             "Automated Terraform deployment modules for AWS, Kubernetes, Databricks, and CI/CD platform operations.",
             "Built Python release utilities that connected Spark workload deployment checks with cloud infrastructure gates.",
             "Implemented OpenAI API and Claude API workflow helpers for deployment readiness and operational response.",
-            "Managed Docker and Helm release patterns supporting Kubernetes services around the data platform.",
+            "Managed Kubernetes release patterns supporting services around the data platform.",
         ]
         second_bullets = [
             "Reduced manual platform handoffs through CI/CD automation spanning Terraform and Databricks changes.",
@@ -128,7 +138,7 @@ def _good_resume(variant_id: str = "V01", angle: str = "cloud platform") -> Resu
         ]
     elif "data engineering" in angle:
         bullets = [
-            "Developed Apache Spark workloads in Databricks using Python, PySpark, and Delta Lake for cloud data pipelines.",
+            "Developed Apache Spark workloads in Databricks using Python for cloud data pipelines.",
             "Aligned AWS infrastructure and Terraform modules with data engineering delivery requirements.",
             "Integrated OpenAI API and Claude API automation into data platform operational workflows.",
             "Supported Kubernetes-based services that backed CI/CD deployment paths for Spark processing.",
@@ -141,8 +151,8 @@ def _good_resume(variant_id: str = "V01", angle: str = "cloud platform") -> Resu
         bullets = [
             "Built OpenAI API and Claude API automation for cloud data platform operations across Databricks and AWS.",
             "Connected AI-assisted checks with Terraform, Kubernetes, and CI/CD workflows to automate deployments and support deployment quality.",
-            "Developed Apache Spark workload support patterns using Python, Databricks, and Delta Lake context.",
-            "Maintained Docker and Helm integration points for Kubernetes services around AI-enabled platform workflows.",
+            "Developed Apache Spark workload support patterns using Python and Databricks context.",
+            "Maintained Kubernetes integration points for AI-enabled platform workflows.",
         ]
         second_bullets = [
             "Applied LangChain to approved automation patterns while keeping Databricks and cloud operations central.",
@@ -152,11 +162,11 @@ def _good_resume(variant_id: str = "V01", angle: str = "cloud platform") -> Resu
         bullets = [
             f"Managed Databricks platform operations on AWS while shaping {angle} automation with Terraform and Kubernetes.",
             "Automated CI/CD deployments using Python workflows across cloud infrastructure and data platform release paths.",
-            "Developed Apache Spark workloads with Databricks, Delta Lake, and PySpark for production data engineering needs.",
+            "Developed Apache Spark workloads with Databricks for production data engineering needs.",
             "Built operational automation using OpenAI API and Claude API to support deployment and platform workflows.",
         ]
         second_bullets = [
-            "Supported Kubernetes platform reliability with Docker and Helm while maintaining Terraform deployment modules.",
+            "Supported Kubernetes platform reliability while maintaining Terraform deployment modules.",
             "Applied LangChain patterns for approved AI-assisted cloud data platform support workflows.",
         ]
 
@@ -168,8 +178,8 @@ def _good_resume(variant_id: str = "V01", angle: str = "cloud platform") -> Resu
                 "Claude API, AWS, Kubernetes, CI/CD, Python, and Apache Spark."
             ),
             "technical_skills": {
-                "Cloud and DevOps": ["AWS", "Terraform", "Kubernetes", "CI/CD", "Docker", "Helm"],
-                "Data Platform": ["Databricks", "Apache Spark", "Python", "Delta Lake", "PySpark"],
+                "Cloud and DevOps": ["AWS", "Terraform", "Kubernetes", "CI/CD", "Docker"],
+                "Data Platform": ["Databricks", "Apache Spark", "Python"],
                 "AI Automation": ["OpenAI API", "Claude API", "LangChain"],
             },
             "experience": [
@@ -236,7 +246,7 @@ def _fixture_assertion_inventory() -> dict:
     fixture_ids = sorted(path.stem for path in fixture_dir.glob("*.txt"))
     missing = [fixture_id for fixture_id in fixture_ids if fixture_id not in assertions]
     return {
-        "assertion_file": str(assertion_path),
+        "assertion_file": portable_path(assertion_path),
         "assertion_count": len(assertions),
         "fixture_count": len(fixture_ids),
         "missing_assertions": missing,
@@ -255,19 +265,135 @@ def run_behavioral_audit() -> dict:
     validation = run_validators(blueprint, good_resume, None, "behavioral_good")
     ai_placement_result = validate_ai_tool_placement(blueprint, good_resume)
     hybrid_result = validate_hybrid_family_retention(blueprint, good_resume)
+    p4_result = validate_p4_usage(blueprint, good_resume)
+
+    # Missing P4 must not create required-placement failures or repair stuffing.
+    zero_p4_resume = attach_skill_provenance(blueprint, _good_resume())
+    zero_p4_resume.technical_skills = {
+        group: [skill for skill in skills if skill not in blueprint.priority_skills.get("P4", [])]
+        for group, skills in zero_p4_resume.technical_skills.items()
+    }
+    for exp in zero_p4_resume.experience:
+        exp.bullets = [
+            " ".join(
+                word
+                for word in bullet.split()
+                if word.rstrip(".,") not in blueprint.priority_skills.get("P4", [])
+            )
+            for bullet in exp.bullets
+        ]
+    zero_p4_resume = attach_skill_provenance(blueprint, zero_p4_resume)
+    zero_p4_coverage = validate_coverage(blueprint, zero_p4_resume)
+    zero_p4_bundle = run_validators(blueprint, zero_p4_resume, None, "behavioral_zero_p4")
+    zero_p4_plan = build_repair_plan(zero_p4_bundle, blueprint=blueprint)
+    p4_optional_ok = not any(
+        issue.code == "FAIL_MISSING_REQUIRED_PLACEMENT"
+        and (
+            issue.metadata.get("placement") == "technical_skills_optional"
+            or issue.metadata.get("priority") == "P4"
+            or issue.metadata.get("skill") in blueprint.priority_skills.get("P4", [])
+        )
+        for issue in zero_p4_coverage.issues
+    )
+    p4_not_in_repair = not any(
+        skill in zero_p4_plan.get("missing_skills", [])
+        for skill in blueprint.priority_skills.get("P4", [])
+    )
 
     hallucinated = attach_skill_provenance(blueprint, _bad_hallucinated_resume())
     hallucination_result = validate_technology_firewall(blueprint, hallucinated)
 
     repair_resume = attach_skill_provenance(blueprint, _bad_repair_resume())
     repair_before = run_validators(blueprint, repair_resume, None, "behavioral_repair_before")
-    repair_plan = build_repair_plan(repair_before)
+    repair_plan = build_repair_plan(repair_before, blueprint=blueprint)
+
+    # Patch-based targeted repair proof (deterministic; no live OpenAI).
+    patched_resume, scope_issues = apply_resume_patches(
+        resume=repair_resume,
+        patches=[
+            ResumePatch(
+                location="experience[0].bullets[1]",
+                replacement=(
+                    "Owned Databricks and Terraform delivery on AWS with OpenAI API and Claude API "
+                    "ops automation, Kubernetes, CI/CD, Python, and Apache Spark support."
+                ),
+            )
+        ],
+        repair_plan={
+            "targets": [{"location": "experience[0].bullets[1]", "reason_codes": ["FAIL_EXACT_DUPLICATE_BULLET"]}],
+            "failed_bullets": ["experience[0].bullets[1]"],
+        },
+    )
+    patch_only_target_changed = (
+        patched_resume.summary == repair_resume.summary
+        and patched_resume.technical_skills == repair_resume.technical_skills
+        and patched_resume.experience[0].bullets[0] == repair_resume.experience[0].bullets[0]
+        and patched_resume.experience[0].bullets[1] != repair_resume.experience[0].bullets[1]
+        and not scope_issues
+    )
+
+    # Out-of-scope patch must be rejected.
+    out_of_scope_rejected = False
+    try:
+        apply_resume_patches(
+            resume=repair_resume,
+            patches=[ResumePatch(location="summary", replacement="Hacked summary")],
+            repair_plan={
+                "targets": [{"location": "experience[0].bullets[1]", "reason_codes": ["X"]}],
+                "failed_bullets": ["experience[0].bullets[1]"],
+            },
+        )
+    except Exception:
+        out_of_scope_rejected = True
 
     repaired = attach_skill_provenance(blueprint, _good_resume("VREPAIR", "AI-enabled data platform"))
     repair_after = run_validators(blueprint, repaired, None, "behavioral_repair_after")
     unchanged_valid_content = (
         repaired.target_title == good_resume.target_title
         and repaired.technical_skills == good_resume.technical_skills
+    )
+
+    # Failed-final + score regression + run isolation proofs (offline).
+    failing_bundle = ValidationBundle(
+        variant_id="VFAIL",
+        resume_id="fail",
+        passed=False,
+        optimization_score=86.59,
+        action="REPAIR_REQUIRED",
+        validator_results=[],
+    )
+    worse_bundle = ValidationBundle(
+        variant_id="VFAIL",
+        resume_id="fail_repaired",
+        passed=False,
+        optimization_score=86.57,
+        action="REPAIR_REQUIRED",
+        validator_results=[],
+    )
+    selection = select_best_resume_version(
+        raw_resume=repair_resume,
+        raw_bundle=failing_bundle,
+        repaired_resume=repaired,
+        repaired_bundle=worse_bundle,
+    )
+    failed_final_gate = (
+        selection.status == "FAILED_VALIDATION"
+        and selection.regression_recorded
+        and "REPAIR_SCORE_REGRESSION" in selection.notes
+    )
+
+    run_a = create_run_paths("behavioral_jd_hash", run_id=f"run-a-{uuid.uuid4().hex[:8]}")
+    run_b = create_run_paths("behavioral_jd_hash", run_id=f"run-b-{uuid.uuid4().hex[:8]}")
+    raw_a = save_raw_resume(run_a, "V01", good_resume)
+    raw_b = save_raw_resume(run_b, "V01", good_resume)
+    repaired_a = save_repaired_resume(run_a, "V01", patched_resume)
+    run_isolation = (
+        run_a.root != run_b.root
+        and raw_a.exists()
+        and raw_b.exists()
+        and repaired_a.exists()
+        and raw_a != repaired_a
+        and raw_a.read_text(encoding="utf-8") != ""
     )
 
     too_similar = [
@@ -304,9 +430,7 @@ def run_behavioral_audit() -> dict:
     }
 
     p4_items = blueprint.priority_skills.get("P4", [])
-    resume_text = json.dumps(good_resume.model_dump(), ensure_ascii=False)
-    p4_mentions = [item for item in p4_items if item in resume_text]
-    p4_usage_ratio = len(p4_mentions) / max(1, len(p4_items))
+    p4_usage_ratio = float(p4_result.details.get("usage_ratio", 0.0))
 
     checks = {
         "template_mode_default": template_context["generation_mode"] == "TEMPLATE",
@@ -323,10 +447,17 @@ def run_behavioral_audit() -> dict:
         "repair_preserves_valid_content": unchanged_valid_content,
         "similar_variants_blocked": not similar_result.passed,
         "distinct_variants_pass": distinct_result.passed,
+        "p4_usage_within_limit": p4_result.passed and p4_usage_ratio <= thresholds.P4_USAGE_MAX,
+        "p4_optional_semantics": p4_optional_ok and p4_not_in_repair,
+        "failed_final_gate": failed_final_gate,
+        "raw_artifact_preserved": run_isolation,
+        "run_isolation": run_isolation,
+        "targeted_patch_repair": patch_only_target_changed,
+        "repair_scope_guard": out_of_scope_rejected,
     }
 
     result = {
-        "phase": "Phase 2.5",
+        "phase": "Phase 2.6 Wave 1",
         "audit_type": "BEHAVIORAL_VALIDATION",
         "fixture_inventory": _fixture_inventory(),
         "fixture_assertions": _fixture_assertion_inventory(),
@@ -342,8 +473,10 @@ def run_behavioral_audit() -> dict:
         "hybrid_family_validator": hybrid_result.model_dump(),
         "p4_usage": {
             "p4_items": p4_items,
-            "p4_mentions": p4_mentions,
+            "p4_used": p4_result.details.get("p4_used", []),
             "usage_ratio": round(p4_usage_ratio, 3),
+            "max_ratio": thresholds.P4_USAGE_MAX,
+            "validator_passed": p4_result.passed,
         },
         "hallucination_firewall": {
             "unauthorized_technologies": hallucination_result.details["unauthorized_count"],
@@ -365,11 +498,18 @@ def run_behavioral_audit() -> dict:
             "failures_after": sum(len(result.issues) for result in repair_after.validator_results),
             "targeted_plan": repair_plan,
             "valid_content_preserved": unchanged_valid_content,
+            "patch_only_target_changed": patch_only_target_changed,
+            "out_of_scope_rejected": out_of_scope_rejected,
         },
         "variant_diversity": {
             "similar_pair_blocked": not similar_result.passed,
             "distinct_set_passed": distinct_result.passed,
             "variant_positions": [variant.positioning for variant in variants],
+        },
+        "wave1_gates": {
+            "failed_final_gate": failed_final_gate,
+            "run_isolation": run_isolation,
+            "p4_optional_semantics": p4_optional_ok and p4_not_in_repair,
         },
         "checks": checks,
         "pass_conditions": {
@@ -387,8 +527,13 @@ def run_behavioral_audit() -> dict:
             "Hybrid role detection": blueprint.job.hybrid_probability >= 0.55,
             "Secondary family retention": blueprint.job.secondary_family == "data_engineering",
             "Hybrid family validator": hybrid_result.passed,
-            "P4 limit respected": p4_usage_ratio <= 1.0,
-            "Targeted repair": repair_plan["required"] and repair_after.passed,
+            "P4 limit respected": p4_usage_ratio <= thresholds.P4_USAGE_MAX and p4_result.passed,
+            "P4 optional semantics": p4_optional_ok and p4_not_in_repair,
+            "Targeted repair": repair_plan["required"] and repair_after.passed and patch_only_target_changed,
+            "Repair scope guard": out_of_scope_rejected,
+            "Failed-final gate": failed_final_gate,
+            "Raw artifact preserved": run_isolation,
+            "Run isolation": run_isolation,
             "Variant differentiation": distinct_result.passed and not similar_result.passed,
         },
     }

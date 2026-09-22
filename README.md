@@ -29,7 +29,15 @@ JD_BLUEPRINT.json
   -> Learning + Reports
 ```
 
-DOCX/PDF is intentionally not included yet.
+```text
+Phase 3:
+Validated Resume JSON
+  -> DOCX export
+  -> PDF export
+  -> Operator UI (browse + download)
+```
+
+ATS document parsing and job-application automation are intentionally out of scope.
 
 ## Where To Paste Your OpenAI Key
 
@@ -164,14 +172,43 @@ resume_engine/storage/reports/BEHAVIORAL_AUDIT.json
 resume_engine/storage/reports/BEHAVIORAL_AUDIT.txt
 ```
 
+## Run Phase 3 Export (DOCX / PDF / UI)
+
+Export a validated resume JSON:
+
+```bash
+python3 phase_3_export.py export \
+  --resume resume_engine/storage/runs/JD_HASH/RUN_ID/validated/V01_final.json \
+  --format docx,pdf \
+  --candidate-profile candidate_profile.json \
+  --out-dir resume_engine/storage/exports
+```
+
+Or export automatically at the end of Phase 2 for validated finals only:
+
+```bash
+python3 phase_2_resume_pipeline.py \
+  --blueprint resume_engine_data/blueprints/YOUR_BLUEPRINT.json \
+  --candidate-profile candidate_profile.json \
+  --export docx,pdf
+```
+
+Launch the operator UI (browse validated runs, download DOCX/PDF):
+
+```bash
+python3 phase_3_export.py ui
+# open http://127.0.0.1:8765
+```
+
 ## Main Files
 
 - `phase_1_jd_intelligence_blueprint.py` - main working file where you paste the JD.
 - `jd_blueprint_engine.py` - reusable Phase 1 engine.
 - `phase_2_resume_pipeline.py` - main Phase 2 runner.
+- `phase_3_export.py` - Phase 3 DOCX/PDF export + UI entrypoint.
 - `resume_seed.json` - default template-mode seed; candidate profile is optional.
-- `candidate_profile.json` - editable truthful candidate profile for Phase 2.
-- `resume_engine/` - Phase 2 package with strategy, generation, validation, scoring, repair, learning, and reports.
+- `candidate_profile.json` - editable truthful candidate profile for Phase 2/3 headers.
+- `resume_engine/` - Phase 2/2.6/3 package (strategy, generation, validation, repair, learning, export, UI).
 - `.env.local` - local key location.
 - `sample_jd.txt` - quick test JD.
 - `resume_engine_data/skill_registry.json` - self-improving skill registry created on first run.

@@ -1,6 +1,6 @@
-from typing import Any, Optional
+from typing import Any, Literal, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class BlueprintJob(BaseModel):
@@ -26,6 +26,16 @@ class BlueprintEntity(BaseModel):
     parent_skill: Optional[str] = None
 
 
+class CertificationRequirement(BaseModel):
+    """Preserved certification requirement semantics (not a flat string)."""
+
+    name: str
+    requirement: Literal["mandatory", "required", "preferred", "mentioned"] = "mentioned"
+    evidence: Optional[str] = None
+    source: Optional[str] = "jd_direct"
+    candidate_verified: bool = False
+
+
 class GenerationContract(BaseModel):
     allowed_technologies: list[str] = Field(default_factory=list)
     allow_new_llm_skills: bool = False
@@ -42,6 +52,16 @@ class QualityGates(BaseModel):
     technology_drift_allowed: bool = False
 
 
+def coerce_certification(item: Union[str, dict, CertificationRequirement]) -> CertificationRequirement:
+    if isinstance(item, CertificationRequirement):
+        return item
+    if isinstance(item, str):
+        return CertificationRequirement(name=item, requirement="mentioned", source="jd_direct")
+    if isinstance(item, dict):
+        return CertificationRequirement.model_validate(item)
+    raise TypeError(f"Unsupported certification payload: {type(item)}")
+
+
 class JDBlueprint(BaseModel):
     blueprint_version: str
     jd_hash: str
@@ -51,9 +71,18 @@ class JDBlueprint(BaseModel):
     entities: list[BlueprintEntity] = Field(default_factory=list)
     responsibilities: list[str] = Field(default_factory=list)
     domain_terms: list[str] = Field(default_factory=list)
-    certifications: list[str] = Field(default_factory=list)
+    certifications: list[CertificationRequirement] = Field(default_factory=list)
     generation_contract: GenerationContract
     quality_gates: QualityGates = Field(default_factory=QualityGates)
+
+    @field_validator("certifications", mode="before")
+    @classmethod
+    def _coerce_certifications(cls, value: Any) -> list[Any]:
+        if value is None:
+            return []
+        if isinstance(value, list):
+            return [coerce_certification(item) for item in value]
+        return value
 
     @classmethod
     def from_json_file(cls, path: str):
@@ -64,3 +93,13 @@ class JDBlueprint(BaseModel):
 
     def as_prompt_payload(self) -> dict[str, Any]:
         return self.model_dump()
+
+    def certification_names(self) -> list[str]:
+        return [item.name for item in self.certifications]
+
+    def responsibility_entries(self) -> list[dict[str, str]]:
+        """Stable responsibility IDs: R001, R002, ..."""
+        entries = []
+        for index, text in enumerate(self.responsibilities, start=1):
+            entries.append({"id": f"R{index:03d}", "text": text})
+        return entries

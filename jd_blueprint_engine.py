@@ -667,7 +667,16 @@ def build_blueprint(jd_text: str, extraction: JDExtraction, registry: dict, laya
         "entities": entity_records,
         "responsibilities": extraction.responsibilities,
         "domain_terms": extraction.domain_terms,
-        "certifications": extraction.certifications,
+        "certifications": [
+            {
+                "name": name,
+                "requirement": "mentioned",
+                "evidence": "jd_extraction",
+                "source": "jd_direct",
+                "candidate_verified": False,
+            }
+            for name in extraction.certifications
+        ],
         "generation_contract": {
             "allowed_technologies": allowed_technologies,
             "allow_new_llm_skills": False,

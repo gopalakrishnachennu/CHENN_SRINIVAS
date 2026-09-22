@@ -5,8 +5,17 @@ allowing behavioral tests to verify each validator fires correctly.
 """
 from __future__ import annotations
 
+from resume_engine.config import thresholds
 from resume_engine.models.jd_blueprint import JDBlueprint
 from resume_engine.models.resume_schema import ResumeJSON
+
+
+def _allowed_p4_skills(p4: list[str]) -> list[str]:
+    """Good resumes may include optional P4 skills only within the configured max ratio."""
+    if not p4:
+        return []
+    max_count = int(thresholds.P4_USAGE_MAX * len(p4))
+    return p4[:max_count]
 
 
 def _build_resume(
@@ -23,7 +32,7 @@ def _build_resume(
     p1 = blueprint.priority_skills.get("P1", [])
     p2 = blueprint.priority_skills.get("P2", [])
     p3 = blueprint.priority_skills.get("P3", [])
-    p4 = blueprint.priority_skills.get("P4", [])
+    p4 = _allowed_p4_skills(blueprint.priority_skills.get("P4", []))
 
     # Build summary covering all P1 skills
     p1_str = ", ".join(p1) if p1 else "cloud infrastructure"
@@ -65,7 +74,7 @@ def _build_resume(
     )
     second_bullet_2 = f"Delivered {blueprint.job.primary_family.replace('_', ' ')} improvements aligned with JD requirements."
 
-    certifications = list(blueprint.certifications) if blueprint.certifications else []
+    certifications = list(blueprint.certification_names()) if blueprint.certifications else []
 
     return ResumeJSON.model_validate({
         "target_title": blueprint.job.target_title or "Senior Engineer",

@@ -57,8 +57,14 @@ def main() -> None:
     parser.add_argument("--candidate-profile", default=None, help="Optional truthful candidate profile JSON for candidate mode.")
     parser.add_argument("--variants", type=int, default=5, help="Number of variants to generate.")
     parser.add_argument("--model", default=None, help="Optional OpenAI model override.")
+    parser.add_argument("--run-id", default=None, help="Optional run ID (UUID generated automatically if omitted).")
     parser.add_argument("--no-repair", action="store_true", help="Disable targeted repair pass.")
     parser.add_argument("--skip-laya", action="store_true", help="Skip Laya semantic validation.")
+    parser.add_argument(
+        "--export",
+        default=None,
+        help="Phase 3: comma-separated export formats for validated finals (docx,pdf).",
+    )
     parser.add_argument("--audit", action="store_true", help="Run implementation audit after pipeline.")
     parser.add_argument("--behavioral-audit", action="store_true", help="Run Phase 2.5 behavioral audit after pipeline.")
     parser.add_argument("--run-fixture-tests", action="store_true", help="Run behavioral pytest fixture tests (no OpenAI required).")
@@ -85,6 +91,10 @@ def main() -> None:
     if args.blueprint is None:
         parser.error("--blueprint is required unless using --run-fixture-tests or --phase25-report")
 
+    export_formats = None
+    if args.export:
+        export_formats = [part.strip().lower() for part in args.export.split(",") if part.strip()]
+
     result = run_phase2_pipeline(
         blueprint_path=args.blueprint,
         resume_seed_path=args.resume_seed,
@@ -93,6 +103,8 @@ def main() -> None:
         model=args.model,
         repair=not args.no_repair,
         use_laya=not args.skip_laya,
+        run_id=args.run_id,
+        export_formats=export_formats,
     )
     print(json.dumps(result, indent=2, ensure_ascii=False))
 

@@ -1,65 +1,50 @@
-PHASE 2 IMPLEMENTATION AUDIT
+PHASE 2.6 IMPLEMENTATION AUDIT
 =================================
+Note: imports_successfully != tested.
 
-[PASS] strategy_builder
-       Imported resume_engine.strategy.strategy_builder
-[PASS] variant_planner
-       Imported resume_engine.strategy.variant_planner
-[PASS] skill_placement
-       Imported resume_engine.strategy.skill_placement
-[PASS] role_positioning
-       Imported resume_engine.strategy.role_positioning
-[PASS] prompt_builder
-       Imported resume_engine.generation.prompt_builder
-[PASS] openai_generator
-       Imported resume_engine.generation.openai_generator
-[PASS] resume_generator
-       Imported resume_engine.generation.resume_generator
-[PASS] blueprint_validator
-       Imported resume_engine.validation.blueprint_validator
-[PASS] technology_firewall
-       Imported resume_engine.validation.technology_firewall
-[PASS] coverage_validator
-       Imported resume_engine.validation.coverage_validator
-[PASS] ai_tool_placement_validator
-       Imported resume_engine.validation.ai_tool_placement_validator
-[PASS] responsibility_validator
-       Imported resume_engine.validation.responsibility_validator
-[PASS] hybrid_family_validator
-       Imported resume_engine.validation.hybrid_family_validator
-[PASS] laya_validator
-       Imported resume_engine.validation.laya_validator
-[PASS] duplicate_validator
-       Imported resume_engine.validation.duplicate_validator
-[PASS] role_drift_validator
-       Imported resume_engine.validation.role_drift_validator
-[PASS] ats_validator
-       Imported resume_engine.validation.ats_validator
-[PASS] variant_similarity_validator
-       Imported resume_engine.validation.variant_similarity_validator
-[PASS] score_engine
-       Imported resume_engine.scoring.score_engine
-[PASS] repair_planner
-       Imported resume_engine.repair.repair_planner
-[PASS] targeted_rewriter
-       Imported resume_engine.repair.targeted_rewriter
-[PASS] repair_validator
-       Imported resume_engine.repair.repair_validator
-[PASS] outcome_store
-       Imported resume_engine.learning.outcome_store
-[PASS] failure_store
-       Imported resume_engine.learning.failure_store
-[PASS] strategy_memory
-       Imported resume_engine.learning.strategy_memory
-[PASS] pattern_updater
-       Imported resume_engine.learning.pattern_updater
-[PASS] resume_validation_report
-       Imported resume_engine.reports.resume_validation_report
-[PASS] behavioral_audit
-       Imported resume_engine.reports.behavioral_audit
-[PASS] phase2_pipeline
-       Imported resume_engine.pipeline.phase2_pipeline
+[EXISTS] strategy_builder | imports=True | unit_test_exists=False | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] variant_planner | imports=True | unit_test_exists=True | integration_test_exists=True | live=LIVE_TEST_NOT_RUN
+[EXISTS] skill_placement | imports=True | unit_test_exists=False | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] role_positioning | imports=True | unit_test_exists=False | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] prompt_builder | imports=True | unit_test_exists=False | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] openai_generator | imports=True | unit_test_exists=False | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] resume_generator | imports=True | unit_test_exists=False | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] bullet_enrichment | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] blueprint_validator | imports=True | unit_test_exists=False | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] technology_firewall | imports=True | unit_test_exists=True | integration_test_exists=True | live=LIVE_TEST_NOT_RUN
+[EXISTS] coverage_validator | imports=True | unit_test_exists=True | integration_test_exists=True | live=LIVE_TEST_NOT_RUN
+[EXISTS] p4_usage_validator | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] ai_tool_placement_validator | imports=True | unit_test_exists=False | integration_test_exists=True | live=LIVE_TEST_NOT_RUN
+[EXISTS] responsibility_validator | imports=True | unit_test_exists=True | integration_test_exists=True | live=LIVE_TEST_NOT_RUN
+[EXISTS] hybrid_family_validator | imports=True | unit_test_exists=False | integration_test_exists=True | live=LIVE_TEST_NOT_RUN
+[EXISTS] laya_validator | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] duplicate_validator | imports=True | unit_test_exists=False | integration_test_exists=True | live=LIVE_TEST_NOT_RUN
+[EXISTS] role_drift_validator | imports=True | unit_test_exists=False | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] ats_validator | imports=True | unit_test_exists=False | integration_test_exists=True | live=LIVE_TEST_NOT_RUN
+[EXISTS] variant_similarity_validator | imports=True | unit_test_exists=False | integration_test_exists=True | live=LIVE_TEST_NOT_RUN
+[EXISTS] variant_regeneration | imports=True | unit_test_exists=True | integration_test_exists=True | live=LIVE_TEST_NOT_RUN
+[EXISTS] score_engine | imports=True | unit_test_exists=False | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] repair_planner | imports=True | unit_test_exists=False | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] targeted_rewriter | imports=True | unit_test_exists=False | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] patch_applier | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] repair_validator | imports=True | unit_test_exists=False | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] outcome_store | imports=True | unit_test_exists=False | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] outcome_builder | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] failure_store | imports=True | unit_test_exists=False | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] strategy_memory | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] eligibility | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] fingerprint_store | imports=True | unit_test_exists=True | integration_test_exists=True | live=LIVE_TEST_NOT_RUN
+[EXISTS] pattern_updater | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] learning_repository | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] llm_client | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] docx_exporter | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] pdf_exporter | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] export_service | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] phase3_ui | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] resume_validation_report | imports=True | unit_test_exists=False | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] behavioral_audit | imports=True | unit_test_exists=True | integration_test_exists=True | live=LIVE_TEST_NOT_RUN
+[EXISTS] phase2_pipeline | imports=True | unit_test_exists=True | integration_test_exists=True | live=LIVE_TEST_NOT_RUN
 
 Overall:
-29/29 implemented
+42/42 importable modules
 100.0%

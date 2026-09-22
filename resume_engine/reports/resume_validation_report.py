@@ -37,7 +37,7 @@ def build_resume_validation_text(blueprint: JDBlueprint, bundle: ValidationBundl
     lines.extend(
         [
             "",
-            "INTERNAL OPTIMIZATION SCORE",
+            "INTERNAL OPTIMIZATION SCORE / JD_COMPATIBILITY_SCORE",
             f"{bundle.optimization_score:.1f} / 100",
             "",
             f"ACTION: {bundle.action}",

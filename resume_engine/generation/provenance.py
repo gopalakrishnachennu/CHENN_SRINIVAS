@@ -23,8 +23,8 @@ def blueprint_provenance_map(blueprint: JDBlueprint) -> dict[str, SkillProvenanc
         )
     for certification in blueprint.certifications:
         provenance.setdefault(
-            normalize_text(certification),
-            SkillProvenance(name=certification, source="JD_DIRECT", priority="certification"),
+            normalize_text(certification.name),
+            SkillProvenance(name=certification.name, source="JD_DIRECT", priority="certification"),
         )
     return provenance
 

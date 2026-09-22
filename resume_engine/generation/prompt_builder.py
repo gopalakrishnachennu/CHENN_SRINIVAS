@@ -31,6 +31,9 @@ STRICT RULES:
 13. Return only the requested structured JSON.
 14. Do not populate skill_provenance; the deterministic engine will attach it after generation.
 15. technical_skills must be a list of category objects, each with category and skills.
+16. In TEMPLATE mode, leave certifications as an empty list. JD certification requirements are handled deterministically and must never be claimed as candidate-earned.
+17. In CANDIDATE mode, only include certifications that are explicitly verified in candidate_profile.
+18. Embody the assigned variant_strategy.positioning angle without abandoning P1/P2 coverage.
 """
 
     user = {
@@ -38,6 +41,11 @@ STRICT RULES:
         "resume_strategy": strategy.model_dump(),
         "variant_strategy": variant.model_dump(),
         "generation_context": generation_context,
+        "certification_policy": {
+            "generation_mode": generation_context.get("generation_mode"),
+            "blueprint_certifications": [c.model_dump() for c in blueprint.certifications],
+            "rule": "Template never claims unverified certs as possessed.",
+        },
         "output_requirements": {
             "format": "OpenAIResumeJSON",
             "include_sections": [

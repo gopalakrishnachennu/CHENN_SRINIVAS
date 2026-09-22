@@ -164,17 +164,23 @@ class TestBlueprintAssertions:
         assertions = load_assertions()
         blueprint = get_blueprint(fixture_id)
         mandatory = assertions[fixture_id].get("mandatory_certifications", [])
+        names = blueprint.certification_names()
         for cert in mandatory:
-            assert cert in blueprint.certifications, (
+            assert cert in names, (
                 f"[{fixture_id}] mandatory cert {cert!r} not in blueprint.certifications"
+            )
+            match = next(c for c in blueprint.certifications if c.name == cert)
+            assert match.requirement in {"mandatory", "required"}, (
+                f"[{fixture_id}] cert {cert!r} requirement should be mandatory/required, got {match.requirement}"
             )
 
     def test_preferred_certifications_in_blueprint(self, fixture_id):
         assertions = load_assertions()
         blueprint = get_blueprint(fixture_id)
         preferred = assertions[fixture_id].get("preferred_certifications", [])
+        names = blueprint.certification_names()
         for cert in preferred:
-            assert cert in blueprint.certifications, (
+            assert cert in names, (
                 f"[{fixture_id}] preferred cert {cert!r} not in blueprint.certifications"
             )
 

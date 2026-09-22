@@ -54,8 +54,15 @@ def validate_coverage(blueprint: JDBlueprint, resume: ResumeJSON) -> ValidatorRe
                 )
             )
 
+    p4_skills = {skill for skill in blueprint.priority_skills.get("P4", [])}
+
     for entity in blueprint.entities:
+        # P4 / technical_skills_optional means allowed, never required.
+        if entity.priority == "P4" or entity.name in p4_skills:
+            continue
         for placement in entity.placement:
+            if placement == "technical_skills_optional":
+                continue
             placement_text = _placement_text(resume, placement)
             if not contains_term(placement_text, entity.name):
                 severity = "error" if entity.priority in {"P1", "P2"} else "warning"
@@ -66,7 +73,7 @@ def validate_coverage(blueprint: JDBlueprint, resume: ResumeJSON) -> ValidatorRe
                         message=f"{entity.name} is missing required placement: {placement}",
                         location=placement,
                         repair_hint=f"Add '{entity.name}' naturally to {placement}.",
-                        metadata={"skill": entity.name, "placement": placement},
+                        metadata={"skill": entity.name, "placement": placement, "priority": entity.priority},
                     )
                 )
 

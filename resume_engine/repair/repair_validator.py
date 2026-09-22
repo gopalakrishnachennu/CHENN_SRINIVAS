@@ -1,4 +1,5 @@
 from resume_engine.config import thresholds
+from resume_engine.models.jd_blueprint import JDBlueprint
 from resume_engine.models.validation_schema import ValidationBundle
 from resume_engine.repair.repair_planner import build_repair_plan
 
@@ -9,8 +10,11 @@ def should_repair(bundle: ValidationBundle) -> bool:
     return bundle.optimization_score >= thresholds.REPAIR_SCORE_MIN or not bundle.passed
 
 
-def attach_repair_plan(bundle: ValidationBundle) -> ValidationBundle:
-    bundle.repair_plan = build_repair_plan(bundle)
+def attach_repair_plan(
+    bundle: ValidationBundle,
+    blueprint: JDBlueprint | None = None,
+) -> ValidationBundle:
+    bundle.repair_plan = build_repair_plan(bundle, blueprint=blueprint)
     if bundle.passed and bundle.optimization_score >= thresholds.PASS_SCORE_MIN:
         bundle.action = "PASS"
     elif should_repair(bundle):

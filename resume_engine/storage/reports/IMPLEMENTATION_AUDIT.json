@@ -1,153 +1,470 @@
 {
-  "phase": "Phase 2",
+  "phase": "Phase 2.6",
+  "implemented_count": 42,
+  "total_count": 42,
+  "implementation_percent": 100.0,
   "modules": {
     "strategy_builder": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": false,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.strategy.strategy_builder"
+      "tested": false
     },
     "variant_planner": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": true,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.strategy.variant_planner"
+      "tested": false
     },
     "skill_placement": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": false,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.strategy.skill_placement"
+      "tested": false
     },
     "role_positioning": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": false,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.strategy.role_positioning"
+      "tested": false
     },
     "prompt_builder": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": false,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.generation.prompt_builder"
+      "tested": false
     },
     "openai_generator": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": false,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.generation.openai_generator"
+      "tested": false
     },
     "resume_generator": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": false,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.generation.resume_generator"
+      "tested": false
+    },
+    "bullet_enrichment": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
     },
     "blueprint_validator": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": false,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.validation.blueprint_validator"
+      "tested": false
     },
     "technology_firewall": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": true,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.validation.technology_firewall"
+      "tested": false
     },
     "coverage_validator": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": true,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.validation.coverage_validator"
+      "tested": false
+    },
+    "p4_usage_validator": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
     },
     "ai_tool_placement_validator": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": false,
+      "unit_test_passed": null,
+      "integration_test_exists": true,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.validation.ai_tool_placement_validator"
+      "tested": false
     },
     "responsibility_validator": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": true,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.validation.responsibility_validator"
+      "tested": false
     },
     "hybrid_family_validator": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": false,
+      "unit_test_passed": null,
+      "integration_test_exists": true,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.validation.hybrid_family_validator"
+      "tested": false
     },
     "laya_validator": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.validation.laya_validator"
+      "tested": false
     },
     "duplicate_validator": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": false,
+      "unit_test_passed": null,
+      "integration_test_exists": true,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.validation.duplicate_validator"
+      "tested": false
     },
     "role_drift_validator": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": false,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.validation.role_drift_validator"
+      "tested": false
     },
     "ats_validator": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": false,
+      "unit_test_passed": null,
+      "integration_test_exists": true,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.validation.ats_validator"
+      "tested": false
     },
     "variant_similarity_validator": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": false,
+      "unit_test_passed": null,
+      "integration_test_exists": true,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.validation.variant_similarity_validator"
+      "tested": false
+    },
+    "variant_regeneration": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": true,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
     },
     "score_engine": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": false,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.scoring.score_engine"
+      "tested": false
     },
     "repair_planner": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": false,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.repair.repair_planner"
+      "tested": false
     },
     "targeted_rewriter": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": false,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.repair.targeted_rewriter"
+      "tested": false
+    },
+    "patch_applier": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
     },
     "repair_validator": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": false,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.repair.repair_validator"
+      "tested": false
     },
     "outcome_store": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": false,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.learning.outcome_store"
+      "tested": false
+    },
+    "outcome_builder": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
     },
     "failure_store": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": false,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.learning.failure_store"
+      "tested": false
     },
     "strategy_memory": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.learning.strategy_memory"
+      "tested": false
+    },
+    "eligibility": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
+    },
+    "fingerprint_store": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": true,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
     },
     "pattern_updater": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.learning.pattern_updater"
+      "tested": false
+    },
+    "learning_repository": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
+    },
+    "llm_client": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
+    },
+    "docx_exporter": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
+    },
+    "pdf_exporter": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
+    },
+    "export_service": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
+    },
+    "phase3_ui": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
     },
     "resume_validation_report": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": false,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.reports.resume_validation_report"
+      "tested": false
     },
     "behavioral_audit": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": true,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.reports.behavioral_audit"
+      "tested": false
     },
     "phase2_pipeline": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": true,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
       "implemented": true,
-      "tested": true,
-      "details": "Imported resume_engine.pipeline.phase2_pipeline"
+      "tested": false
     }
-  },
-  "implemented_count": 29,
-  "total_count": 29,
-  "implementation_percent": 100.0
+  }
 }

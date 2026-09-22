@@ -32,11 +32,27 @@ def _make_blueprint(
     p3: list[str],
     p4: list[str],
     responsibilities: list[str],
-    certifications: list[str] | None = None,
+    certifications: list[str] | list[dict[str, Any]] | None = None,
     domain_terms: list[str] | None = None,
     entities_extra: list[dict[str, Any]] | None = None,
+    certification_requirement: str = "mentioned",
 ) -> JDBlueprint:
-    allowed = p1 + p2 + p3 + p4 + (certifications or [])
+    cert_payload: list[dict[str, Any]] = []
+    for item in certifications or []:
+        if isinstance(item, str):
+            cert_payload.append(
+                {
+                    "name": item,
+                    "requirement": certification_requirement,
+                    "evidence": "fixture blueprint",
+                    "source": "jd_direct",
+                    "candidate_verified": False,
+                }
+            )
+        else:
+            cert_payload.append(item)
+
+    allowed = p1 + p2 + p3 + p4 + [c["name"] for c in cert_payload]
 
     # Build placement rules
     def _placement(priority: str, name: str) -> list[str]:
@@ -89,7 +105,7 @@ def _make_blueprint(
         "entities": entities,
         "responsibilities": responsibilities,
         "domain_terms": domain_terms or [],
-        "certifications": certifications or [],
+        "certifications": cert_payload,
         "generation_contract": {
             "allowed_technologies": allowed,
             "allow_new_llm_skills": False,
@@ -354,6 +370,7 @@ def blueprint_13_mandatory_certification() -> JDBlueprint:
             "Manage Kubernetes clusters",
         ],
         certifications=["AWS Certified Solutions Architect"],
+        certification_requirement="mandatory",
     )
 
 
@@ -374,6 +391,7 @@ def blueprint_14_preferred_certification() -> JDBlueprint:
             "Support data quality frameworks",
         ],
         certifications=["Databricks Data Engineer Associate"],
+        certification_requirement="preferred",
     )
 
 

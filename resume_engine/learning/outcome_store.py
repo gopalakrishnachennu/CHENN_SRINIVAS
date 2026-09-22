@@ -9,6 +9,16 @@ OUTCOMES_FILE = LEARNING_STORAGE_DIR / "outcomes.jsonl"
 
 
 def save_learning_outcome(record: dict) -> Path:
+    """Persist outcome to JSONL + SQLite via LearningRepository."""
+    ensure_storage_dirs()
+    from resume_engine.learning.repository import get_default_repository
+
+    get_default_repository().save_outcome(record)
+    return OUTCOMES_FILE
+
+
+def append_outcome_jsonl_only(record: dict) -> Path:
+    """Low-level JSONL append used by tests / migration helpers."""
     ensure_storage_dirs()
     enriched = {
         "created_at": datetime.now(timezone.utc).isoformat(),

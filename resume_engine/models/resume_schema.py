@@ -1,12 +1,30 @@
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
+
+
+class ResumeBullet(BaseModel):
+    id: str
+    text: str
+    technologies: list[str] = Field(default_factory=list)
+    responsibility_ids: list[str] = Field(default_factory=list)
+    priority_skills: list[str] = Field(default_factory=list)
+    family: Optional[str] = None
+    provenance: list[str] = Field(default_factory=list)
+
+
+class ResumeCertification(BaseModel):
+    name: str
+    status: Literal["possessed", "recommended", "jd_requirement"] = "recommended"
+    candidate_verified: bool = False
+    requirement: Optional[str] = None
 
 
 class ResumeExperience(BaseModel):
     company: str
     title: str
     bullets: list[str] = Field(default_factory=list)
+    bullet_meta: list[ResumeBullet] = Field(default_factory=list)
 
 
 class ResumeProject(BaseModel):
@@ -14,6 +32,7 @@ class ResumeProject(BaseModel):
     summary: str
     bullets: list[str] = Field(default_factory=list)
     technologies: list[str] = Field(default_factory=list)
+    bullet_meta: list[ResumeBullet] = Field(default_factory=list)
 
 
 class TechnicalSkillGroup(BaseModel):
@@ -48,6 +67,7 @@ class ResumeJSON(BaseModel):
     experience: list[ResumeExperience] = Field(default_factory=list)
     projects: list[ResumeProject] = Field(default_factory=list)
     certifications: list[str] = Field(default_factory=list)
+    certification_records: list[ResumeCertification] = Field(default_factory=list)
     skill_provenance: list[SkillProvenance] = Field(default_factory=list)
     variant_id: Optional[str] = None
     source_blueprint_hash: Optional[str] = None
