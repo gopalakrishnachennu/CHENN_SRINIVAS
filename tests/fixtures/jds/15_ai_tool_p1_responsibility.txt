@@ -1,0 +1,4 @@
+Senior AI Automation Engineer
+
+Required: OpenAI API, Claude API, Python, AWS, CI/CD.
+Responsibilities: Build production automation using OpenAI API, implement Claude API workflows, and integrate AI tools into operational deployment pipelines.

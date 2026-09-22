@@ -1,0 +1,64 @@
+RESUME VALIDATION REPORT
+================================
+
+JD: Senior Cloud Data Platform Engineer
+Variant: V01
+
+ROLE
+[PASS] blueprint_validator: 100.0
+[FAIL] technology_firewall: 0.0
+  ! FAIL_UNAPPROVED_TECHNOLOGY_IN_TEXT: Resume text mentions unapproved technology: scala
+    Repair: Remove 'scala' unless it exists in allowed_technologies.
+[PASS] coverage_validator: 100.0
+  - FAIL_MISSING_REQUIRED_PLACEMENT: Unity Catalog is missing required placement: technical_skills_optional
+    Repair: Add 'Unity Catalog' naturally to technical_skills_optional.
+  - FAIL_MISSING_REQUIRED_PLACEMENT: Helm is missing required placement: technical_skills_optional
+    Repair: Add 'Helm' naturally to technical_skills_optional.
+  - FAIL_MISSING_REQUIRED_PLACEMENT: Prompt Engineering is missing required placement: technical_skills_optional
+    Repair: Add 'Prompt Engineering' naturally to technical_skills_optional.
+  - FAIL_MISSING_REQUIRED_PLACEMENT: Embeddings is missing required placement: technical_skills_optional
+    Repair: Add 'Embeddings' naturally to technical_skills_optional.
+  - FAIL_MISSING_REQUIRED_PLACEMENT: RAG is missing required placement: technical_skills_optional
+    Repair: Add 'RAG' naturally to technical_skills_optional.
+  - FAIL_MISSING_REQUIRED_PLACEMENT: Tool Calling is missing required placement: technical_skills_optional
+    Repair: Add 'Tool Calling' naturally to technical_skills_optional.
+  - FAIL_MISSING_REQUIRED_PLACEMENT: Vector Databases is missing required placement: technical_skills_optional
+    Repair: Add 'Vector Databases' naturally to technical_skills_optional.
+  - FAIL_MISSING_REQUIRED_PLACEMENT: LLM Applications is missing required placement: technical_skills_optional
+    Repair: Add 'LLM Applications' naturally to technical_skills_optional.
+[PASS] responsibility_validator: 100.0
+[PASS] duplicate_validator: 100.0
+[PASS] role_drift_validator: 100.0
+[PASS] ats_validator: 100.0
+[PASS] laya_validator: 83.0
+  - WARN_LAYA_GENERIC_BULLET: Laya found bullet likely generic (0.77).
+    Repair: Rewrite bullet with more specific technology, action, and result.
+
+INTERNAL OPTIMIZATION SCORE
+86.6 / 100
+
+ACTION: REPAIR_REQUIRED
+
+REPAIR PLAN
+{
+  "required": true,
+  "failed_bullets": [
+    "experience[0].bullets[0]"
+  ],
+  "missing_skills": [
+    "Unity Catalog",
+    "Helm",
+    "Prompt Engineering",
+    "Embeddings",
+    "RAG",
+    "Tool Calling",
+    "Vector Databases",
+    "LLM Applications"
+  ],
+  "missing_responsibilities": [],
+  "remove_technologies": [
+    "scala"
+  ],
+  "duplicate_locations": [],
+  "issue_count": 10
+}

@@ -1,0 +1,35 @@
+RESUME VALIDATION REPORT
+================================
+
+JD: Senior Cloud Data Platform Engineer
+Variant: V01
+
+ROLE
+[PASS] blueprint_validator: 100.0
+[PASS] technology_firewall: 100.0
+[PASS] coverage_validator: 100.0
+[PASS] responsibility_validator: 100.0
+[PASS] duplicate_validator: 100.0
+[PASS] role_drift_validator: 100.0
+[PASS] ats_validator: 100.0
+[PASS] laya_validator: 82.8
+  - WARN_LAYA_GENERIC_BULLET: Laya found bullet likely generic (0.74).
+    Repair: Rewrite bullet with more specific technology, action, and result.
+
+INTERNAL OPTIMIZATION SCORE
+96.6 / 100
+
+ACTION: PASS
+
+REPAIR PLAN
+{
+  "required": true,
+  "failed_bullets": [
+    "experience[0].bullets[0]"
+  ],
+  "missing_skills": [],
+  "missing_responsibilities": [],
+  "remove_technologies": [],
+  "duplicate_locations": [],
+  "issue_count": 1
+}

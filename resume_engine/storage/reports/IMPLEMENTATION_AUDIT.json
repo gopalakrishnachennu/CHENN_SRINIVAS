@@ -1,0 +1,153 @@
+{
+  "phase": "Phase 2",
+  "modules": {
+    "strategy_builder": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.strategy.strategy_builder"
+    },
+    "variant_planner": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.strategy.variant_planner"
+    },
+    "skill_placement": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.strategy.skill_placement"
+    },
+    "role_positioning": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.strategy.role_positioning"
+    },
+    "prompt_builder": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.generation.prompt_builder"
+    },
+    "openai_generator": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.generation.openai_generator"
+    },
+    "resume_generator": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.generation.resume_generator"
+    },
+    "blueprint_validator": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.validation.blueprint_validator"
+    },
+    "technology_firewall": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.validation.technology_firewall"
+    },
+    "coverage_validator": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.validation.coverage_validator"
+    },
+    "ai_tool_placement_validator": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.validation.ai_tool_placement_validator"
+    },
+    "responsibility_validator": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.validation.responsibility_validator"
+    },
+    "hybrid_family_validator": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.validation.hybrid_family_validator"
+    },
+    "laya_validator": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.validation.laya_validator"
+    },
+    "duplicate_validator": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.validation.duplicate_validator"
+    },
+    "role_drift_validator": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.validation.role_drift_validator"
+    },
+    "ats_validator": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.validation.ats_validator"
+    },
+    "variant_similarity_validator": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.validation.variant_similarity_validator"
+    },
+    "score_engine": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.scoring.score_engine"
+    },
+    "repair_planner": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.repair.repair_planner"
+    },
+    "targeted_rewriter": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.repair.targeted_rewriter"
+    },
+    "repair_validator": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.repair.repair_validator"
+    },
+    "outcome_store": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.learning.outcome_store"
+    },
+    "failure_store": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.learning.failure_store"
+    },
+    "strategy_memory": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.learning.strategy_memory"
+    },
+    "pattern_updater": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.learning.pattern_updater"
+    },
+    "resume_validation_report": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.reports.resume_validation_report"
+    },
+    "behavioral_audit": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.reports.behavioral_audit"
+    },
+    "phase2_pipeline": {
+      "implemented": true,
+      "tested": true,
+      "details": "Imported resume_engine.pipeline.phase2_pipeline"
+    }
+  },
+  "implemented_count": 29,
+  "total_count": 29,
+  "implementation_percent": 100.0
+}

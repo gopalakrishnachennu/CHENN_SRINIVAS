@@ -1,0 +1,4 @@
+Cloud Data Engineer
+
+Required: Databricks, Apache Spark, Python, SQL, AWS, Terraform, CI/CD.
+Responsibilities: Build data pipelines, automate data platform deployment, operate cloud data services, and improve pipeline observability.

@@ -1,0 +1,297 @@
+{
+  "target_title": "Senior AI DevOps & Data Engineer",
+  "summary": "JD-centric template profile for a senior engineer focused on reliable AWS infrastructure with Terraform and Kubernetes, Databricks and Apache Spark data engineering, and production GenAI workflows. Designed to emphasize Python-based platform automation, LLM integrations, LangChain, and observability; content should be reviewed and adapted to verified candidate experience.",
+  "technical_skills": {
+    "Cloud Infrastructure": [
+      "AWS"
+    ],
+    "DevOps": [
+      "Terraform",
+      "Kubernetes"
+    ],
+    "Data Platforms": [
+      "Databricks",
+      "Apache Spark"
+    ],
+    "Programming Languages": [
+      "Python"
+    ],
+    "AI Tools": [
+      "LLMs",
+      "OpenAI API",
+      "Claude"
+    ],
+    "AI Frameworks": [
+      "LangChain"
+    ],
+    "Platform Operations": [
+      "observability"
+    ],
+    "Generative AI": [
+      "GenAI"
+    ],
+    "Supporting Data Platform Skills": [
+      "PySpark",
+      "Delta Lake",
+      "Unity Catalog"
+    ],
+    "Supporting Infrastructure Skills": [
+      "Infrastructure as Code",
+      "Azure",
+      "Docker",
+      "Helm",
+      "CI/CD"
+    ],
+    "Supporting AI Application Skills": [
+      "Prompt Engineering",
+      "Embeddings",
+      "RAG",
+      "Tool Calling",
+      "Anthropic API",
+      "Tool Use",
+      "Vector Databases",
+      "LLM Applications"
+    ]
+  },
+  "experience": [
+    {
+      "company": "Company A",
+      "title": "Senior AI DevOps & Data Engineer",
+      "bullets": [
+        "Deploy and maintain Kubernetes clusters on AWS using Terraform to support consistent, reliable, and scalable cloud infrastructure.",
+        "Design Databricks data engineering pipelines with Apache Spark and Python to support dependable large-scale data processing and downstream AI-powered workflows.",
+        "Integrate LLMs through the OpenAI API and Claude to produce automated operational insights within production workflows.",
+        "Develop GenAI features and AI agent architectures with LangChain while establishing maintainable patterns for production operation.",
+        "Strengthen platform reliability through observability practices spanning cloud infrastructure, data pipelines, and AI-enabled services."
+      ]
+    },
+    {
+      "company": "Company B",
+      "title": "DevOps & Data Platform Engineer",
+      "bullets": [
+        "Manage AWS platform components through Terraform and Kubernetes, promoting repeatable infrastructure delivery and stable runtime operations.",
+        "Build and optimize Databricks and Apache Spark pipelines in Python to improve data availability for operational and AI use cases.",
+        "Support LLM integrations using the OpenAI API and Claude, aligning AI capabilities with reliable production workflows.",
+        "Apply observability practices to identify platform and pipeline issues and improve operational readiness."
+      ]
+    },
+    {
+      "company": "Company C",
+      "title": "Cloud Data Engineer",
+      "bullets": [
+        "Develop Python-based data engineering pipelines on Databricks and Apache Spark for scalable processing and dependable data delivery.",
+        "Support AWS infrastructure managed with Terraform and Kubernetes, reinforcing consistent deployment and platform reliability.",
+        "Contribute to GenAI and LangChain workflows that connect LLMs with operational and data platform use cases."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Databricks AI Data Platform Template",
+      "summary": "Template project concept for a reliable Databricks platform that combines large-scale data processing with production AI workflows.",
+      "bullets": [
+        "Design Python and Apache Spark pipelines on Databricks with platform controls that support reliable data engineering and AI-powered processing.",
+        "Connect curated pipeline outputs to LangChain workflows using LLMs, OpenAI API, and Claude while applying observability across processing and AI operations."
+      ],
+      "technologies": [
+        "Databricks",
+        "Apache Spark",
+        "Python",
+        "LangChain",
+        "LLMs",
+        "OpenAI API",
+        "Claude",
+        "observability"
+      ]
+    },
+    {
+      "name": "AWS Kubernetes Platform Template",
+      "summary": "Template project concept for scalable cloud infrastructure supporting data engineering and GenAI services.",
+      "bullets": [
+        "Define AWS and Kubernetes infrastructure with Terraform to create repeatable environments for Databricks pipelines and AI-enabled workloads.",
+        "Establish platform reliability and observability patterns for infrastructure, data processing, and GenAI production workflows."
+      ],
+      "technologies": [
+        "AWS",
+        "Terraform",
+        "Kubernetes",
+        "Databricks",
+        "GenAI",
+        "observability"
+      ]
+    }
+  ],
+  "certifications": [],
+  "skill_provenance": [
+    {
+      "name": "AWS",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Terraform",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Kubernetes",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Databricks",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Apache Spark",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Python",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "LLMs",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "OpenAI API",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Claude",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "LangChain",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "observability",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "GenAI",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "PySpark",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Databricks"
+    },
+    {
+      "name": "Delta Lake",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Databricks"
+    },
+    {
+      "name": "Unity Catalog",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Databricks"
+    },
+    {
+      "name": "Infrastructure as Code",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Terraform"
+    },
+    {
+      "name": "Azure",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Terraform"
+    },
+    {
+      "name": "Docker",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Kubernetes"
+    },
+    {
+      "name": "Helm",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Kubernetes"
+    },
+    {
+      "name": "CI/CD",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Kubernetes"
+    },
+    {
+      "name": "Prompt Engineering",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "OpenAI API"
+    },
+    {
+      "name": "Embeddings",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "OpenAI API"
+    },
+    {
+      "name": "RAG",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "OpenAI API"
+    },
+    {
+      "name": "Tool Calling",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "OpenAI API"
+    },
+    {
+      "name": "Anthropic API",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Claude"
+    },
+    {
+      "name": "Tool Use",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Claude"
+    },
+    {
+      "name": "Vector Databases",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "LangChain"
+    },
+    {
+      "name": "LLM Applications",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "LangChain"
+    }
+  ],
+  "variant_id": "V02",
+  "source_blueprint_hash": "6e60d4d225581288"
+}

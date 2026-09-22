@@ -1,0 +1,5 @@
+.env
+.env.local
+resume_engine_data/
+__pycache__/
+.ipynb_checkpoints/

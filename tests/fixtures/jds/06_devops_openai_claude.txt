@@ -1,0 +1,4 @@
+DevOps Automation Engineer
+
+Required: AWS, Terraform, Kubernetes, CI/CD, Python.
+Responsibilities: Automate infrastructure, manage deployment reliability, and build operational assistants using OpenAI API and Claude API.

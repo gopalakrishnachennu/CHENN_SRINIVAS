@@ -1,0 +1,248 @@
+{
+  "target_title": "Senior Cloud Data Platform Engineer",
+  "summary": "JD-centric template profile for a senior cloud data platform engineer focused on AWS, Databricks, and Terraform. Emphasizes cloud platform ownership, Kubernetes operations, CI/CD automation, Python and Spark workloads, and automation using OpenAI API and Claude API. All experience and project content is illustrative and requires candidate verification before use.",
+  "technical_skills": {
+    "Cloud": [
+      "AWS"
+    ],
+    "Data Platform": [
+      "Databricks"
+    ],
+    "DevOps": [
+      "Terraform",
+      "Kubernetes",
+      "CI/CD"
+    ],
+    "Programming": [
+      "Python"
+    ],
+    "Data Processing": [
+      "Spark"
+    ],
+    "AI Tools and Frameworks": [
+      "OpenAI API",
+      "Claude API",
+      "LangChain"
+    ],
+    "Supporting Technologies": [
+      "Infrastructure as Code",
+      "Apache Spark",
+      "PySpark",
+      "Delta Lake",
+      "Unity Catalog",
+      "Docker",
+      "Helm",
+      "Prompt Engineering",
+      "Embeddings",
+      "RAG",
+      "Tool Calling",
+      "Vector Databases",
+      "LLM Applications"
+    ]
+  },
+  "experience": [
+    {
+      "company": "Company A",
+      "title": "Senior Cloud Data Platform Engineer",
+      "bullets": [
+        "Template bullet: Own the AWS cloud data platform, manage Databricks, provision infrastructure with Terraform, and operate Kubernetes services.",
+        "Template bullet: Automate infrastructure and application deployments through CI/CD, improving release consistency and platform maintainability.",
+        "Template bullet: Develop and support Python and Spark workloads aligned with scalable cloud data processing requirements.",
+        "Template bullet: Build operational automation using OpenAI API and Claude API to streamline platform workflows and engineering tasks.",
+        "Template bullet: Apply LangChain where appropriate to structure maintainable automation for LLM Applications."
+      ]
+    },
+    {
+      "company": "Company B",
+      "title": "Cloud Platform Engineer",
+      "bullets": [
+        "Template bullet: Build reusable AWS cloud infrastructure with Terraform and Infrastructure as Code practices.",
+        "Template bullet: Operate Kubernetes workloads with Docker and integrate deployment controls into CI/CD workflows.",
+        "Template bullet: Support Databricks platform capabilities and Delta Lake workloads with an emphasis on reliability and governance.",
+        "Template bullet: Create Python and PySpark automation that simplifies cloud platform operations and data workload delivery."
+      ]
+    },
+    {
+      "company": "Company C",
+      "title": "Data Platform Engineer",
+      "bullets": [
+        "Template bullet: Develop and maintain Databricks and Spark workloads supporting cloud data platform use cases.",
+        "Template bullet: Coordinate AWS, Terraform, and Kubernetes changes to deliver repeatable platform environments.",
+        "Template bullet: Extend Python-based automation with OpenAI API and Claude API for engineering and deployment workflows."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Cloud Data Platform Foundation",
+      "summary": "Template project concept for establishing a repeatable AWS and Databricks platform foundation.",
+      "bullets": [
+        "Template bullet: Define Terraform-managed AWS infrastructure, Kubernetes deployment patterns, and CI/CD controls for Databricks and Apache Spark workloads."
+      ],
+      "technologies": [
+        "AWS",
+        "Databricks",
+        "Terraform",
+        "Kubernetes",
+        "CI/CD",
+        "Apache Spark"
+      ]
+    },
+    {
+      "name": "Generative AI Platform Automation",
+      "summary": "Template project concept for adding controlled AI-assisted automation to cloud platform operations.",
+      "bullets": [
+        "Template bullet: Build Python automation with OpenAI API, Claude API, and LangChain to support repeatable platform workflows."
+      ],
+      "technologies": [
+        "Python",
+        "OpenAI API",
+        "Claude API",
+        "LangChain"
+      ]
+    }
+  ],
+  "certifications": [],
+  "skill_provenance": [
+    {
+      "name": "AWS",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Databricks",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Terraform",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Kubernetes",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "CI/CD",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Python",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Spark",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "OpenAI API",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Claude API",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "LangChain",
+      "source": "JD_DIRECT",
+      "priority": "P3",
+      "parent": null
+    },
+    {
+      "name": "Infrastructure as Code",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Terraform"
+    },
+    {
+      "name": "Apache Spark",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Databricks"
+    },
+    {
+      "name": "PySpark",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Databricks"
+    },
+    {
+      "name": "Delta Lake",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Databricks"
+    },
+    {
+      "name": "Unity Catalog",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Databricks"
+    },
+    {
+      "name": "Docker",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Kubernetes"
+    },
+    {
+      "name": "Helm",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Kubernetes"
+    },
+    {
+      "name": "Prompt Engineering",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "OpenAI API"
+    },
+    {
+      "name": "Embeddings",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "OpenAI API"
+    },
+    {
+      "name": "RAG",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "OpenAI API"
+    },
+    {
+      "name": "Tool Calling",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "OpenAI API"
+    },
+    {
+      "name": "Vector Databases",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "LangChain"
+    },
+    {
+      "name": "LLM Applications",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "LangChain"
+    }
+  ],
+  "variant_id": "V01",
+  "source_blueprint_hash": "3b63a75c28b6c7e2"
+}

@@ -1,0 +1,362 @@
+{
+  "variant_id": "V01",
+  "resume_id": "6e60d4d225581288_V01before_repair",
+  "passed": true,
+  "optimization_score": 96.1,
+  "action": "PASS",
+  "subscores": {
+    "p1_coverage": 100.0,
+    "p2_coverage": 100.0,
+    "responsibility_coverage": 100.0,
+    "role_alignment": 80.48,
+    "technology_alignment": 100.0,
+    "keyword_distribution": 100.0,
+    "bullet_quality": 80.48,
+    "duplicate_safety": 100.0,
+    "ats_structure": 100.0
+  },
+  "validator_results": [
+    {
+      "name": "blueprint_validator",
+      "passed": true,
+      "score": 100.0,
+      "issues": [],
+      "details": {}
+    },
+    {
+      "name": "technology_firewall",
+      "passed": true,
+      "score": 100.0,
+      "issues": [],
+      "details": {
+        "checked_generated_skills": [
+          "AWS",
+          "Azure",
+          "Terraform",
+          "Kubernetes",
+          "Infrastructure as Code",
+          "Docker",
+          "Helm",
+          "CI/CD",
+          "Databricks",
+          "Apache Spark",
+          "Python",
+          "LLMs",
+          "OpenAI API",
+          "Claude",
+          "LangChain",
+          "GenAI",
+          "observability"
+        ],
+        "unauthorized_count": 0
+      }
+    },
+    {
+      "name": "coverage_validator",
+      "passed": true,
+      "score": 100.0,
+      "issues": [
+        {
+          "code": "FAIL_MISSING_REQUIRED_PLACEMENT",
+          "severity": "warning",
+          "message": "PySpark is missing required placement: technical_skills_optional",
+          "location": "technical_skills_optional",
+          "repair_hint": "Add 'PySpark' naturally to technical_skills_optional.",
+          "metadata": {
+            "skill": "PySpark",
+            "placement": "technical_skills_optional"
+          }
+        },
+        {
+          "code": "FAIL_MISSING_REQUIRED_PLACEMENT",
+          "severity": "warning",
+          "message": "Delta Lake is missing required placement: technical_skills_optional",
+          "location": "technical_skills_optional",
+          "repair_hint": "Add 'Delta Lake' naturally to technical_skills_optional.",
+          "metadata": {
+            "skill": "Delta Lake",
+            "placement": "technical_skills_optional"
+          }
+        },
+        {
+          "code": "FAIL_MISSING_REQUIRED_PLACEMENT",
+          "severity": "warning",
+          "message": "Unity Catalog is missing required placement: technical_skills_optional",
+          "location": "technical_skills_optional",
+          "repair_hint": "Add 'Unity Catalog' naturally to technical_skills_optional.",
+          "metadata": {
+            "skill": "Unity Catalog",
+            "placement": "technical_skills_optional"
+          }
+        },
+        {
+          "code": "FAIL_MISSING_REQUIRED_PLACEMENT",
+          "severity": "warning",
+          "message": "Prompt Engineering is missing required placement: technical_skills_optional",
+          "location": "technical_skills_optional",
+          "repair_hint": "Add 'Prompt Engineering' naturally to technical_skills_optional.",
+          "metadata": {
+            "skill": "Prompt Engineering",
+            "placement": "technical_skills_optional"
+          }
+        },
+        {
+          "code": "FAIL_MISSING_REQUIRED_PLACEMENT",
+          "severity": "warning",
+          "message": "Embeddings is missing required placement: technical_skills_optional",
+          "location": "technical_skills_optional",
+          "repair_hint": "Add 'Embeddings' naturally to technical_skills_optional.",
+          "metadata": {
+            "skill": "Embeddings",
+            "placement": "technical_skills_optional"
+          }
+        },
+        {
+          "code": "FAIL_MISSING_REQUIRED_PLACEMENT",
+          "severity": "warning",
+          "message": "RAG is missing required placement: technical_skills_optional",
+          "location": "technical_skills_optional",
+          "repair_hint": "Add 'RAG' naturally to technical_skills_optional.",
+          "metadata": {
+            "skill": "RAG",
+            "placement": "technical_skills_optional"
+          }
+        },
+        {
+          "code": "FAIL_MISSING_REQUIRED_PLACEMENT",
+          "severity": "warning",
+          "message": "Tool Calling is missing required placement: technical_skills_optional",
+          "location": "technical_skills_optional",
+          "repair_hint": "Add 'Tool Calling' naturally to technical_skills_optional.",
+          "metadata": {
+            "skill": "Tool Calling",
+            "placement": "technical_skills_optional"
+          }
+        },
+        {
+          "code": "FAIL_MISSING_REQUIRED_PLACEMENT",
+          "severity": "warning",
+          "message": "Anthropic API is missing required placement: technical_skills_optional",
+          "location": "technical_skills_optional",
+          "repair_hint": "Add 'Anthropic API' naturally to technical_skills_optional.",
+          "metadata": {
+            "skill": "Anthropic API",
+            "placement": "technical_skills_optional"
+          }
+        },
+        {
+          "code": "FAIL_MISSING_REQUIRED_PLACEMENT",
+          "severity": "warning",
+          "message": "Tool Use is missing required placement: technical_skills_optional",
+          "location": "technical_skills_optional",
+          "repair_hint": "Add 'Tool Use' naturally to technical_skills_optional.",
+          "metadata": {
+            "skill": "Tool Use",
+            "placement": "technical_skills_optional"
+          }
+        },
+        {
+          "code": "FAIL_MISSING_REQUIRED_PLACEMENT",
+          "severity": "warning",
+          "message": "Vector Databases is missing required placement: technical_skills_optional",
+          "location": "technical_skills_optional",
+          "repair_hint": "Add 'Vector Databases' naturally to technical_skills_optional.",
+          "metadata": {
+            "skill": "Vector Databases",
+            "placement": "technical_skills_optional"
+          }
+        },
+        {
+          "code": "FAIL_MISSING_REQUIRED_PLACEMENT",
+          "severity": "warning",
+          "message": "LLM Applications is missing required placement: technical_skills_optional",
+          "location": "technical_skills_optional",
+          "repair_hint": "Add 'LLM Applications' naturally to technical_skills_optional.",
+          "metadata": {
+            "skill": "LLM Applications",
+            "placement": "technical_skills_optional"
+          }
+        }
+      ],
+      "details": {
+        "P1_coverage": 1.0,
+        "P1_missing": [],
+        "P2_coverage": 1.0,
+        "P2_missing": [],
+        "P3_coverage": 1.0,
+        "P3_missing": []
+      }
+    },
+    {
+      "name": "ai_tool_placement_validator",
+      "passed": true,
+      "score": 100.0,
+      "issues": [],
+      "details": {
+        "LLMs": {
+          "priority": "P2",
+          "in_skills": true,
+          "in_experience": true,
+          "in_summary": true
+        },
+        "OpenAI API": {
+          "priority": "P2",
+          "in_skills": true,
+          "in_experience": true,
+          "in_summary": true
+        },
+        "Claude": {
+          "priority": "P2",
+          "in_skills": true,
+          "in_experience": true,
+          "in_summary": true
+        },
+        "LangChain": {
+          "priority": "P2",
+          "in_skills": true,
+          "in_experience": true,
+          "in_summary": true
+        },
+        "Embeddings": {
+          "priority": "P4",
+          "in_skills": false,
+          "in_experience": false,
+          "in_summary": false
+        },
+        "RAG": {
+          "priority": "P4",
+          "in_skills": false,
+          "in_experience": false,
+          "in_summary": false
+        },
+        "Anthropic API": {
+          "priority": "P4",
+          "in_skills": false,
+          "in_experience": false,
+          "in_summary": false
+        }
+      }
+    },
+    {
+      "name": "responsibility_validator",
+      "passed": true,
+      "score": 100.0,
+      "issues": [],
+      "details": {
+        "responsibility_coverage": {
+          "Deploy and maintain Kubernetes clusters on AWS using Terraform": true,
+          "Design and optimize Databricks data engineering pipelines with Spark": true,
+          "Integrate Claude and OpenAI API for automated operational insights": true,
+          "Develop GenAI features utilizing LangChain": true,
+          "Ensure platform reliability and observability": true
+        },
+        "covered": 5,
+        "total": 5
+      }
+    },
+    {
+      "name": "hybrid_family_validator",
+      "passed": true,
+      "score": 100.0,
+      "issues": [],
+      "details": {
+        "hybrid_expected": true,
+        "primary_family": "devops_cloud",
+        "secondary_family": "data_engineering",
+        "primary_represented": true,
+        "secondary_represented": true,
+        "unrelated_terms": []
+      }
+    },
+    {
+      "name": "duplicate_validator",
+      "passed": true,
+      "score": 100.0,
+      "issues": [],
+      "details": {
+        "bullet_count": 14,
+        "duplicate_issue_count": 0
+      }
+    },
+    {
+      "name": "role_drift_validator",
+      "passed": true,
+      "score": 100.0,
+      "issues": [],
+      "details": {
+        "primary_family": "devops_cloud",
+        "secondary_family": "data_engineering"
+      }
+    },
+    {
+      "name": "ats_validator",
+      "passed": true,
+      "score": 100.0,
+      "issues": [],
+      "details": {
+        "standard_headings": true,
+        "tables": false,
+        "graphics": false,
+        "columns": false,
+        "format_safe": true
+      }
+    },
+    {
+      "name": "laya_validator",
+      "passed": true,
+      "score": 80.48,
+      "issues": [
+        {
+          "code": "WARN_LAYA_GENERIC_BULLET",
+          "severity": "warning",
+          "message": "Laya found bullet likely generic (0.72).",
+          "location": "experience[1].bullets[0]",
+          "repair_hint": "Rewrite bullet with more specific technology, action, and result.",
+          "metadata": {
+            "bullet": "Template scope: Build and maintain AWS environments with Terraform, Kubernetes, and Infrastructure as Code practices.",
+            "generic_probability": 0.7241
+          }
+        },
+        {
+          "code": "WARN_LAYA_GENERIC_BULLET",
+          "severity": "warning",
+          "message": "Laya found bullet likely generic (0.71).",
+          "location": "experience[2].bullets[0]",
+          "repair_hint": "Rewrite bullet with more specific technology, action, and result.",
+          "metadata": {
+            "bullet": "Template scope: Support Kubernetes platforms across AWS and Azure, using Terraform to standardize cloud infrastructure delivery.",
+            "generic_probability": 0.7073
+          }
+        }
+      ],
+      "details": {
+        "average_semantic_alignment": 0.8048000000000001,
+        "validated_bullet_count": 14
+      }
+    }
+  ],
+  "repair_plan": {
+    "required": true,
+    "failed_bullets": [
+      "experience[1].bullets[0]",
+      "experience[2].bullets[0]"
+    ],
+    "missing_skills": [
+      "PySpark",
+      "Delta Lake",
+      "Unity Catalog",
+      "Prompt Engineering",
+      "Embeddings",
+      "RAG",
+      "Tool Calling",
+      "Anthropic API",
+      "Tool Use",
+      "Vector Databases",
+      "LLM Applications"
+    ],
+    "missing_responsibilities": [],
+    "remove_technologies": [],
+    "duplicate_locations": [],
+    "issue_count": 13
+  }
+}

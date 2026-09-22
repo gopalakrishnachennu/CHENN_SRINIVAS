@@ -1,0 +1,4 @@
+Senior DevOps Engineer
+
+Required: AWS, Kubernetes, Terraform, Docker, Helm, CI/CD.
+Responsibilities: Build cloud infrastructure, automate deployments, manage Kubernetes clusters, and improve release reliability.

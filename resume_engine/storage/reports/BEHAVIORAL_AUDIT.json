@@ -1,0 +1,192 @@
+{
+  "phase": "Phase 2.5",
+  "audit_type": "BEHAVIORAL_VALIDATION",
+  "fixture_inventory": {
+    "count": 15,
+    "files": [
+      "01_pure_data_engineer.txt",
+      "02_pure_devops.txt",
+      "03_devops_databricks_ai_monster.txt",
+      "04_data_engineer_devops.txt",
+      "05_ai_engineer_openai_claude.txt",
+      "06_devops_openai_claude.txt",
+      "07_databricks_genai.txt",
+      "08_unknown_ai_tool.txt",
+      "09_many_technologies.txt",
+      "10_conflicting_title_responsibilities.txt",
+      "11_very_long_jd.txt",
+      "12_sparse_poor_jd.txt",
+      "13_mandatory_certification.txt",
+      "14_preferred_certification.txt",
+      "15_ai_tool_p1_responsibility.txt"
+    ]
+  },
+  "fixture_assertions": {
+    "assertion_file": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/tests/fixtures/expected/fixture_assertions.json",
+    "assertion_count": 15,
+    "fixture_count": 15,
+    "missing_assertions": [],
+    "all_fixtures_have_assertions": true
+  },
+  "jd": "hybrid_devops_databricks_ai",
+  "blueprint": {
+    "primary_family_correct": true,
+    "secondary_family_correct": true,
+    "hybrid_detected": true
+  },
+  "critical_skill_detection": {
+    "Databricks": true,
+    "Terraform": true,
+    "Kubernetes": true,
+    "OpenAI API": true,
+    "Claude API": true,
+    "LangChain": true
+  },
+  "placement_validation": {
+    "OpenAI_in_skills": true,
+    "OpenAI_in_responsibilities": true,
+    "Claude_in_skills": true,
+    "Claude_in_responsibilities": true,
+    "explicit_ai_validator_passed": true
+  },
+  "ai_tool_placement_validator": {
+    "name": "ai_tool_placement_validator",
+    "passed": true,
+    "score": 100.0,
+    "issues": [],
+    "details": {
+      "OpenAI API": {
+        "priority": "P1",
+        "in_skills": true,
+        "in_experience": true,
+        "in_summary": true
+      },
+      "Claude API": {
+        "priority": "P1",
+        "in_skills": true,
+        "in_experience": true,
+        "in_summary": true
+      },
+      "LangChain": {
+        "priority": "P3",
+        "in_skills": true,
+        "in_experience": true,
+        "in_summary": false
+      }
+    }
+  },
+  "hybrid_family_validator": {
+    "name": "hybrid_family_validator",
+    "passed": true,
+    "score": 100.0,
+    "issues": [],
+    "details": {
+      "hybrid_expected": true,
+      "primary_family": "devops_cloud",
+      "secondary_family": "data_engineering",
+      "primary_represented": true,
+      "secondary_represented": true,
+      "unrelated_terms": []
+    }
+  },
+  "p4_usage": {
+    "p4_items": [
+      "Delta Lake",
+      "PySpark",
+      "Docker",
+      "Helm"
+    ],
+    "p4_mentions": [
+      "Delta Lake",
+      "PySpark",
+      "Docker",
+      "Helm"
+    ],
+    "usage_ratio": 1.0
+  },
+  "hallucination_firewall": {
+    "unauthorized_technologies": 3,
+    "blocked": true
+  },
+  "role_drift": false,
+  "duplicate_bullets": 1,
+  "repair_test": {
+    "failures_before": 38,
+    "failures_after": 0,
+    "targeted_plan": {
+      "required": true,
+      "failed_bullets": [
+        "experience[0].bullets[0] / experience[0].bullets[1]"
+      ],
+      "missing_skills": [
+        "Databricks",
+        "Terraform",
+        "OpenAI API",
+        "Claude API",
+        "CI/CD",
+        "Python",
+        "Apache Spark",
+        "LangChain",
+        "Delta Lake",
+        "PySpark",
+        "Docker",
+        "Helm"
+      ],
+      "missing_responsibilities": [
+        "Manage Databricks platform",
+        "Automate deployments",
+        "Develop Spark workloads",
+        "Build automation using OpenAI API and Claude API"
+      ],
+      "remove_technologies": [],
+      "duplicate_locations": [
+        "experience[0].bullets[0] / experience[0].bullets[1]"
+      ],
+      "issue_count": 38
+    },
+    "valid_content_preserved": true
+  },
+  "variant_diversity": {
+    "similar_pair_blocked": true,
+    "distinct_set_passed": true,
+    "variant_positions": [
+      "cloud_platform_heavy",
+      "databricks_platform_heavy",
+      "devops_automation_heavy",
+      "cloud_data_engineering_heavy",
+      "ai_enabled_data_platform_heavy"
+    ]
+  },
+  "checks": {
+    "template_mode_default": true,
+    "candidate_profile_optional": true,
+    "fixture_assertions_present": true,
+    "variant_count": true,
+    "variant_positioning_distinct": true,
+    "good_resume_passes": true,
+    "ai_tool_placement_validator_passes": true,
+    "hybrid_family_validator_passes": true,
+    "hallucination_blocked": true,
+    "repair_plan_targeted": true,
+    "repair_after_passes": true,
+    "repair_preserves_valid_content": true,
+    "similar_variants_blocked": true,
+    "distinct_variants_pass": true
+  },
+  "pass_conditions": {
+    "P1 coverage": true,
+    "P2 coverage": true,
+    "Unauthorized technology": true,
+    "Role drift": true,
+    "P1 AI tool in skills": true,
+    "P1 AI tool in responsibility": true,
+    "AI placement validator": true,
+    "Hybrid role detection": true,
+    "Secondary family retention": true,
+    "Hybrid family validator": true,
+    "P4 limit respected": true,
+    "Targeted repair": true,
+    "Variant differentiation": true
+  },
+  "result": "PASS"
+}

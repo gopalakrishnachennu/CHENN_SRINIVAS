@@ -1,0 +1,21 @@
+Senior Cloud Data Platform Engineer
+
+Required:
+AWS
+Databricks
+Terraform
+Kubernetes
+CI/CD
+Python
+Spark
+
+Responsibilities:
+Manage Databricks platform
+Build cloud infrastructure
+Automate deployments
+Develop Spark workloads
+
+Generative AI:
+Build automation using OpenAI API and Claude API.
+
+Experience with LangChain preferred.

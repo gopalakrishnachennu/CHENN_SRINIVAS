@@ -1,0 +1,39 @@
+RESUME VALIDATION REPORT
+================================
+
+JD: Senior Cloud Data Platform Engineer
+Variant: V01
+
+ROLE
+[PASS] blueprint_validator: 100.0
+[FAIL] technology_firewall: 0.0
+  ! FAIL_UNAPPROVED_TECHNOLOGY_IN_TEXT: Resume text mentions unapproved technology: scala
+    Repair: Remove 'scala' unless it exists in allowed_technologies.
+[PASS] coverage_validator: 100.0
+[PASS] responsibility_validator: 100.0
+[PASS] duplicate_validator: 100.0
+[PASS] role_drift_validator: 100.0
+[PASS] ats_validator: 100.0
+[PASS] laya_validator: 82.8
+  - WARN_LAYA_GENERIC_BULLET: Laya found bullet likely generic (0.74).
+    Repair: Rewrite bullet with more specific technology, action, and result.
+
+INTERNAL OPTIMIZATION SCORE
+86.6 / 100
+
+ACTION: REPAIR_REQUIRED
+
+REPAIR PLAN
+{
+  "required": true,
+  "failed_bullets": [
+    "experience[0].bullets[0]"
+  ],
+  "missing_skills": [],
+  "missing_responsibilities": [],
+  "remove_technologies": [
+    "scala"
+  ],
+  "duplicate_locations": [],
+  "issue_count": 2
+}

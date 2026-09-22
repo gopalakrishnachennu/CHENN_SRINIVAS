@@ -1,0 +1,100 @@
+{
+  "phase": "Phase 2",
+  "generation_mode": "TEMPLATE",
+  "blueprint": "resume_engine_data/blueprints/6e60d4d225581288.json",
+  "resume_seed": "resume_seed.json",
+  "candidate_profile": null,
+  "strategy": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/strategies/strategy_6e60d4d225581288.json",
+  "variants_processed": 5,
+  "variant_results": [
+    {
+      "variant_id": "V01",
+      "variant_positioning": "cloud_platform_heavy",
+      "generated_resume": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/generated/6e60d4d225581288_V01_resume.json",
+      "repaired_resume": null,
+      "final_resume": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/validated/6e60d4d225581288_V01final_final_resume.json",
+      "before_validation_json": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/reports/6e60d4d225581288_V01before_repair_validation.json",
+      "before_validation_txt": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/reports/6e60d4d225581288_V01before_repair_validation.txt",
+      "after_validation_json": null,
+      "after_validation_txt": null,
+      "score_before_repair": 96.1,
+      "score_after_repair": 96.1,
+      "passed": true,
+      "action": "PASS"
+    },
+    {
+      "variant_id": "V02",
+      "variant_positioning": "databricks_platform_heavy",
+      "generated_resume": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/generated/6e60d4d225581288_V02_resume.json",
+      "repaired_resume": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/generated/6e60d4d225581288_V02_resume.json",
+      "final_resume": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/validated/6e60d4d225581288_V02final_final_resume.json",
+      "before_validation_json": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/reports/6e60d4d225581288_V02before_repair_validation.json",
+      "before_validation_txt": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/reports/6e60d4d225581288_V02before_repair_validation.txt",
+      "after_validation_json": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/reports/6e60d4d225581288_V02after_repair_validation.json",
+      "after_validation_txt": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/reports/6e60d4d225581288_V02after_repair_validation.txt",
+      "score_before_repair": 93.17,
+      "score_after_repair": 96.16,
+      "passed": true,
+      "action": "PASS"
+    },
+    {
+      "variant_id": "V03",
+      "variant_positioning": "devops_automation_heavy",
+      "generated_resume": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/generated/6e60d4d225581288_V03_resume.json",
+      "repaired_resume": null,
+      "final_resume": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/validated/6e60d4d225581288_V03final_final_resume.json",
+      "before_validation_json": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/reports/6e60d4d225581288_V03before_repair_validation.json",
+      "before_validation_txt": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/reports/6e60d4d225581288_V03before_repair_validation.txt",
+      "after_validation_json": null,
+      "after_validation_txt": null,
+      "score_before_repair": 95.9,
+      "score_after_repair": 95.9,
+      "passed": true,
+      "action": "PASS"
+    },
+    {
+      "variant_id": "V04",
+      "variant_positioning": "cloud_data_engineering_heavy",
+      "generated_resume": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/generated/6e60d4d225581288_V04_resume.json",
+      "repaired_resume": null,
+      "final_resume": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/validated/6e60d4d225581288_V04final_final_resume.json",
+      "before_validation_json": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/reports/6e60d4d225581288_V04before_repair_validation.json",
+      "before_validation_txt": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/reports/6e60d4d225581288_V04before_repair_validation.txt",
+      "after_validation_json": null,
+      "after_validation_txt": null,
+      "score_before_repair": 96.13,
+      "score_after_repair": 96.13,
+      "passed": true,
+      "action": "PASS"
+    },
+    {
+      "variant_id": "V05",
+      "variant_positioning": "ai_enabled_data_platform_heavy",
+      "generated_resume": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/generated/6e60d4d225581288_V05_resume.json",
+      "repaired_resume": null,
+      "final_resume": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/validated/6e60d4d225581288_V05final_final_resume.json",
+      "before_validation_json": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/reports/6e60d4d225581288_V05before_repair_validation.json",
+      "before_validation_txt": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/reports/6e60d4d225581288_V05before_repair_validation.txt",
+      "after_validation_json": null,
+      "after_validation_txt": null,
+      "score_before_repair": 96.03,
+      "score_after_repair": 96.03,
+      "passed": true,
+      "action": "PASS"
+    }
+  ],
+  "variant_diversity": {
+    "name": "variant_similarity_validator",
+    "passed": true,
+    "score": 100.0,
+    "issues": [],
+    "details": {
+      "variant_count": 5,
+      "threshold": 0.92
+    }
+  },
+  "learning_update": {
+    "updated": true,
+    "strategy_memory_summary": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/learning/strategy_memory_summary.json"
+  }
+}

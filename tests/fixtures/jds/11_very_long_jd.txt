@@ -1,0 +1,5 @@
+Senior Enterprise Data Platform Engineer
+
+Required: AWS, Databricks, Apache Spark, Python, SQL, Terraform, Kubernetes, CI/CD, Airflow, Delta Lake.
+Responsibilities: Own platform reliability, build reusable pipeline frameworks, automate deployments, define data governance standards, improve observability, partner with analytics teams, document runbooks, optimize Spark jobs, manage cloud cost, enforce security controls, coordinate incident response, mentor engineers, and lead migration from legacy ETL systems to modern lakehouse architecture.
+Preferred: OpenAI API, Claude API, LangChain, Unity Catalog, dbt, Snowflake.

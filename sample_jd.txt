@@ -1,0 +1,12 @@
+Senior AI Data Engineer
+
+We are looking for a Senior AI Data Engineer to build reliable data pipelines
+and AI-enabled analytics workflows. The role requires Python, SQL, Databricks,
+Apache Spark, Delta Lake, and experience with OpenAI API or Claude for LLM
+application development. Kubernetes and Terraform experience are preferred.
+
+Responsibilities include designing ETL pipelines, building data quality checks,
+supporting RAG workflows, collaborating with analytics teams, and documenting
+production data platform standards.
+
+AWS experience is a plus. Databricks certification is preferred.

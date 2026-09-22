@@ -1,0 +1,200 @@
+{
+  "target_title": "Senior AI DevOps & Data Engineer",
+  "summary": "JD-aligned resume template for a senior hybrid engineer focused on AI-enabled data platforms and cloud operations. Emphasizes AWS infrastructure delivered with Terraform and Kubernetes, Databricks and Apache Spark data engineering, Python automation, production LLM integrations through OpenAI API and Claude, LangChain-based GenAI workflows, and platform observability. Template content requires candidate review and verification before use.",
+  "technical_skills": {
+    "Cloud Infrastructure": [
+      "AWS"
+    ],
+    "DevOps and Orchestration": [
+      "Terraform",
+      "Kubernetes",
+      "Infrastructure as Code",
+      "Docker"
+    ],
+    "Data Engineering": [
+      "Databricks",
+      "Apache Spark",
+      "Delta Lake"
+    ],
+    "Programming": [
+      "Python"
+    ],
+    "AI and GenAI": [
+      "LLMs",
+      "OpenAI API",
+      "Claude",
+      "LangChain",
+      "GenAI",
+      "RAG"
+    ],
+    "Platform Operations": [
+      "observability"
+    ]
+  },
+  "experience": [
+    {
+      "company": "Company A",
+      "title": "Senior AI DevOps & Data Engineer",
+      "bullets": [
+        "Template responsibility: Deploy and maintain scalable Kubernetes environments on AWS using Terraform, strengthening platform consistency and operational reliability.",
+        "Template responsibility: Design Databricks data engineering pipelines with Apache Spark and Python to support dependable large-scale data processing.",
+        "Template responsibility: Integrate LLMs through OpenAI API and Claude to deliver automated operational insights within production workflows.",
+        "Template responsibility: Develop GenAI capabilities with LangChain and RAG patterns, connecting AI-enabled workflows to governed platform services.",
+        "Template responsibility: Establish observability practices across cloud, data, and AI workloads to improve platform reliability and operational response."
+      ]
+    },
+    {
+      "company": "Company B",
+      "title": "Senior Data Platform Engineer",
+      "bullets": [
+        "Template responsibility: Build and optimize Databricks and Apache Spark pipelines in Python for maintainable data processing workflows.",
+        "Template responsibility: Support AI-enabled data platform automation by integrating OpenAI API, Claude, and LangChain with production data workflows.",
+        "Template responsibility: Apply Delta Lake patterns to strengthen reliability and consistency across Databricks workloads.",
+        "Template responsibility: Coordinate Kubernetes-based platform operations with observability requirements for data and LLM applications."
+      ]
+    },
+    {
+      "company": "Company C",
+      "title": "DevOps & Cloud Engineer",
+      "bullets": [
+        "Template responsibility: Provision AWS infrastructure with Terraform and Infrastructure as Code practices for repeatable cloud delivery.",
+        "Template responsibility: Operate Kubernetes workloads packaged with Docker while supporting reliable deployment of data and GenAI services.",
+        "Template responsibility: Use Python automation and observability practices to streamline platform operations and surface actionable operational insights."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "AI-Enabled Data Platform Template",
+      "summary": "JD-centric project template for combining cloud infrastructure, data engineering, and production AI workflows.",
+      "bullets": [
+        "Template project scope: Build an AWS and Kubernetes platform with Terraform, then run Databricks and Apache Spark pipelines that support LangChain workflows using OpenAI API and Claude."
+      ],
+      "technologies": [
+        "AWS",
+        "Terraform",
+        "Kubernetes",
+        "Databricks",
+        "Apache Spark",
+        "LangChain",
+        "OpenAI API",
+        "Claude"
+      ]
+    },
+    {
+      "name": "Operational Insights Automation Template",
+      "summary": "Template project for applying GenAI to platform operations and data workflow support.",
+      "bullets": [
+        "Template project scope: Develop Python-based LLM workflows with RAG and observability to generate operational insights for cloud and data platform teams."
+      ],
+      "technologies": [
+        "Python",
+        "LLMs",
+        "GenAI",
+        "RAG",
+        "observability"
+      ]
+    }
+  ],
+  "certifications": [],
+  "skill_provenance": [
+    {
+      "name": "AWS",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Terraform",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Kubernetes",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Infrastructure as Code",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Terraform"
+    },
+    {
+      "name": "Docker",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Kubernetes"
+    },
+    {
+      "name": "Databricks",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Apache Spark",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Delta Lake",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Databricks"
+    },
+    {
+      "name": "Python",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "LLMs",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "OpenAI API",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Claude",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "LangChain",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "GenAI",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "RAG",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "OpenAI API"
+    },
+    {
+      "name": "observability",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    }
+  ],
+  "variant_id": "V05",
+  "source_blueprint_hash": "6e60d4d225581288"
+}

@@ -1,0 +1,231 @@
+{
+  "strategy_id": "strategy_6e60d4d225581288",
+  "jd_hash": "6e60d4d225581288",
+  "positioning": {
+    "target_role": "Senior AI DevOps & Data Engineer",
+    "primary_family": "devops_cloud",
+    "secondary_family": "data_engineering",
+    "seniority": "senior",
+    "hybrid_positioning": "hybrid"
+  },
+  "summary_focus": [
+    "AWS",
+    "Terraform",
+    "Kubernetes"
+  ],
+  "experience_focus": [
+    "AWS",
+    "Terraform",
+    "Kubernetes",
+    "Databricks",
+    "Apache Spark",
+    "Python",
+    "LLMs",
+    "OpenAI API",
+    "Claude",
+    "LangChain",
+    "observability",
+    "GenAI"
+  ],
+  "project_focus": [
+    "AWS",
+    "Terraform",
+    "Kubernetes",
+    "Databricks",
+    "Infrastructure as Code",
+    "Azure",
+    "Docker"
+  ],
+  "technical_skill_categories": {
+    "cloud": [
+      "AWS"
+    ],
+    "devops": [
+      "Terraform",
+      "Kubernetes"
+    ],
+    "data_platform": [
+      "Databricks",
+      "Apache Spark"
+    ],
+    "programming_language": [
+      "Python"
+    ],
+    "ai_tool": [
+      "LLMs",
+      "OpenAI API",
+      "Claude"
+    ],
+    "ai_framework": [
+      "LangChain"
+    ],
+    "observability": [
+      "observability"
+    ],
+    "other": [
+      "GenAI"
+    ],
+    "optional_adjacent": [
+      "Infrastructure as Code",
+      "Azure",
+      "Docker",
+      "Helm",
+      "CI/CD",
+      "PySpark",
+      "Delta Lake",
+      "Unity Catalog",
+      "Prompt Engineering",
+      "Embeddings",
+      "RAG",
+      "Tool Calling",
+      "Anthropic API",
+      "Tool Use",
+      "Vector Databases",
+      "LLM Applications"
+    ]
+  },
+  "certification_treatment": [],
+  "allowed_tools": [
+    "AWS",
+    "Terraform",
+    "Kubernetes",
+    "Databricks",
+    "Apache Spark",
+    "Python",
+    "LLMs",
+    "OpenAI API",
+    "Claude",
+    "LangChain",
+    "observability",
+    "GenAI",
+    "Infrastructure as Code",
+    "Azure",
+    "Docker",
+    "Helm",
+    "CI/CD",
+    "PySpark",
+    "Delta Lake",
+    "Unity Catalog",
+    "Prompt Engineering",
+    "Embeddings",
+    "RAG",
+    "Tool Calling",
+    "Anthropic API",
+    "Tool Use",
+    "Vector Databases",
+    "LLM Applications"
+  ],
+  "forbidden_drift": [
+    "data_scientist",
+    "frontend_only",
+    "salesforce_admin"
+  ],
+  "bullet_allocation": {
+    "current": 5,
+    "previous_1": 4,
+    "previous_2": 3,
+    "projects": 2
+  },
+  "placement_requirements": {
+    "AWS": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "Terraform": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "Kubernetes": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "Databricks": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "Apache Spark": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "Python": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "LLMs": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "OpenAI API": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "Claude": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "LangChain": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "observability": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "GenAI": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "Infrastructure as Code": [
+      "technical_skills_optional"
+    ],
+    "Azure": [
+      "technical_skills_optional"
+    ],
+    "Docker": [
+      "technical_skills_optional"
+    ],
+    "Helm": [
+      "technical_skills_optional"
+    ],
+    "CI/CD": [
+      "technical_skills_optional"
+    ],
+    "PySpark": [
+      "technical_skills_optional"
+    ],
+    "Delta Lake": [
+      "technical_skills_optional"
+    ],
+    "Unity Catalog": [
+      "technical_skills_optional"
+    ],
+    "Prompt Engineering": [
+      "technical_skills_optional"
+    ],
+    "Embeddings": [
+      "technical_skills_optional"
+    ],
+    "RAG": [
+      "technical_skills_optional"
+    ],
+    "Tool Calling": [
+      "technical_skills_optional"
+    ],
+    "Anthropic API": [
+      "technical_skills_optional"
+    ],
+    "Tool Use": [
+      "technical_skills_optional"
+    ],
+    "Vector Databases": [
+      "technical_skills_optional"
+    ],
+    "LLM Applications": [
+      "technical_skills_optional"
+    ]
+  },
+  "p4_limits": {
+    "max_optional_mentions_ratio": 0.35,
+    "max_project_only_count": 8
+  }
+}

@@ -1,0 +1,259 @@
+{
+  "variant_id": "V01",
+  "resume_id": "3b63a75c28b6c7e2_V01before_repair",
+  "passed": false,
+  "optimization_score": 86.59,
+  "action": "REPAIR_REQUIRED",
+  "subscores": {
+    "p1_coverage": 100.0,
+    "p2_coverage": 100.0,
+    "responsibility_coverage": 100.0,
+    "role_alignment": 82.96,
+    "technology_alignment": 0.0,
+    "keyword_distribution": 100.0,
+    "bullet_quality": 82.96,
+    "duplicate_safety": 100.0,
+    "ats_structure": 100.0
+  },
+  "validator_results": [
+    {
+      "name": "blueprint_validator",
+      "passed": true,
+      "score": 100.0,
+      "issues": [],
+      "details": {}
+    },
+    {
+      "name": "technology_firewall",
+      "passed": false,
+      "score": 0.0,
+      "issues": [
+        {
+          "code": "FAIL_UNAPPROVED_TECHNOLOGY_IN_TEXT",
+          "severity": "error",
+          "message": "Resume text mentions unapproved technology: scala",
+          "location": "summary/experience",
+          "repair_hint": "Remove 'scala' unless it exists in allowed_technologies.",
+          "metadata": {}
+        }
+      ],
+      "details": {
+        "checked_generated_skills": [
+          "AWS",
+          "Databricks",
+          "Terraform",
+          "Kubernetes",
+          "CI/CD",
+          "Python",
+          "Spark",
+          "OpenAI API",
+          "Claude API",
+          "LangChain",
+          "Infrastructure as Code",
+          "Apache Spark",
+          "PySpark",
+          "Delta Lake",
+          "Docker"
+        ],
+        "unauthorized_count": 1
+      }
+    },
+    {
+      "name": "coverage_validator",
+      "passed": true,
+      "score": 100.0,
+      "issues": [
+        {
+          "code": "FAIL_MISSING_REQUIRED_PLACEMENT",
+          "severity": "warning",
+          "message": "Unity Catalog is missing required placement: technical_skills_optional",
+          "location": "technical_skills_optional",
+          "repair_hint": "Add 'Unity Catalog' naturally to technical_skills_optional.",
+          "metadata": {
+            "skill": "Unity Catalog",
+            "placement": "technical_skills_optional"
+          }
+        },
+        {
+          "code": "FAIL_MISSING_REQUIRED_PLACEMENT",
+          "severity": "warning",
+          "message": "Helm is missing required placement: technical_skills_optional",
+          "location": "technical_skills_optional",
+          "repair_hint": "Add 'Helm' naturally to technical_skills_optional.",
+          "metadata": {
+            "skill": "Helm",
+            "placement": "technical_skills_optional"
+          }
+        },
+        {
+          "code": "FAIL_MISSING_REQUIRED_PLACEMENT",
+          "severity": "warning",
+          "message": "Prompt Engineering is missing required placement: technical_skills_optional",
+          "location": "technical_skills_optional",
+          "repair_hint": "Add 'Prompt Engineering' naturally to technical_skills_optional.",
+          "metadata": {
+            "skill": "Prompt Engineering",
+            "placement": "technical_skills_optional"
+          }
+        },
+        {
+          "code": "FAIL_MISSING_REQUIRED_PLACEMENT",
+          "severity": "warning",
+          "message": "Embeddings is missing required placement: technical_skills_optional",
+          "location": "technical_skills_optional",
+          "repair_hint": "Add 'Embeddings' naturally to technical_skills_optional.",
+          "metadata": {
+            "skill": "Embeddings",
+            "placement": "technical_skills_optional"
+          }
+        },
+        {
+          "code": "FAIL_MISSING_REQUIRED_PLACEMENT",
+          "severity": "warning",
+          "message": "RAG is missing required placement: technical_skills_optional",
+          "location": "technical_skills_optional",
+          "repair_hint": "Add 'RAG' naturally to technical_skills_optional.",
+          "metadata": {
+            "skill": "RAG",
+            "placement": "technical_skills_optional"
+          }
+        },
+        {
+          "code": "FAIL_MISSING_REQUIRED_PLACEMENT",
+          "severity": "warning",
+          "message": "Tool Calling is missing required placement: technical_skills_optional",
+          "location": "technical_skills_optional",
+          "repair_hint": "Add 'Tool Calling' naturally to technical_skills_optional.",
+          "metadata": {
+            "skill": "Tool Calling",
+            "placement": "technical_skills_optional"
+          }
+        },
+        {
+          "code": "FAIL_MISSING_REQUIRED_PLACEMENT",
+          "severity": "warning",
+          "message": "Vector Databases is missing required placement: technical_skills_optional",
+          "location": "technical_skills_optional",
+          "repair_hint": "Add 'Vector Databases' naturally to technical_skills_optional.",
+          "metadata": {
+            "skill": "Vector Databases",
+            "placement": "technical_skills_optional"
+          }
+        },
+        {
+          "code": "FAIL_MISSING_REQUIRED_PLACEMENT",
+          "severity": "warning",
+          "message": "LLM Applications is missing required placement: technical_skills_optional",
+          "location": "technical_skills_optional",
+          "repair_hint": "Add 'LLM Applications' naturally to technical_skills_optional.",
+          "metadata": {
+            "skill": "LLM Applications",
+            "placement": "technical_skills_optional"
+          }
+        }
+      ],
+      "details": {
+        "P1_coverage": 1.0,
+        "P1_missing": [],
+        "P2_coverage": 1.0,
+        "P2_missing": [],
+        "P3_coverage": 1.0,
+        "P3_missing": []
+      }
+    },
+    {
+      "name": "responsibility_validator",
+      "passed": true,
+      "score": 100.0,
+      "issues": [],
+      "details": {
+        "responsibility_coverage": {
+          "Manage Databricks platform": true,
+          "Build cloud infrastructure": true,
+          "Automate deployments": true,
+          "Develop Spark workloads": true,
+          "Build automation using OpenAI API and Claude API": true
+        },
+        "covered": 5,
+        "total": 5
+      }
+    },
+    {
+      "name": "duplicate_validator",
+      "passed": true,
+      "score": 100.0,
+      "issues": [],
+      "details": {
+        "bullet_count": 14,
+        "duplicate_issue_count": 0
+      }
+    },
+    {
+      "name": "role_drift_validator",
+      "passed": true,
+      "score": 100.0,
+      "issues": [],
+      "details": {
+        "primary_family": "devops_cloud",
+        "secondary_family": "data_engineering"
+      }
+    },
+    {
+      "name": "ats_validator",
+      "passed": true,
+      "score": 100.0,
+      "issues": [],
+      "details": {
+        "standard_headings": true,
+        "tables": false,
+        "graphics": false,
+        "columns": false,
+        "format_safe": true
+      }
+    },
+    {
+      "name": "laya_validator",
+      "passed": true,
+      "score": 82.96,
+      "issues": [
+        {
+          "code": "WARN_LAYA_GENERIC_BULLET",
+          "severity": "warning",
+          "message": "Laya found bullet likely generic (0.77).",
+          "location": "experience[0].bullets[0]",
+          "repair_hint": "Rewrite bullet with more specific technology, action, and result.",
+          "metadata": {
+            "bullet": "Template bullet: Own an AWS and Databricks cloud data platform provisioned through Terraform and operated with Kubernetes.",
+            "generic_probability": 0.773
+          }
+        }
+      ],
+      "details": {
+        "average_semantic_alignment": 0.8296214285714285,
+        "validated_bullet_count": 14
+      }
+    }
+  ],
+  "repair_plan": {
+    "required": true,
+    "failed_bullets": [
+      "experience[0].bullets[0]"
+    ],
+    "missing_skills": [
+      "Unity Catalog",
+      "Helm",
+      "Prompt Engineering",
+      "Embeddings",
+      "RAG",
+      "Tool Calling",
+      "Vector Databases",
+      "LLM Applications"
+    ],
+    "missing_responsibilities": [],
+    "remove_technologies": [
+      "scala"
+    ],
+    "duplicate_locations": [],
+    "issue_count": 10
+  }
+}

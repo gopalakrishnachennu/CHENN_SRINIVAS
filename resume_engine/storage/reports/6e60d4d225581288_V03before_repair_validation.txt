@@ -1,0 +1,80 @@
+RESUME VALIDATION REPORT
+================================
+
+JD: Senior AI DevOps & Data Engineer
+Variant: V03
+
+ROLE
+[PASS] blueprint_validator: 100.0
+[PASS] technology_firewall: 100.0
+[PASS] coverage_validator: 100.0
+  - FAIL_MISSING_REQUIRED_PLACEMENT: Azure is missing required placement: technical_skills_optional
+    Repair: Add 'Azure' naturally to technical_skills_optional.
+  - FAIL_MISSING_REQUIRED_PLACEMENT: PySpark is missing required placement: technical_skills_optional
+    Repair: Add 'PySpark' naturally to technical_skills_optional.
+  - FAIL_MISSING_REQUIRED_PLACEMENT: Delta Lake is missing required placement: technical_skills_optional
+    Repair: Add 'Delta Lake' naturally to technical_skills_optional.
+  - FAIL_MISSING_REQUIRED_PLACEMENT: Unity Catalog is missing required placement: technical_skills_optional
+    Repair: Add 'Unity Catalog' naturally to technical_skills_optional.
+  - FAIL_MISSING_REQUIRED_PLACEMENT: Prompt Engineering is missing required placement: technical_skills_optional
+    Repair: Add 'Prompt Engineering' naturally to technical_skills_optional.
+  - FAIL_MISSING_REQUIRED_PLACEMENT: Embeddings is missing required placement: technical_skills_optional
+    Repair: Add 'Embeddings' naturally to technical_skills_optional.
+  - FAIL_MISSING_REQUIRED_PLACEMENT: RAG is missing required placement: technical_skills_optional
+    Repair: Add 'RAG' naturally to technical_skills_optional.
+  - FAIL_MISSING_REQUIRED_PLACEMENT: Tool Calling is missing required placement: technical_skills_optional
+    Repair: Add 'Tool Calling' naturally to technical_skills_optional.
+  - FAIL_MISSING_REQUIRED_PLACEMENT: Anthropic API is missing required placement: technical_skills_optional
+    Repair: Add 'Anthropic API' naturally to technical_skills_optional.
+  - FAIL_MISSING_REQUIRED_PLACEMENT: Tool Use is missing required placement: technical_skills_optional
+    Repair: Add 'Tool Use' naturally to technical_skills_optional.
+  - FAIL_MISSING_REQUIRED_PLACEMENT: Vector Databases is missing required placement: technical_skills_optional
+    Repair: Add 'Vector Databases' naturally to technical_skills_optional.
+  - FAIL_MISSING_REQUIRED_PLACEMENT: LLM Applications is missing required placement: technical_skills_optional
+    Repair: Add 'LLM Applications' naturally to technical_skills_optional.
+[PASS] ai_tool_placement_validator: 100.0
+[PASS] responsibility_validator: 100.0
+[PASS] hybrid_family_validator: 100.0
+[PASS] duplicate_validator: 100.0
+[PASS] role_drift_validator: 100.0
+[PASS] ats_validator: 100.0
+[FAIL] laya_validator: 79.5
+  - WARN_LAYA_GENERIC_BULLET: Laya found bullet likely generic (0.76).
+    Repair: Rewrite bullet with more specific technology, action, and result.
+  - WARN_LAYA_GENERIC_BULLET: Laya found bullet likely generic (0.71).
+    Repair: Rewrite bullet with more specific technology, action, and result.
+  - WARN_LAYA_GENERIC_BULLET: Laya found bullet likely generic (0.72).
+    Repair: Rewrite bullet with more specific technology, action, and result.
+
+INTERNAL OPTIMIZATION SCORE
+95.9 / 100
+
+ACTION: PASS
+
+REPAIR PLAN
+{
+  "required": true,
+  "failed_bullets": [
+    "experience[0].bullets[0]",
+    "experience[1].bullets[3]",
+    "experience[2].bullets[0]"
+  ],
+  "missing_skills": [
+    "Azure",
+    "PySpark",
+    "Delta Lake",
+    "Unity Catalog",
+    "Prompt Engineering",
+    "Embeddings",
+    "RAG",
+    "Tool Calling",
+    "Anthropic API",
+    "Tool Use",
+    "Vector Databases",
+    "LLM Applications"
+  ],
+  "missing_responsibilities": [],
+  "remove_technologies": [],
+  "duplicate_locations": [],
+  "issue_count": 15
+}

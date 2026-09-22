@@ -1,0 +1,5 @@
+Cloud Platform Engineer
+
+Required: AWS, Terraform, Kubernetes, CI/CD.
+Mandatory certification: AWS Certified Solutions Architect.
+Responsibilities: Build infrastructure, automate releases, and maintain secure cloud platform operations.

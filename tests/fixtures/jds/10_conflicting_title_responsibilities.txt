@@ -1,0 +1,4 @@
+Data Scientist
+
+Required: Terraform, Kubernetes, AWS, CI/CD, Docker, Helm.
+Responsibilities: Build cloud infrastructure, automate deployments, manage Kubernetes clusters, and improve release reliability.

@@ -1,0 +1,197 @@
+{
+  "target_title": "Senior AI DevOps & Data Engineer",
+  "summary": "JD-aligned template profile for a Senior AI DevOps & Data Engineer focused on scalable cloud infrastructure with AWS, Terraform, and Kubernetes. Emphasizes Databricks, Apache Spark, and Python data engineering alongside production LLMs, OpenAI API, Claude, LangChain, GenAI, and observability. Template content requires candidate review and validation before use.",
+  "technical_skills": {
+    "Cloud Platforms": [
+      "AWS",
+      "Azure"
+    ],
+    "DevOps and Infrastructure": [
+      "Terraform",
+      "Kubernetes",
+      "Infrastructure as Code",
+      "Docker",
+      "Helm",
+      "CI/CD"
+    ],
+    "Data Engineering": [
+      "Databricks",
+      "Apache Spark",
+      "Python"
+    ],
+    "AI and GenAI": [
+      "LLMs",
+      "OpenAI API",
+      "Claude",
+      "LangChain",
+      "GenAI"
+    ],
+    "Platform Operations": [
+      "observability"
+    ]
+  },
+  "experience": [
+    {
+      "company": "Company A",
+      "title": "Senior AI DevOps & Data Engineer",
+      "bullets": [
+        "Template scope: Lead AWS cloud platform delivery using Terraform and Kubernetes to support scalable, maintainable production workflows.",
+        "Design Databricks data engineering pipelines with Apache Spark and Python, aligning large-scale data processing with platform reliability requirements.",
+        "Integrate LLMs through OpenAI API and Claude to generate automated operational insights for cloud and data workflows.",
+        "Develop GenAI capabilities and AI agent architectures with LangChain while establishing production deployment and operational patterns.",
+        "Strengthen observability across Kubernetes, Databricks, and AI-powered pipelines to support reliable operations and effective issue resolution."
+      ]
+    },
+    {
+      "company": "Company B",
+      "title": "Cloud & Data Platform Engineer",
+      "bullets": [
+        "Template scope: Build and maintain AWS environments with Terraform, Kubernetes, and Infrastructure as Code practices.",
+        "Deliver Databricks and Apache Spark pipelines in Python to support dependable data processing and downstream AI workflows.",
+        "Apply Docker, Helm, and CI/CD practices to improve Kubernetes application delivery and operational consistency.",
+        "Connect OpenAI API and Claude with LangChain-based LLM Applications while incorporating observability into production workflows."
+      ]
+    },
+    {
+      "company": "Company C",
+      "title": "DevOps & AI Platform Engineer",
+      "bullets": [
+        "Template scope: Support Kubernetes platforms across AWS and Azure, using Terraform to standardize cloud infrastructure delivery.",
+        "Develop Python workflows that connect Databricks and Apache Spark processing with GenAI and LLM capabilities.",
+        "Improve platform reliability through observability practices spanning cloud infrastructure, data engineering pipelines, and LangChain services."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "AI-Enabled Cloud and Data Platform Template",
+      "summary": "Conceptual JD-aligned project template combining cloud infrastructure, data engineering, and production GenAI workflows; candidate validation is required before use.",
+      "bullets": [
+        "Define an AWS and Azure platform design using Terraform, Kubernetes, Docker, and Infrastructure as Code to support portable infrastructure delivery.",
+        "Design Databricks and Apache Spark pipelines connected to Python, LangChain, OpenAI API, and Claude workflows with operational observability."
+      ],
+      "technologies": [
+        "AWS",
+        "Azure",
+        "Terraform",
+        "Kubernetes",
+        "Infrastructure as Code",
+        "Docker",
+        "Databricks",
+        "Apache Spark",
+        "Python",
+        "LangChain",
+        "OpenAI API",
+        "Claude",
+        "observability"
+      ]
+    }
+  ],
+  "certifications": [],
+  "skill_provenance": [
+    {
+      "name": "AWS",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Azure",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Terraform"
+    },
+    {
+      "name": "Terraform",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Kubernetes",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Infrastructure as Code",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Terraform"
+    },
+    {
+      "name": "Docker",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Kubernetes"
+    },
+    {
+      "name": "Helm",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Kubernetes"
+    },
+    {
+      "name": "CI/CD",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Kubernetes"
+    },
+    {
+      "name": "Databricks",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Apache Spark",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Python",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "LLMs",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "OpenAI API",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Claude",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "LangChain",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "GenAI",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "observability",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    }
+  ],
+  "variant_id": "V01",
+  "source_blueprint_hash": "6e60d4d225581288"
+}

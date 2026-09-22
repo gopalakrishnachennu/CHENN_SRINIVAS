@@ -1,0 +1,4 @@
+Platform Engineer
+
+Required: AWS, Azure, GCP, Kubernetes, Docker, Helm, Terraform, Ansible, Jenkins, GitHub Actions, Python, Go, Java, SQL, PostgreSQL, Redis, Kafka, Spark, Databricks, Snowflake, dbt, Airflow, Prometheus, Grafana, OpenTelemetry, Vault, IAM, Linux, Bash, REST APIs, OpenAI API, Claude API.
+Responsibilities: Maintain platform reliability across cloud, data, observability, security, and automation systems.

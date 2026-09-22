@@ -1,0 +1,205 @@
+{
+  "target_title": "Senior AI DevOps & Data Engineer",
+  "summary": "JD-centric template profile for a senior engineer focused on AWS infrastructure, Terraform automation, Kubernetes operations, and reliable delivery of data and AI platforms. Intended emphasis includes Python automation, Databricks and Apache Spark pipelines, production LLM integrations, GenAI workflows, and platform observability. Template content requires candidate review and verification before use.",
+  "technical_skills": {
+    "Cloud Infrastructure": [
+      "AWS"
+    ],
+    "DevOps and Automation": [
+      "Terraform",
+      "Kubernetes",
+      "Infrastructure as Code",
+      "Docker",
+      "Helm",
+      "CI/CD"
+    ],
+    "Data Engineering": [
+      "Databricks",
+      "Apache Spark"
+    ],
+    "Programming": [
+      "Python"
+    ],
+    "AI and GenAI": [
+      "LLMs",
+      "OpenAI API",
+      "Claude",
+      "LangChain",
+      "GenAI"
+    ],
+    "Platform Reliability": [
+      "observability"
+    ]
+  },
+  "experience": [
+    {
+      "company": "Company A",
+      "title": "Senior AI DevOps & Data Engineer (Template)",
+      "bullets": [
+        "Template scope: Deploy and maintain Kubernetes environments on AWS using Terraform and Infrastructure as Code practices to support scalable cloud infrastructure.",
+        "Template scope: Automate delivery workflows with Python, Docker, Helm, and CI/CD to improve deployment consistency and operational reliability.",
+        "Template scope: Design and optimize Databricks data engineering pipelines using Apache Spark for dependable large-scale data processing.",
+        "Template scope: Integrate LLMs through OpenAI API and Claude to deliver automated operational insights within production workflows.",
+        "Template scope: Develop GenAI agent architectures with LangChain and strengthen platform observability to support reliable operations."
+      ]
+    },
+    {
+      "company": "Company B",
+      "title": "DevOps and Data Platform Engineer (Template)",
+      "bullets": [
+        "Template scope: Build reusable Terraform automation for AWS infrastructure and Kubernetes platform delivery.",
+        "Template scope: Improve deployment reliability through Docker, Helm, CI/CD, and Python-based operational automation.",
+        "Template scope: Develop Databricks and Apache Spark pipelines that support production data processing requirements.",
+        "Template scope: Apply observability practices across cloud, data, and AI-powered pipelines to improve operational readiness."
+      ]
+    },
+    {
+      "company": "Company C",
+      "title": "Cloud Infrastructure and Data Engineer (Template)",
+      "bullets": [
+        "Template scope: Support AWS and Kubernetes infrastructure through Terraform-driven provisioning and standardized delivery practices.",
+        "Template scope: Create Python automation for platform operations, deployment workflows, and data engineering processes.",
+        "Template scope: Enable GenAI and LLM Applications using LangChain, OpenAI API, and Claude within production-oriented workflows."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Automated AI and Data Platform Delivery Template",
+      "summary": "Template project for automated delivery of Kubernetes, Databricks, and AI workloads on AWS.",
+      "bullets": [
+        "Define AWS and Kubernetes infrastructure with Terraform, then standardize application delivery using Docker, Helm, and CI/CD.",
+        "Establish deployment and observability practices for reliable Databricks, Apache Spark, and GenAI workflows."
+      ],
+      "technologies": [
+        "AWS",
+        "Terraform",
+        "Kubernetes",
+        "Databricks",
+        "Apache Spark",
+        "Docker",
+        "Helm",
+        "CI/CD",
+        "observability",
+        "GenAI"
+      ]
+    },
+    {
+      "name": "Operational Insights Automation Template",
+      "summary": "Template project for integrating production LLM capabilities with platform and data workflows.",
+      "bullets": [
+        "Develop Python workflows that integrate OpenAI API and Claude for automated operational insights.",
+        "Use LangChain to coordinate LLMs and GenAI workflows while supporting reliable production operations."
+      ],
+      "technologies": [
+        "Python",
+        "LLMs",
+        "OpenAI API",
+        "Claude",
+        "LangChain",
+        "GenAI"
+      ]
+    }
+  ],
+  "certifications": [],
+  "skill_provenance": [
+    {
+      "name": "AWS",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Terraform",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Kubernetes",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Infrastructure as Code",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Terraform"
+    },
+    {
+      "name": "Docker",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Kubernetes"
+    },
+    {
+      "name": "Helm",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Kubernetes"
+    },
+    {
+      "name": "CI/CD",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Kubernetes"
+    },
+    {
+      "name": "Databricks",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Apache Spark",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Python",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "LLMs",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "OpenAI API",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Claude",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "LangChain",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "GenAI",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "observability",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    }
+  ],
+  "variant_id": "V03",
+  "source_blueprint_hash": "6e60d4d225581288"
+}

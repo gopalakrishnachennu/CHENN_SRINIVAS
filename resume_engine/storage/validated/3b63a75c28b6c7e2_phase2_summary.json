@@ -1,0 +1,30 @@
+{
+  "phase": "Phase 2",
+  "generation_mode": "TEMPLATE",
+  "blueprint": "resume_engine_data/blueprints/3b63a75c28b6c7e2.json",
+  "resume_seed": "resume_seed.json",
+  "candidate_profile": null,
+  "strategy": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/strategies/strategy_3b63a75c28b6c7e2.json",
+  "variants_processed": 1,
+  "variant_results": [
+    {
+      "variant_id": "V01",
+      "variant_positioning": "cloud_platform_heavy",
+      "generated_resume": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/generated/3b63a75c28b6c7e2_V01_resume.json",
+      "repaired_resume": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/generated/3b63a75c28b6c7e2_V01_resume.json",
+      "final_resume": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/validated/3b63a75c28b6c7e2_V01final_final_resume.json",
+      "before_validation_json": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/reports/3b63a75c28b6c7e2_V01before_repair_validation.json",
+      "before_validation_txt": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/reports/3b63a75c28b6c7e2_V01before_repair_validation.txt",
+      "after_validation_json": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/reports/3b63a75c28b6c7e2_V01after_repair_validation.json",
+      "after_validation_txt": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/reports/3b63a75c28b6c7e2_V01after_repair_validation.txt",
+      "score_before_repair": 86.59,
+      "score_after_repair": 86.57,
+      "passed": false,
+      "action": "REPAIR_REQUIRED"
+    }
+  ],
+  "learning_update": {
+    "updated": true,
+    "strategy_memory_summary": "/Users/gopalakrishnachennu/Desktop/CHENN_SRINIVAS/resume_engine/storage/learning/strategy_memory_summary.json"
+  }
+}

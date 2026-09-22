@@ -1,0 +1,1 @@
+"""Structured resume generation."""

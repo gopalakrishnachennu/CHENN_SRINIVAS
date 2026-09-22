@@ -1,0 +1,39 @@
+PHASE 2.5 BEHAVIORAL VALIDATION & HARDENING
+============================================
+
+Fixture JDs: 15
+Fixture assertions: 15
+Monster JD: hybrid_devops_databricks_ai
+
+CHECKS
+[PASS] template_mode_default
+[PASS] candidate_profile_optional
+[PASS] fixture_assertions_present
+[PASS] variant_count
+[PASS] variant_positioning_distinct
+[PASS] good_resume_passes
+[PASS] ai_tool_placement_validator_passes
+[PASS] hybrid_family_validator_passes
+[PASS] hallucination_blocked
+[PASS] repair_plan_targeted
+[PASS] repair_after_passes
+[PASS] repair_preserves_valid_content
+[PASS] similar_variants_blocked
+[PASS] distinct_variants_pass
+
+PASS CONDITIONS
+[PASS] P1 coverage
+[PASS] P2 coverage
+[PASS] Unauthorized technology
+[PASS] Role drift
+[PASS] P1 AI tool in skills
+[PASS] P1 AI tool in responsibility
+[PASS] AI placement validator
+[PASS] Hybrid role detection
+[PASS] Secondary family retention
+[PASS] Hybrid family validator
+[PASS] P4 limit respected
+[PASS] Targeted repair
+[PASS] Variant differentiation
+
+RESULT: PASS

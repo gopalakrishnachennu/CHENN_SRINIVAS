@@ -1,0 +1,5 @@
+AI Engineer
+
+Required: OpenAI API, Claude API, Python, RAG, embeddings, vector databases.
+Preferred: LangChain and LangGraph.
+Responsibilities: Build LLM applications, evaluate model outputs, implement retrieval workflows, and monitor AI product quality.

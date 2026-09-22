@@ -1,0 +1,218 @@
+{
+  "target_title": "Senior AI DevOps & Data Engineer",
+  "summary": "JD-centric template profile for a senior hybrid cloud and data engineering role focused on scalable AWS platforms, Terraform-managed infrastructure, Kubernetes operations, and Databricks data pipelines. Emphasizes Python and Apache Spark engineering, production integration of LLMs through OpenAI API and Claude, LangChain-based GenAI workflows, and platform observability. Template content requires candidate review and validation before use as personal experience.",
+  "technical_skills": {
+    "Cloud": [
+      "AWS"
+    ],
+    "DevOps and Platform Engineering": [
+      "Terraform",
+      "Kubernetes"
+    ],
+    "Data Engineering": [
+      "Databricks",
+      "Apache Spark"
+    ],
+    "Programming": [
+      "Python"
+    ],
+    "AI and GenAI": [
+      "LLMs",
+      "OpenAI API",
+      "Claude",
+      "LangChain",
+      "GenAI"
+    ],
+    "Platform Operations": [
+      "observability"
+    ],
+    "Supporting Technologies": [
+      "Infrastructure as Code",
+      "Azure",
+      "Docker",
+      "CI/CD",
+      "PySpark",
+      "Delta Lake"
+    ]
+  },
+  "experience": [
+    {
+      "company": "Company A",
+      "title": "Senior AI DevOps & Data Engineer",
+      "bullets": [
+        "Template scope: Deploy and maintain scalable Kubernetes environments on AWS using Terraform, supporting consistent cloud infrastructure and reliable production workflows.",
+        "Design Databricks data engineering pipelines with Apache Spark and Python, emphasizing maintainability, processing efficiency, and dependable delivery of large-scale data.",
+        "Integrate LLMs through OpenAI API and Claude to generate automated operational insights and support AI-powered platform workflows.",
+        "Develop GenAI capabilities and AI agent architectures with LangChain, connecting model-driven features to production data and operational processes.",
+        "Establish observability practices for cloud, data, and AI workloads to improve platform reliability, troubleshooting, and operational readiness."
+      ]
+    },
+    {
+      "company": "Company B",
+      "title": "Senior Cloud Data Engineer",
+      "bullets": [
+        "Template scope: Build AWS cloud foundations with Terraform and operate Kubernetes-based services for scalable data engineering workloads.",
+        "Develop and optimize Databricks pipelines using Apache Spark and Python to support reliable transformation and processing workflows.",
+        "Connect OpenAI API and Claude integrations to data pipelines, enabling production use of LLMs for operational and data-driven use cases.",
+        "Apply observability across Kubernetes and Databricks workloads to strengthen service health, pipeline visibility, and incident response."
+      ]
+    },
+    {
+      "company": "Company C",
+      "title": "DevOps & Data Platform Engineer",
+      "bullets": [
+        "Template scope: Maintain AWS infrastructure and Kubernetes platform components through Terraform-based delivery practices.",
+        "Engineer Python and Apache Spark workflows on Databricks to support scalable data processing and downstream applications.",
+        "Support LangChain-based GenAI workflows that integrate LLMs, OpenAI API, and Claude within governed production processes."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Template Cloud Data Platform",
+      "summary": "JD-aligned project concept for an AWS-based data platform combining Kubernetes infrastructure with Databricks processing workloads.",
+      "bullets": [
+        "Define AWS and Kubernetes platform resources with Terraform to create repeatable foundations for cloud-based data engineering.",
+        "Build Python and Apache Spark pipelines in Databricks with operational visibility and reliability considerations."
+      ],
+      "technologies": [
+        "AWS",
+        "Terraform",
+        "Kubernetes",
+        "Databricks",
+        "Apache Spark",
+        "Python",
+        "observability"
+      ]
+    },
+    {
+      "name": "Template GenAI Operational Insights Pipeline",
+      "summary": "JD-aligned project concept for adding model-driven operational insights to cloud and data platform workflows.",
+      "bullets": [
+        "Integrate OpenAI API and Claude with production workflows to produce automated operational insights from platform and pipeline context.",
+        "Use LangChain to coordinate LLM-based GenAI workflows while aligning outputs with platform reliability and observability needs."
+      ],
+      "technologies": [
+        "LLMs",
+        "OpenAI API",
+        "Claude",
+        "LangChain",
+        "GenAI",
+        "observability"
+      ]
+    }
+  ],
+  "certifications": [],
+  "skill_provenance": [
+    {
+      "name": "AWS",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Terraform",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Kubernetes",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Databricks",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Apache Spark",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Python",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "LLMs",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "OpenAI API",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Claude",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "LangChain",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "GenAI",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "observability",
+      "source": "JD_DIRECT",
+      "priority": "P2",
+      "parent": null
+    },
+    {
+      "name": "Infrastructure as Code",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Terraform"
+    },
+    {
+      "name": "Azure",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Terraform"
+    },
+    {
+      "name": "Docker",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Kubernetes"
+    },
+    {
+      "name": "CI/CD",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Kubernetes"
+    },
+    {
+      "name": "PySpark",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Databricks"
+    },
+    {
+      "name": "Delta Lake",
+      "source": "APPROVED_ADJACENT",
+      "priority": "P4",
+      "parent": "Databricks"
+    }
+  ],
+  "variant_id": "V04",
+  "source_blueprint_hash": "6e60d4d225581288"
+}

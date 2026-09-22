@@ -1,0 +1,5 @@
+Data Engineer
+
+Required: Databricks, Spark, Python, SQL.
+Preferred certification: Databricks Data Engineer Associate.
+Responsibilities: Build data pipelines, optimize Spark workloads, and support lakehouse production operations.

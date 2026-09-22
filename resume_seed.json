@@ -1,0 +1,23 @@
+{
+  "companies": [
+    {
+      "company": "Company A",
+      "title_style": "JD-aligned",
+      "experience_order": 1
+    },
+    {
+      "company": "Company B",
+      "title_style": "JD-adjacent",
+      "experience_order": 2
+    },
+    {
+      "company": "Company C",
+      "title_style": "JD-adjacent",
+      "experience_order": 3
+    }
+  ],
+  "template_notes": [
+    "Generate JD-centric template content, not verified personal claims.",
+    "Keep company names generic unless the user later provides verified candidate data."
+  ]
+}

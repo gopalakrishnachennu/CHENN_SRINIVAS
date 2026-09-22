@@ -1,0 +1,46 @@
+{
+  "candidate_name": "Candidate Name",
+  "target_background_summary": "Replace this with truthful candidate background.",
+  "technical_skills": [
+    "Python",
+    "SQL",
+    "AWS",
+    "Databricks",
+    "Apache Spark",
+    "Terraform",
+    "Kubernetes",
+    "OpenAI API"
+  ],
+  "experience": [
+    {
+      "company": "Current Company",
+      "title": "Current Role",
+      "dates": "YYYY-Present",
+      "truthful_facts": [
+        "Built data pipelines using Python and SQL.",
+        "Supported cloud data platform reliability.",
+        "Worked with Databricks and Apache Spark."
+      ]
+    },
+    {
+      "company": "Previous Company",
+      "title": "Previous Role",
+      "dates": "YYYY-YYYY",
+      "truthful_facts": [
+        "Automated operational workflows.",
+        "Improved reporting and data quality processes."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Relevant Project",
+      "truthful_facts": [
+        "Replace with a real project and technologies actually used."
+      ]
+    }
+  ],
+  "certifications": [
+    "Replace with truthful certifications only"
+  ]
+}

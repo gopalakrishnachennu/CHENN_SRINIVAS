@@ -1,0 +1,28 @@
+{
+  "candidate_name": "PASTE_CANDIDATE_NAME_HERE",
+  "target_background_summary": "Paste truthful candidate background here. Do not add anything the candidate has not actually done.",
+  "technical_skills": [
+    "Python",
+    "SQL"
+  ],
+  "experience": [
+    {
+      "company": "Company Name",
+      "title": "Job Title",
+      "dates": "YYYY-Present",
+      "truthful_facts": [
+        "Paste truthful experience facts here.",
+        "Include tools actually used, real responsibilities, and real outcomes."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Project Name",
+      "truthful_facts": [
+        "Paste truthful project facts here."
+      ]
+    }
+  ],
+  "certifications": []
+}

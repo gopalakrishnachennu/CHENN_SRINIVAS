@@ -1,0 +1,22 @@
+{
+  "devops_cloud|data_engineering|cloud_platform_heavy": {
+    "average_score": 91.33,
+    "count": 2
+  },
+  "devops_cloud|data_engineering|databricks_platform_heavy": {
+    "average_score": 96.16,
+    "count": 1
+  },
+  "devops_cloud|data_engineering|devops_automation_heavy": {
+    "average_score": 95.9,
+    "count": 1
+  },
+  "devops_cloud|data_engineering|cloud_data_engineering_heavy": {
+    "average_score": 96.13,
+    "count": 1
+  },
+  "devops_cloud|data_engineering|ai_enabled_data_platform_heavy": {
+    "average_score": 96.03,
+    "count": 1
+  }
+}

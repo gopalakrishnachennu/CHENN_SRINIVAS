@@ -1,0 +1,104 @@
+{
+  "01_pure_data_engineer": {
+    "expected_primary_family": "data_engineering",
+    "expected_secondary_family": "none",
+    "hybrid_expected": false,
+    "critical_skills": ["Python", "SQL", "Apache Spark", "Databricks", "Delta Lake", "Airflow"],
+    "must_not_drift_to": ["devops_cloud", "ai_ml"]
+  },
+  "02_pure_devops": {
+    "expected_primary_family": "devops_cloud",
+    "expected_secondary_family": "none",
+    "hybrid_expected": false,
+    "critical_skills": ["AWS", "Kubernetes", "Terraform", "Docker", "Helm", "CI/CD"],
+    "must_not_drift_to": ["data_scientist", "frontend_engineer"]
+  },
+  "03_devops_databricks_ai_monster": {
+    "expected_primary_family": "devops_cloud",
+    "expected_secondary_family": "data_engineering",
+    "hybrid_expected": true,
+    "critical_skills": ["AWS", "Databricks", "Terraform", "Kubernetes", "CI/CD", "Python", "Apache Spark", "OpenAI API", "Claude API", "LangChain"],
+    "ai_tools_requiring_responsibility": ["OpenAI API", "Claude API"]
+  },
+  "04_data_engineer_devops": {
+    "expected_primary_family": "data_engineering",
+    "expected_secondary_family": "devops_cloud",
+    "hybrid_expected": true,
+    "critical_skills": ["Databricks", "Apache Spark", "Python", "SQL", "AWS", "Terraform", "CI/CD"]
+  },
+  "05_ai_engineer_openai_claude": {
+    "expected_primary_family": "ai_ml",
+    "expected_secondary_family": "none",
+    "hybrid_expected": false,
+    "critical_skills": ["OpenAI API", "Claude API", "Python", "RAG", "embeddings", "vector databases"],
+    "ai_tools_requiring_responsibility": ["OpenAI API", "Claude API"]
+  },
+  "06_devops_openai_claude": {
+    "expected_primary_family": "devops_cloud",
+    "expected_secondary_family": "ai_ml",
+    "hybrid_expected": true,
+    "critical_skills": ["AWS", "Terraform", "Kubernetes", "CI/CD", "Python", "OpenAI API", "Claude API"],
+    "ai_tools_requiring_responsibility": ["OpenAI API", "Claude API"]
+  },
+  "07_databricks_genai": {
+    "expected_primary_family": "data_engineering",
+    "expected_secondary_family": "ai_ml",
+    "hybrid_expected": true,
+    "critical_skills": ["Databricks", "Apache Spark", "Delta Lake", "OpenAI API", "RAG", "Python"]
+  },
+  "08_unknown_ai_tool": {
+    "expected_primary_family": "ai_ml",
+    "expected_secondary_family": "devops_cloud",
+    "hybrid_expected": true,
+    "critical_skills": ["Python", "Kubernetes", "PromptMeshX", "VectorFlow Cloud"],
+    "unknown_tools_must_be_preserved": ["PromptMeshX", "VectorFlow Cloud"]
+  },
+  "09_many_technologies": {
+    "expected_primary_family": "devops_cloud",
+    "expected_secondary_family": "data_engineering",
+    "hybrid_expected": true,
+    "critical_skills": ["AWS", "Azure", "GCP", "Kubernetes", "Terraform", "Databricks", "Snowflake", "OpenAI API", "Claude API"],
+    "technology_count_min": 30
+  },
+  "10_conflicting_title_responsibilities": {
+    "expected_primary_family": "devops_cloud",
+    "expected_secondary_family": "none",
+    "hybrid_expected": false,
+    "critical_skills": ["Terraform", "Kubernetes", "AWS", "CI/CD", "Docker", "Helm"],
+    "title_conflict_should_follow_responsibilities": true
+  },
+  "11_very_long_jd": {
+    "expected_primary_family": "data_engineering",
+    "expected_secondary_family": "devops_cloud",
+    "hybrid_expected": true,
+    "critical_skills": ["AWS", "Databricks", "Apache Spark", "Python", "SQL", "Terraform", "Kubernetes", "CI/CD", "Airflow", "Delta Lake"]
+  },
+  "12_sparse_poor_jd": {
+    "expected_primary_family": "other",
+    "expected_secondary_family": "none",
+    "hybrid_expected": false,
+    "critical_skills": ["Python"],
+    "low_confidence_expected": true
+  },
+  "13_mandatory_certification": {
+    "expected_primary_family": "devops_cloud",
+    "expected_secondary_family": "none",
+    "hybrid_expected": false,
+    "critical_skills": ["AWS", "Terraform", "Kubernetes", "CI/CD"],
+    "mandatory_certifications": ["AWS Certified Solutions Architect"]
+  },
+  "14_preferred_certification": {
+    "expected_primary_family": "data_engineering",
+    "expected_secondary_family": "none",
+    "hybrid_expected": false,
+    "critical_skills": ["Databricks", "Spark", "Python", "SQL"],
+    "preferred_certifications": ["Databricks Data Engineer Associate"]
+  },
+  "15_ai_tool_p1_responsibility": {
+    "expected_primary_family": "ai_ml",
+    "expected_secondary_family": "devops_cloud",
+    "hybrid_expected": true,
+    "critical_skills": ["OpenAI API", "Claude API", "Python", "AWS", "CI/CD"],
+    "ai_tools_requiring_responsibility": ["OpenAI API", "Claude API"]
+  }
+}

@@ -1,0 +1,201 @@
+{
+  "strategy_id": "strategy_3b63a75c28b6c7e2",
+  "jd_hash": "3b63a75c28b6c7e2",
+  "positioning": {
+    "target_role": "Senior Cloud Data Platform Engineer",
+    "primary_family": "devops_cloud",
+    "secondary_family": "data_engineering",
+    "seniority": "senior",
+    "hybrid_positioning": "hybrid"
+  },
+  "summary_focus": [
+    "AWS",
+    "Databricks",
+    "Terraform"
+  ],
+  "experience_focus": [
+    "AWS",
+    "Databricks",
+    "Terraform",
+    "Kubernetes",
+    "CI/CD",
+    "Python",
+    "Spark",
+    "OpenAI API",
+    "Claude API",
+    "LangChain"
+  ],
+  "project_focus": [
+    "AWS",
+    "Databricks",
+    "Terraform",
+    "Kubernetes",
+    "LangChain",
+    "Apache Spark",
+    "PySpark",
+    "Delta Lake"
+  ],
+  "technical_skill_categories": {
+    "cloud": [
+      "AWS"
+    ],
+    "data_platform": [
+      "Databricks"
+    ],
+    "devops": [
+      "Terraform",
+      "Kubernetes",
+      "CI/CD"
+    ],
+    "programming_language": [
+      "Python"
+    ],
+    "framework": [
+      "Spark"
+    ],
+    "ai_tool": [
+      "OpenAI API",
+      "Claude API"
+    ],
+    "ai_framework": [
+      "LangChain"
+    ],
+    "optional_adjacent": [
+      "Apache Spark",
+      "PySpark",
+      "Delta Lake",
+      "Unity Catalog",
+      "Infrastructure as Code",
+      "Docker",
+      "Helm",
+      "Prompt Engineering",
+      "Embeddings",
+      "RAG",
+      "Tool Calling",
+      "Vector Databases",
+      "LLM Applications"
+    ]
+  },
+  "certification_treatment": [],
+  "allowed_tools": [
+    "AWS",
+    "Databricks",
+    "Terraform",
+    "Kubernetes",
+    "CI/CD",
+    "Python",
+    "Spark",
+    "OpenAI API",
+    "Claude API",
+    "LangChain",
+    "Apache Spark",
+    "PySpark",
+    "Delta Lake",
+    "Unity Catalog",
+    "Infrastructure as Code",
+    "Docker",
+    "Helm",
+    "Prompt Engineering",
+    "Embeddings",
+    "RAG",
+    "Tool Calling",
+    "Vector Databases",
+    "LLM Applications"
+  ],
+  "forbidden_drift": [
+    "data_scientist",
+    "frontend_only",
+    "salesforce_admin"
+  ],
+  "bullet_allocation": {
+    "current": 5,
+    "previous_1": 4,
+    "previous_2": 3,
+    "projects": 2
+  },
+  "placement_requirements": {
+    "AWS": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "Databricks": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "Terraform": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "Kubernetes": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "CI/CD": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "Python": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "Spark": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "OpenAI API": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "Claude API": [
+      "technical_skills",
+      "experience_responsibilities"
+    ],
+    "LangChain": [
+      "technical_skills",
+      "selected_experience"
+    ],
+    "Apache Spark": [
+      "technical_skills_optional"
+    ],
+    "PySpark": [
+      "technical_skills_optional"
+    ],
+    "Delta Lake": [
+      "technical_skills_optional"
+    ],
+    "Unity Catalog": [
+      "technical_skills_optional"
+    ],
+    "Infrastructure as Code": [
+      "technical_skills_optional"
+    ],
+    "Docker": [
+      "technical_skills_optional"
+    ],
+    "Helm": [
+      "technical_skills_optional"
+    ],
+    "Prompt Engineering": [
+      "technical_skills_optional"
+    ],
+    "Embeddings": [
+      "technical_skills_optional"
+    ],
+    "RAG": [
+      "technical_skills_optional"
+    ],
+    "Tool Calling": [
+      "technical_skills_optional"
+    ],
+    "Vector Databases": [
+      "technical_skills_optional"
+    ],
+    "LLM Applications": [
+      "technical_skills_optional"
+    ]
+  },
+  "p4_limits": {
+    "max_optional_mentions_ratio": 0.35,
+    "max_project_only_count": 6
+  }
+}

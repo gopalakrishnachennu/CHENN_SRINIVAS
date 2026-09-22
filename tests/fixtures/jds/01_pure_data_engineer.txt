@@ -1,0 +1,4 @@
+Senior Data Engineer
+
+Required: Python, SQL, Apache Spark, Databricks, Delta Lake, Airflow.
+Responsibilities: Build ETL pipelines, optimize Spark workloads, maintain data quality checks, and support warehouse-ready datasets.

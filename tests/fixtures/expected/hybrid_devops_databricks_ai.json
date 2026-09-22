@@ -1,0 +1,25 @@
+{
+  "fixture": "03_devops_databricks_ai_monster",
+  "expected_primary_family": "devops_cloud",
+  "expected_secondary_family": "data_engineering",
+  "expected_hybrid": true,
+  "critical_skills": [
+    "AWS",
+    "Databricks",
+    "Terraform",
+    "Kubernetes",
+    "CI/CD",
+    "Python",
+    "Apache Spark",
+    "OpenAI API",
+    "Claude API",
+    "LangChain"
+  ],
+  "p3": [
+    "LangChain"
+  ],
+  "ai_responsibility_skills": [
+    "OpenAI API",
+    "Claude API"
+  ]
+}

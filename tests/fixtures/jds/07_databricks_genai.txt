@@ -1,0 +1,5 @@
+Databricks GenAI Engineer
+
+Required: Databricks, Apache Spark, Delta Lake, OpenAI API, RAG, Python.
+Preferred: Unity Catalog and LangChain.
+Responsibilities: Build GenAI data workflows, manage Databricks jobs, govern datasets, and support AI-enabled analytics.
