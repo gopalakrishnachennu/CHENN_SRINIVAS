@@ -416,8 +416,25 @@ def _apply_historical_ranking(
 
 
 def list_eligible_positionings(blueprint: JDBlueprint) -> list[str]:
-    """Public eligible angle set for online learning (no invention allowed)."""
+    """Evidence-scored eligible angles (excludes fallback-only labels)."""
     return [angle.positioning for _, angle in _eligible_angles(blueprint)]
+
+
+def list_all_candidate_positionings(blueprint: JDBlueprint) -> list[str]:
+    """
+    All positioning labels the deterministic planner can emit before the
+    variant-count limit (eligible + family-scoped fallback).
+
+    River may rank only this set — never invent outside it.
+    """
+    ordered: list[str] = []
+    for _, angle in _eligible_angles(blueprint):
+        if angle.positioning not in ordered:
+            ordered.append(angle.positioning)
+    for angle in _fallback_angles(blueprint):
+        if angle.positioning not in ordered:
+            ordered.append(angle.positioning)
+    return ordered
 
 
 def select_angle_templates(

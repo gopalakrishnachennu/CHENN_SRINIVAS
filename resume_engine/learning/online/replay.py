@@ -17,15 +17,9 @@ logger = logging.getLogger(__name__)
 
 
 def _context_from_record(record: dict[str, Any]) -> dict[str, float] | None:
-    """
-    Reconstruct context only when sufficient structured fields exist.
-
-    Never fabricates features from thin air.
-    """
     required = ("primary_family", "secondary_family", "seniority")
     if any(record.get(key) in (None, "") for key in required):
         return None
-    # Prefer embedded blueprint payload when present.
     blueprint_payload = record.get("blueprint") or record.get("blueprint_snapshot")
     if isinstance(blueprint_payload, dict):
         try:
@@ -33,8 +27,6 @@ def _context_from_record(record: dict[str, Any]) -> dict[str, float] | None:
             return build_context_features(blueprint)
         except Exception:  # noqa: BLE001
             return None
-
-    # Minimal reconstructible context: families/seniority/hybrid + priority counts if present.
     try:
         from resume_engine.learning.eligibility import is_hybrid_blueprint
         from resume_engine.learning.online.feature_builder import (
@@ -58,9 +50,10 @@ def _context_from_record(record: dict[str, Any]) -> dict[str, float] | None:
             record.get("secondary_family"),
             record.get("hybrid_probability"),
         )
-        features["hybrid_probability"] = float(record.get("hybrid_probability") or (1.0 if hybrid else 0.0))
+        features["hybrid_probability"] = float(
+            record.get("hybrid_probability") or (1.0 if hybrid else 0.0)
+        )
         features["is_hybrid"] = 1.0 if hybrid else 0.0
-        # Without counts/entities we cannot honestly fill remaining schema — skip.
         if record.get("p1_count") is None and record.get("priority_skills") is None:
             return None
         return features
@@ -82,26 +75,32 @@ def replay_from_repository(
     eligible = 0
     usable = 0
     skipped = 0
+    skip_reasons: dict[str, int] = {}
     action_counts: dict[str, int] = {}
     rewards: list[float] = []
     pol = policy or RiverStrategyPolicy()
 
+    def bump(reason: str) -> None:
+        nonlocal skipped
+        skipped += 1
+        skip_reasons[reason] = skip_reasons.get(reason, 0) + 1
+
     for record in records:
         if not is_online_trainable(record):
-            skipped += 1
+            bump("ineligible")
             continue
         eligible += 1
         action = record.get("variant_positioning")
         if not action:
-            skipped += 1
+            bump("missing_action")
             continue
         context = _context_from_record(record)
         if context is None:
-            skipped += 1
+            bump("missing_context")
             continue
         reward_result = compute_reward(record)
         if not reward_result.trainable:
-            skipped += 1
+            bump("reward_not_trainable")
             continue
         usable += 1
         action_counts[str(action)] = action_counts.get(str(action), 0) + 1
@@ -121,6 +120,7 @@ def replay_from_repository(
         mean_reward=mean_reward,
         policy_version=ONLINE_POLICY_VERSION,
         dry_run=dry_run,
+        skip_reasons=skip_reasons,
         details={"observation_count_after": pol.observation_count if not dry_run else 0},
     )
 

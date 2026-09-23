@@ -53,6 +53,7 @@ REQUIRED_MODULES = {
     "online_policy_store": "resume_engine.learning.online.policy_store",
     "online_shadow_runner": "resume_engine.learning.online.shadow_runner",
     "online_replay": "resume_engine.learning.online.replay",
+    "online_evaluator": "resume_engine.learning.online.evaluator",
     "resume_validation_report": "resume_engine.reports.resume_validation_report",
     "behavioral_audit": "resume_engine.reports.behavioral_audit",
     "phase2_pipeline": "resume_engine.pipeline.phase2_pipeline",
@@ -89,7 +90,8 @@ UNIT_TEST_HINTS = {
     "online_river_policy": ["tests/test_phase28_online_learning.py"],
     "online_policy_store": ["tests/test_phase28_online_learning.py"],
     "online_shadow_runner": ["tests/test_phase28_online_learning.py"],
-    "online_replay": ["tests/test_phase28_online_learning.py"],
+    "online_replay": ["tests/test_phase28_online_learning.py", "tests/test_phase28_gate1_1.py"],
+    "online_evaluator": ["tests/test_phase28_gate1_1.py"],
 }
 
 

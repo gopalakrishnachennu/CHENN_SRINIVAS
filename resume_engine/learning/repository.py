@@ -138,6 +138,10 @@ CREATE INDEX IF NOT EXISTS idx_online_obs_policy
     ON online_policy_observations(policy_version);
 CREATE INDEX IF NOT EXISTS idx_online_obs_eligible
     ON online_policy_observations(eligible);
+CREATE INDEX IF NOT EXISTS idx_online_decisions_run_variant
+    ON online_policy_decisions(run_id, variant_id);
+CREATE INDEX IF NOT EXISTS idx_online_obs_decision
+    ON online_policy_observations(decision_id);
 """
 
 
@@ -169,7 +173,30 @@ class LearningRepository:
     def _init_schema(self) -> None:
         with self._connect() as conn:
             conn.executescript(SCHEMA_SQL)
+            self._migrate_online_columns(conn)
             conn.commit()
+
+    @staticmethod
+    def _migrate_online_columns(conn: sqlite3.Connection) -> None:
+        def ensure(table: str, column: str, typedef: str) -> None:
+            cols = {row[1] for row in conn.execute(f"PRAGMA table_info({table})").fetchall()}
+            if column not in cols:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {typedef}")
+
+        ensure("online_policy_observations", "reward_schema_version", "TEXT")
+        ensure("online_policy_observations", "linkage_status", "TEXT")
+        ensure("online_policy_observations", "train_status", "TEXT")
+        # Unique applied observation identity — ignore failure if duplicates already exist.
+        try:
+            conn.execute(
+                """
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_online_obs_unique_final
+                ON online_policy_observations(run_id, variant_id, policy_version)
+                WHERE train_status = 'APPLIED'
+                """
+            )
+        except sqlite3.OperationalError:
+            pass
 
     @staticmethod
     def _now() -> str:
@@ -431,6 +458,13 @@ class LearningRepository:
                         {
                             "ranked": ranked,
                             "production_order": decision.get("production_order") or [],
+                            "production_rank": decision.get("production_rank"),
+                            "shadow_rank_of_production_action": decision.get(
+                                "shadow_rank_of_production_action"
+                            ),
+                            "observation_count_at_prediction": decision.get(
+                                "observation_count_at_prediction"
+                            ),
                             "fallback_reason": decision.get("fallback_reason"),
                         },
                         ensure_ascii=False,
@@ -441,6 +475,46 @@ class LearningRepository:
             conn.commit()
             return int(cursor.lastrowid)
 
+    def get_online_decision(
+        self,
+        *,
+        run_id: str,
+        variant_id: str,
+        policy_version: str | None = None,
+    ) -> dict[str, Any] | None:
+        clauses = ["run_id = ?", "variant_id = ?"]
+        params: list[Any] = [run_id, variant_id]
+        if policy_version:
+            clauses.append("policy_version = ?")
+            params.append(policy_version)
+        sql = f"""
+            SELECT * FROM online_policy_decisions
+            WHERE {' AND '.join(clauses)}
+            ORDER BY id DESC LIMIT 1
+        """
+        with self._connect() as conn:
+            row = conn.execute(sql, params).fetchone()
+        return dict(row) if row else None
+
+    def has_applied_online_observation(
+        self,
+        *,
+        run_id: str,
+        variant_id: str,
+        policy_version: str,
+    ) -> bool:
+        with self._connect() as conn:
+            row = conn.execute(
+                """
+                SELECT 1 FROM online_policy_observations
+                WHERE run_id = ? AND variant_id = ? AND policy_version = ?
+                  AND train_status = 'APPLIED'
+                LIMIT 1
+                """,
+                (run_id, variant_id, policy_version),
+            ).fetchone()
+        return row is not None
+
     def save_online_observation(self, observation: dict[str, Any]) -> int:
         created = observation.get("created_at") or self._now()
         with self._connect() as conn:
@@ -448,8 +522,9 @@ class LearningRepository:
                 """
                 INSERT INTO online_policy_observations (
                     decision_id, run_id, jd_hash, variant_id, action, reward,
-                    reward_components_json, eligible, policy_version, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    reward_components_json, eligible, policy_version, created_at,
+                    reward_schema_version, linkage_status, train_status
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     observation.get("decision_id"),
@@ -462,6 +537,9 @@ class LearningRepository:
                     1 if observation.get("eligible") else 0,
                     observation.get("policy_version"),
                     created,
+                    observation.get("reward_schema_version"),
+                    observation.get("linkage_status"),
+                    observation.get("train_status") or ("APPLIED" if observation.get("eligible") else "SKIPPED"),
                 ),
             )
             conn.commit()

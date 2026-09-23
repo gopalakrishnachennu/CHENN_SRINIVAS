@@ -9,6 +9,10 @@ from resume_engine.learning.online.config import (
     ONLINE_POLICY_VERSION,
     get_policy_seed,
 )
+from resume_engine.learning.online.river_compat import (
+    RiverLinUCBCompat,
+    assert_or_warn_river_version,
+)
 from resume_engine.learning.online.schemas import PolicyPrediction
 
 logger = logging.getLogger(__name__)
@@ -19,6 +23,7 @@ class RiverStrategyPolicy:
     Adapter around river.bandit.LinUCBDisjoint.
 
     Callers must never invent actions: rank_actions asserts subset of eligible.
+    Private River fields are accessed only via RiverLinUCBCompat.
     """
 
     def __init__(
@@ -31,12 +36,17 @@ class RiverStrategyPolicy:
         self.policy_version = policy_version
         self.seed = get_policy_seed() if seed is None else seed
         self._model = model
+        self._compat: RiverLinUCBCompat | None = None
         self._observation_count = 0
         self._action_counts: dict[str, int] = {}
         self._reward_sum = 0.0
         self._reward_count = 0
+        self._scoring_available = True
         if self._model is None:
+            if not assert_or_warn_river_version():
+                self._scoring_available = False
             self._model = self._new_model()
+        self._compat = RiverLinUCBCompat(self._model)
 
     def _new_model(self):
         from river.bandit import LinUCBDisjoint
@@ -60,13 +70,26 @@ class RiverStrategyPolicy:
     def rank_actions(self, context: dict[str, float], actions: list[str]) -> list[PolicyPrediction]:
         if not actions:
             return []
-        unique_actions = list(dict.fromkeys(actions))
-        assert set(unique_actions).issubset(set(actions))
+        if not self._scoring_available or self._compat is None:
+            # Deterministic alphabetical fallback ranking — still no invention.
+            unique = list(dict.fromkeys(actions))
+            unique_sorted = sorted(unique)
+            return [
+                PolicyPrediction(
+                    action=action,
+                    rank=index,
+                    score=None,
+                    probability=None,
+                    policy_version=self.policy_version,
+                    model_observation_count=self._observation_count,
+                )
+                for index, action in enumerate(unique_sorted, start=1)
+            ]
 
+        unique_actions = list(dict.fromkeys(actions))
         scores: list[tuple[str, float]] = []
         for action in unique_actions:
-            score = self._score_action(action, context)
-            scores.append((action, score))
+            scores.append((action, self._compat.score_action(action, context)))
         scores.sort(key=lambda item: (-item[1], item[0]))
 
         ranked: list[PolicyPrediction] = []
@@ -81,24 +104,16 @@ class RiverStrategyPolicy:
                     model_observation_count=self._observation_count,
                 )
             )
-
-        # Hard invariant: cannot invent actions.
         ranked_actions = {item.action for item in ranked}
         if not ranked_actions.issubset(set(unique_actions)):
             raise AssertionError("River policy invented an action outside eligible set")
         return ranked
 
-    def _score_action(self, action: str, context: dict[str, float]) -> float:
-        try:
-            dist = self._model._bayes_lin_regs[action].predict_one(context, with_dist=True)
-            return float(dist.mu + dist.sigma)
-        except Exception:  # noqa: BLE001 — cold-start / missing arm
-            # Unseen arms get optimistic prior for ranking exploration in shadow only.
-            return 1.0
-
     def observe(self, context: dict[str, float], action: str, reward: float) -> None:
+        if self._compat is None:
+            self._compat = RiverLinUCBCompat(self._model)
         clamped = max(0.0, min(1.0, float(reward)))
-        self._model.update(action, context, clamped)
+        self._compat.update(action, context, clamped)
         self._observation_count += 1
         self._action_counts[action] = self._action_counts.get(action, 0) + 1
         self._reward_sum += clamped
@@ -116,19 +131,23 @@ class RiverStrategyPolicy:
         if loaded is None:
             return
         self._model = loaded._model
+        self._compat = RiverLinUCBCompat(self._model)
         self._observation_count = loaded._observation_count
         self._action_counts = dict(loaded._action_counts)
         self._reward_sum = loaded._reward_sum
         self._reward_count = loaded._reward_count
         self.policy_version = loaded.policy_version
         self.seed = loaded.seed
+        self._scoring_available = getattr(loaded, "_scoring_available", True)
 
     def reset_for_tests(self) -> None:
         self._model = self._new_model()
+        self._compat = RiverLinUCBCompat(self._model)
         self._observation_count = 0
         self._action_counts = {}
         self._reward_sum = 0.0
         self._reward_count = 0
+        self._scoring_available = True
 
 
 _POLICY_SINGLETON: RiverStrategyPolicy | None = None
@@ -137,6 +156,11 @@ _POLICY_SINGLETON: RiverStrategyPolicy | None = None
 def get_default_policy(*, force_new: bool = False) -> RiverStrategyPolicy:
     global _POLICY_SINGLETON
     if force_new or _POLICY_SINGLETON is None:
+        if not assert_or_warn_river_version():
+            policy = RiverStrategyPolicy()
+            policy._scoring_available = False
+            _POLICY_SINGLETON = policy
+            return policy
         policy = RiverStrategyPolicy()
         try:
             policy.load()

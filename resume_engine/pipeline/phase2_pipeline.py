@@ -507,14 +507,21 @@ def run_phase2_pipeline(
     )[:variant_limit]
 
     # Phase 2.8: shadow ranking only — production order unchanged.
+    online_shadow_decisions = 0
+    online_fallbacks = 0
     with contextlib.suppress(Exception):
-        from resume_engine.learning.online.shadow_runner import record_shadow_decision
+        from resume_engine.learning.online.shadow_runner import (
+            record_shadow_decisions_for_variants,
+        )
 
-        record_shadow_decision(
+        decisions = record_shadow_decisions_for_variants(
             blueprint=blueprint,
-            production_order=[v.positioning for v in variants],
+            production_variants=[(v.variant_id, v.positioning) for v in variants],
             run_id=run_paths.run_id,
         )
+        online_shadow_decisions = len(decisions)
+        if not decisions:
+            online_fallbacks += 1
 
     resolved_model = model or DEFAULT_OPENAI_MODEL
     write_run_metadata(
@@ -632,6 +639,7 @@ def run_phase2_pipeline(
     # After regeneration settles: persist exactly one final learning outcome per variant.
     from resume_engine.learning.eligibility import is_record_eligible_for_learning
 
+    online_observations = 0
     for item in variant_results:
         record = item.get("_learning_record") or {
             "run_id": run_paths.run_id,
@@ -655,7 +663,9 @@ def run_phase2_pipeline(
         with contextlib.suppress(Exception):
             from resume_engine.learning.online.shadow_runner import observe_final_outcome
 
-            observe_final_outcome(blueprint=blueprint, learning_record=record)
+            obs = observe_final_outcome(blueprint=blueprint, learning_record=record)
+            if obs is not None:
+                online_observations += 1
         if item.get("passed") and item.get("_resume_object") is not None:
             save_fingerprint(
                 jd_hash=blueprint.jd_hash,
@@ -749,6 +759,13 @@ def run_phase2_pipeline(
             "learning_min_sample_count": learning_update.get("learning_min_sample_count"),
             "retrieval_applied": learning_insights.get("applied"),
             "retrieval_eligible_sample_count": learning_insights.get("eligible_sample_count"),
+        },
+        "online_learning": {
+            "mode": "shadow",
+            "policy_version": "river-linucb-v1",
+            "shadow_decisions_recorded": online_shadow_decisions,
+            "observations_recorded": online_observations,
+            "fallbacks": online_fallbacks,
         },
     }
 

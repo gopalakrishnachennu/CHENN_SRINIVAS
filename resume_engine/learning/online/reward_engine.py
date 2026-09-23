@@ -6,7 +6,11 @@ from typing import Any
 
 from resume_engine.config import thresholds
 from resume_engine.learning.eligibility import is_record_eligible_for_learning
-from resume_engine.learning.online.config import ONLINE_MAX_REWARD, ONLINE_MIN_REWARD
+from resume_engine.learning.online.config import (
+    ONLINE_MAX_REWARD,
+    ONLINE_MIN_REWARD,
+    ONLINE_REWARD_SCHEMA_VERSION,
+)
 from resume_engine.learning.online.schemas import RewardResult
 
 # Weights sum to 1.00
@@ -119,7 +123,7 @@ def compute_reward(record: dict[str, Any]) -> RewardResult:
     if components["p2"] * 100 < thresholds.LEARNING_P2_MIN - 1e-6:
         return RewardResult(reward=0.0, components=components, trainable=False, zero_reason="p2_below_threshold")
 
-    return RewardResult(reward=reward, components=components, trainable=True, zero_reason=None)
+    return RewardResult(reward=reward, components=components, trainable=True, zero_reason=None, reward_schema_version=ONLINE_REWARD_SCHEMA_VERSION)
 
 
 def _repair_efficiency(record: dict[str, Any]) -> float:
