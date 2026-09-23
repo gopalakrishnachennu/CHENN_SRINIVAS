@@ -1,10 +1,11 @@
 # PHASE 2.7 GATE 4.1 REPORT — CI Reconciliation + Live Isolation + UI Hardening
 
-**Status at write time:** pending GitHub Actions confirmation  
-**Report written (UTC):** 2026-09-23T00:35:00Z  
+**Status:** `PHASE 2.7 GATE 4.1 STATUS: PASS`  
+**Report written (UTC):** 2026-09-23T00:27:00Z  
 **Starting commit:** `c550c45d1331720448d685a85ecf8da975acd15f`  
-**Ending commit:** pending at write time  
-**Branch:** `main`
+**Ending commit:** `ae80a0949a38cf291f9ca398b46bc0d1ff3640c8`  
+**Branch:** `main`  
+**GitHub Actions run:** `35801932761` (success)
 
 Baseline: [`docs/PHASE_2_7_GATE_4_1_BASELINE.md`](PHASE_2_7_GATE_4_1_BASELINE.md)
 
@@ -38,6 +39,17 @@ Gate 4 (`c550c45`) claimed local Ruff = 0 / PASS while GitHub CI failed on Ruff 
 | `ruff check resume_engine tests` | **All checks passed!** |
 | Live OpenAI | **LIVE_TEST_NOT_RUN** |
 | Live Laya | **LIVE_TEST_NOT_RUN** |
+
+---
+
+## GitHub Actions
+
+| Job | Result |
+|-----|--------|
+| Python 3.11 — install / compile / non-live pytest+cov / Ruff | **SUCCESS** |
+| Python 3.12 — install / compile / non-live pytest+cov / Ruff | **SUCCESS** |
+
+Workflow: `.github/workflows/tests.yml` — Ruff remains blocking (`continue-on-error` not added). Live OpenAI not run in CI.
 
 ---
 
@@ -84,7 +96,7 @@ Gate 4 (`c550c45`) claimed local Ruff = 0 / PASS while GitHub CI failed on Ruff 
 | `resume_engine/ui/auth.py` | `safe_next_url` |
 | `resume_engine/ui/app.py` | Use safe redirect + path helper |
 | `docs/PHASE_2_7_GATE_4_REPORT.md` | CI reconciliation correction |
-| Many lint-touched modules under `resume_engine/` / `tests/` | Ruff 0.16.8 clean |
+| Lint-touched modules under `resume_engine/` / `tests/` | Ruff 0.16.8 clean |
 
 ---
 
@@ -92,10 +104,10 @@ Gate 4 (`c550c45`) claimed local Ruff = 0 / PASS while GitHub CI failed on Ruff 
 
 | Criterion | Result |
 |-----------|--------|
-| Ruff locally | **PASS** (0) |
-| Ruff GitHub Python 3.11 | pending |
-| Ruff GitHub Python 3.12 | pending |
-| Offline tests | **PASS** (569/3) |
+| Ruff locally | **PASS** |
+| Ruff GitHub Python 3.11 | **PASS** |
+| Ruff GitHub Python 3.12 | **PASS** |
+| Offline tests | **PASS** |
 | Coverage ≥70 | **PASS** (75.03%) |
 | Live harness isolated | **PASS** |
 | Default registry unchanged | **PASS** |
@@ -109,11 +121,10 @@ Gate 4 (`c550c45`) claimed local Ruff = 0 / PASS while GitHub CI failed on Ruff 
 
 ## Unresolved
 
-1. Paid live OpenAI/Laya still opt-in only (not required for Gate 4.1 PASS).
-2. GitHub Actions results filled after push.
+1. Paid live OpenAI/Laya remains opt-in only (not required for Gate 4.1 PASS).
+2. Coverage ratchet above 70 toward 80%+ — deferred.
+3. Multi-user OAuth / CSRF beyond session password — deferred.
 
 ---
 
-# PHASE 2.7 GATE 4.1 STATUS: INCOMPLETE
-
-Blocker at write time: GitHub Python 3.11 / 3.12 job results not yet confirmed.
+# PHASE 2.7 GATE 4.1 STATUS: PASS
