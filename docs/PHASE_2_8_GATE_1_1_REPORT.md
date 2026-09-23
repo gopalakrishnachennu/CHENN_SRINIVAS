@@ -1,10 +1,11 @@
 # PHASE 2.8 GATE 1.1 REPORT — Shadow Evaluation Hardening
 
-**Status:** pending GitHub confirmation at write; finalized after CI  
+**Status:** PASS  
 **Starting commit:** `2fe8e1a5aa1c48e44a05da2ba43d8343f7b663b0`  
-**Ending commit:** pending  
+**Ending commit:** `c0a202ac00bee1c6f6ad3bf738ad9b4a8a061a89`  
 **Branch:** `main`  
-**Mode:** `shadow` (active production reordering **OFF**)
+**Mode:** `shadow` (active production reordering **OFF**)  
+**CI:** https://github.com/gopalakrishnachennu/CHENN_SRINIVAS/actions/runs/35820340513
 
 Baseline: [`docs/PHASE_2_8_GATE_1_1_BASELINE.md`](PHASE_2_8_GATE_1_1_BASELINE.md)
 
@@ -18,8 +19,8 @@ Baseline: [`docs/PHASE_2_8_GATE_1_1_BASELINE.md`](PHASE_2_8_GATE_1_1_BASELINE.md
 | Online-learning tests | 29 | **67** (29 Gate1 + 38 Gate1.1) |
 | Coverage | 75.09% | **75.50%** |
 | Ruff | 0 | **0** |
-| GitHub 3.11 | — | pending |
-| GitHub 3.12 | — | pending |
+| GitHub 3.11 | — | **SUCCESS** |
+| GitHub 3.12 | — | **SUCCESS** |
 
 ---
 
@@ -50,6 +51,9 @@ Shadow ranks this set so sparse JD production actions are never rejected as “o
 ### Evaluator
 `build_shadow_evaluation()` reads SQLite rewards as stored (no recompute).  
 `activation_ready` always **false** in Gate 1.1 even if sample thresholds would pass.
+
+### Replay diagnostics
+Dry-run reports `eligible_records` / `usable_records` / `skipped_records` with `skip_reasons`; policy bytes unchanged.
 
 ---
 
@@ -84,8 +88,11 @@ Shadow ranks this set so sparse JD production actions are never rejected as “o
 | Fallback action supported | PASS |
 | Action invention impossible | PASS |
 | Shadow evaluator works | PASS |
-| Agreement / agree-disagree rewards | PASS |
-| Per-action / per-family metrics | PASS |
+| Agreement rate calculated | PASS |
+| Agree reward calculated | PASS |
+| Disagree reward calculated | PASS |
+| Per-action metrics | PASS |
+| Per-family metrics | PASS |
 | Insufficient evidence detection | PASS |
 | River version compatibility | PASS |
 | Feature schema compatibility | PASS |
@@ -94,8 +101,8 @@ Shadow ranks this set so sparse JD production actions are never rejected as “o
 | Offline pytest | PASS |
 | Coverage ≥70 | PASS |
 | Ruff | PASS |
-| GitHub Python 3.11 | pending |
-| GitHub Python 3.12 | pending |
+| GitHub Python 3.11 | PASS |
+| GitHub Python 3.12 | PASS |
 | Active production mode | **OFF** |
 
 ---
@@ -105,9 +112,8 @@ Shadow ranks this set so sparse JD production actions are never rejected as “o
 2. Evaluator evidence readiness never flips active mode.
 3. Policy save failure after in-memory observe relies on APPLIED marker to avoid double-train (file may lag).
 4. Do not fabricate 50 observations in tests for activation.
+5. Real shadow performance must come from future production runs (not fabricated).
 
 ---
 
-# PHASE 2.8 ONLINE LEARNING GATE 1.1 STATUS: INCOMPLETE
-
-Awaiting GitHub 3.11 + 3.12 confirmation.
+# PHASE 2.8 ONLINE LEARNING GATE 1.1 STATUS: PASS
