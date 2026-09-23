@@ -82,7 +82,4 @@ def is_record_eligible_for_learning(record: dict) -> bool:
     p2 = float(record.get("p2_coverage") if record.get("p2_coverage") is not None else -1.0)
     if p1 < thresholds.LEARNING_P1_MIN:
         return False
-    if p2 < thresholds.LEARNING_P2_MIN:
-        return False
-
-    return True
+    return not p2 < thresholds.LEARNING_P2_MIN

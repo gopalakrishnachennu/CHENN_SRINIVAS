@@ -3,7 +3,6 @@ from resume_engine.models.resume_schema import ResumeJSON
 from resume_engine.models.validation_schema import ValidationIssue, ValidatorResult
 from resume_engine.validation.text_utils import contains_term, flatten_resume_text
 
-
 ROLE_DRIFT_TERMS = {
     "data scientist": "ai_ml",
     "machine learning researcher": "ai_ml",

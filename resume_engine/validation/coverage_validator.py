@@ -2,7 +2,11 @@ from resume_engine.config import thresholds
 from resume_engine.models.jd_blueprint import JDBlueprint
 from resume_engine.models.resume_schema import ResumeJSON
 from resume_engine.models.validation_schema import ValidationIssue, ValidatorResult
-from resume_engine.validation.text_utils import contains_term, flatten_experience_text, flatten_resume_text
+from resume_engine.validation.text_utils import (
+    contains_term,
+    flatten_experience_text,
+    flatten_resume_text,
+)
 
 
 def _coverage(required: list[str], text: str) -> tuple[float, list[str]]:

@@ -6,7 +6,7 @@ import json
 import re
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from resume_engine.config.settings import (
@@ -122,7 +122,7 @@ def write_run_metadata(paths: RunPaths, metadata: dict) -> Path:
         "run_id": paths.run_id,
         "jd_hash": paths.jd_hash,
         "prompt_version": PROMPT_VERSION,
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         **metadata,
     }
     with open(paths.metadata_path, "w", encoding="utf-8") as f:
@@ -330,7 +330,7 @@ def save_pipeline_error_report(
         "message": str(error)[:2000],
         "passed": False,
         "eligible_for_learning": False,
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
     }
     with open(path, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)

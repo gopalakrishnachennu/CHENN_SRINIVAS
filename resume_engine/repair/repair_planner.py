@@ -183,10 +183,9 @@ def build_repair_plan(
         if skill.lower() not in allowed_norm and skill not in allowed:
             # Not blueprint-allowed — skip rather than invent.
             continue
-        if mode == "CANDIDATE":
-            if not _skill_supported_in_candidate(skill, candidate_profile):
-                unresolved_required_candidate_gaps.append(skill)
-                continue
+        if mode == "CANDIDATE" and not _skill_supported_in_candidate(skill, candidate_profile):
+            unresolved_required_candidate_gaps.append(skill)
+            continue
         group = _choose_skill_group(resume_technical_skills)
         operations.append(
             RepairOperation(

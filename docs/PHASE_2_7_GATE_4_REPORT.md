@@ -110,3 +110,13 @@ None.
 # PHASE 2.7 GATE 4 STATUS: PASS
 
 Phase 2.7 freeze gates 1–4 complete for deferred critical/hygiene/export/live-auth scope.
+
+---
+
+## Post-commit CI reconciliation (Gate 4.1)
+
+GitHub Actions on `c550c45` **failed** under Ruff **0.16.8** (~91 findings on both Python 3.11 and 3.12).  
+Local Gate 4 verification used Ruff **0.8.4**, which reported 0 errors — a tooling mismatch, not a green CI proof.
+
+**Gate 4 final release status is superseded by Gate 4.1.**  
+See [`docs/PHASE_2_7_GATE_4_1_REPORT.md`](PHASE_2_7_GATE_4_1_REPORT.md).

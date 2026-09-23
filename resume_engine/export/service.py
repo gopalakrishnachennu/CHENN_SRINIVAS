@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from resume_engine.config.settings import EXPORT_STORAGE_DIR, ensure_storage_dirs, portable_path
 from resume_engine.export.document_model import ContactHeader
 from resume_engine.export.docx_exporter import export_resume_docx
 from resume_engine.export.pdf_exporter import export_resume_pdf
 from resume_engine.models.resume_schema import ResumeJSON
-
 
 SUPPORTED_FORMATS = ("docx", "pdf")
 

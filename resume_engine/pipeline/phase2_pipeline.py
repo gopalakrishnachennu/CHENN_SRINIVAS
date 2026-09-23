@@ -45,8 +45,8 @@ from resume_engine.storage.run_store import (
 )
 from resume_engine.strategy.strategy_builder import build_strategy, save_strategy
 from resume_engine.strategy.variant_planner import create_variants
-from resume_engine.validation.ats_validator import validate_ats
 from resume_engine.validation.ai_tool_placement_validator import validate_ai_tool_placement
+from resume_engine.validation.ats_validator import validate_ats
 from resume_engine.validation.blueprint_validator import validate_blueprint_ready
 from resume_engine.validation.coverage_validator import validate_coverage
 from resume_engine.validation.duplicate_validator import validate_duplicates

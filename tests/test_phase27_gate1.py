@@ -901,7 +901,10 @@ def test_same_jd_different_runs_still_work():
 
 def test_initial_success_then_regenerated_success_counts_once(tmp_path, monkeypatch):
     from resume_engine.learning import outcome_store
-    from resume_engine.learning.repository import LearningRepository, reset_default_repository_for_tests
+    from resume_engine.learning.repository import (
+        LearningRepository,
+        reset_default_repository_for_tests,
+    )
 
     learning_file = tmp_path / "outcomes.jsonl"
     monkeypatch.setattr(outcome_store, "OUTCOMES_FILE", learning_file)
@@ -961,7 +964,10 @@ def test_superseded_attempt_not_eligible():
 
 def test_only_final_variant_updates_strategy_history(tmp_path, monkeypatch):
     from resume_engine.learning import outcome_store
-    from resume_engine.learning.repository import LearningRepository, reset_default_repository_for_tests
+    from resume_engine.learning.repository import (
+        LearningRepository,
+        reset_default_repository_for_tests,
+    )
 
     learning_file = tmp_path / "outcomes.jsonl"
     monkeypatch.setattr(outcome_store, "OUTCOMES_FILE", learning_file)
@@ -1044,7 +1050,10 @@ def test_learning_record_contains_superseded_flag():
 
 def test_one_run_variant_has_at_most_one_eligible_final_outcome(tmp_path, monkeypatch):
     from resume_engine.learning import outcome_store
-    from resume_engine.learning.repository import LearningRepository, reset_default_repository_for_tests
+    from resume_engine.learning.repository import (
+        LearningRepository,
+        reset_default_repository_for_tests,
+    )
 
     learning_file = tmp_path / "outcomes.jsonl"
     monkeypatch.setattr(outcome_store, "OUTCOMES_FILE", learning_file)

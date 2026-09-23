@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -13,7 +13,6 @@ from resume_engine.config.settings import (
     ensure_storage_dirs,
     portable_path,
 )
-
 
 SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS runs (
@@ -127,7 +126,7 @@ class LearningRepository:
 
     @staticmethod
     def _now() -> str:
-        return datetime.now(timezone.utc).isoformat()
+        return datetime.now(UTC).isoformat()
 
     def save_run(self, record: dict[str, Any]) -> None:
         with self._connect() as conn:

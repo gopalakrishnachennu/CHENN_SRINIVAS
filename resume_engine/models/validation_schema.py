@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -7,8 +7,8 @@ class ValidationIssue(BaseModel):
     code: str
     severity: str
     message: str
-    location: Optional[str] = None
-    repair_hint: Optional[str] = None
+    location: str | None = None
+    repair_hint: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 

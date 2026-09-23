@@ -18,7 +18,7 @@ class ContactHeader:
     website: str | None = None
 
     @classmethod
-    def from_mapping(cls, data: dict[str, Any] | None) -> "ContactHeader":
+    def from_mapping(cls, data: dict[str, Any] | None) -> ContactHeader:
         if not data:
             return cls()
         return cls(

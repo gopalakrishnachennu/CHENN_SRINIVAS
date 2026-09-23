@@ -3,7 +3,6 @@ from resume_engine.models.resume_schema import ResumeJSON
 from resume_engine.models.validation_schema import ValidationIssue, ValidatorResult
 from resume_engine.validation.text_utils import contains_term, flatten_resume_text
 
-
 FAMILY_TERMS = {
     "devops_cloud": ["AWS", "Azure", "GCP", "Terraform", "Kubernetes", "CI/CD", "Docker", "Helm", "cloud infrastructure"],
     "data_engineering": ["Databricks", "Apache Spark", "Spark", "PySpark", "Delta Lake", "ETL", "pipeline", "data platform"],

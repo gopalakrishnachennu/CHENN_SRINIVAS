@@ -3,7 +3,6 @@ from resume_engine.models.resume_schema import ResumeJSON
 from resume_engine.models.validation_schema import ValidationIssue, ValidatorResult
 from resume_engine.validation.text_utils import contains_term, flatten_experience_text
 
-
 AI_CATEGORIES = {"ai_tool", "ai_framework"}
 AI_NAME_HINTS = {
     "openai",

@@ -3,8 +3,8 @@ from resume_engine.models.resume_schema import ResumeJSON
 from resume_engine.models.resume_strategy import VariantStrategy
 from resume_engine.models.validation_schema import ValidatorResult
 from resume_engine.scoring.score_weights import SCORE_WEIGHTS
-from resume_engine.validation.variant_regeneration import variant_focus_score
 from resume_engine.validation.text_utils import flatten_resume_text
+from resume_engine.validation.variant_regeneration import variant_focus_score
 
 
 def _result(results: list[ValidatorResult], name: str) -> ValidatorResult | None:

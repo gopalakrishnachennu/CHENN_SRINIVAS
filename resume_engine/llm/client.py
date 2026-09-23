@@ -13,7 +13,11 @@ from typing import Any
 from openai import OpenAI
 
 from resume_engine.config import thresholds
-from resume_engine.config.settings import DEFAULT_OPENAI_MODEL, PROMPT_VERSION, load_local_environment
+from resume_engine.config.settings import (
+    DEFAULT_OPENAI_MODEL,
+    PROMPT_VERSION,
+    load_local_environment,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -180,7 +184,7 @@ class LLMClient:
                     metrics.request_id,
                 )
                 return response
-            except Exception as exc:  # noqa: BLE001 — classified below
+            except Exception as exc:
                 latency_ms = (time.perf_counter() - started) * 1000.0
                 error_class = self.classify_error(exc)
                 last_exc = exc

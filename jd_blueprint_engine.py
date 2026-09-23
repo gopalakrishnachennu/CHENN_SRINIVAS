@@ -2,15 +2,14 @@ import argparse
 import hashlib
 import json
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from getpass import getpass
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal
 
 from dotenv import load_dotenv
 from openai import OpenAI
 from pydantic import BaseModel, Field
-
 
 RequirementLevel = Literal[
     "mandatory",
@@ -47,8 +46,8 @@ class JDEntity(BaseModel):
 
 
 class JDExtraction(BaseModel):
-    target_title: Optional[str] = None
-    company_name: Optional[str] = None
+    target_title: str | None = None
+    company_name: str | None = None
     seniority_signals: list[str] = Field(default_factory=list)
     responsibilities: list[str] = Field(default_factory=list)
     entities: list[JDEntity] = Field(default_factory=list)
@@ -275,26 +274,35 @@ def normalize_name(name: str) -> str:
     return " ".join(name.strip().lower().split())
 
 
-def load_registry() -> dict:
+def load_registry(path: Path | None = None) -> dict:
     ensure_project_dirs()
+    target = path or REGISTRY_FILE
 
-    if REGISTRY_FILE.exists():
-        with open(REGISTRY_FILE, "r", encoding="utf-8") as f:
+    if target.exists():
+        with open(target, encoding="utf-8") as f:
             return json.load(f)
 
-    with open(REGISTRY_FILE, "w", encoding="utf-8") as f:
-        json.dump(SEED_REGISTRY, f, indent=2)
+    seed = json.loads(json.dumps(SEED_REGISTRY))
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with open(target, "w", encoding="utf-8") as f:
+        json.dump(seed, f, indent=2)
+    return seed
 
-    return SEED_REGISTRY.copy()
 
-
-def save_registry(registry: dict) -> None:
+def save_registry(registry: dict, path: Path | None = None) -> None:
     ensure_project_dirs()
-    with open(REGISTRY_FILE, "w", encoding="utf-8") as f:
+    target = path or REGISTRY_FILE
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with open(target, "w", encoding="utf-8") as f:
         json.dump(registry, f, indent=2, ensure_ascii=False)
 
 
-def update_registry_from_jd(extraction: JDExtraction, registry: dict) -> dict:
+def update_registry_from_jd(
+    extraction: JDExtraction,
+    registry: dict,
+    *,
+    registry_path: Path | None = None,
+) -> dict:
     for entity in extraction.entities:
         key = normalize_name(entity.name)
 
@@ -311,7 +319,7 @@ def update_registry_from_jd(extraction: JDExtraction, registry: dict) -> dict:
             if not registry[key].get("category"):
                 registry[key]["category"] = entity.category
 
-    save_registry(registry)
+    save_registry(registry, path=registry_path)
     return registry
 
 
@@ -439,7 +447,7 @@ def refine_role_with_deterministic_signals(extraction: JDExtraction, role: dict)
     if (
         role["primary_family"] == "devops_cloud"
         and scores.get("data_engineering", 0) >= 3
-        and {"databricks", "spark"} <= set(term for term in FAMILY_SIGNAL_TERMS["data_engineering"] if term in text)
+        and {"databricks", "spark"} <= {term for term in FAMILY_SIGNAL_TERMS["data_engineering"] if term in text}
     ):
         role["secondary_family"] = "data_engineering"
         role["hybrid_probability"] = max(float(role.get("hybrid_probability") or 0.0), 0.80)
@@ -570,9 +578,12 @@ def placement_rules(priority: str, category: str) -> list[str]:
     if priority == "P4":
         sections = ["technical_skills_optional"]
 
-    if category in {"ai_tool", "ai_framework"} and priority in {"P1", "P2"}:
-        if "experience_responsibilities" not in sections:
-            sections.append("experience_responsibilities")
+    if (
+        category in {"ai_tool", "ai_framework"}
+        and priority in {"P1", "P2"}
+        and "experience_responsibilities" not in sections
+    ):
+        sections.append("experience_responsibilities")
 
     return sections
 
@@ -656,15 +667,15 @@ def build_blueprint(jd_text: str, extraction: JDExtraction, registry: dict, laya
             }
         )
 
-    for priority in priority_groups:
-        priority_groups[priority] = list(dict.fromkeys(priority_groups[priority]))
+    for priority, values in priority_groups.items():
+        priority_groups[priority] = list(dict.fromkeys(values))
 
     allowed_technologies = list(dict.fromkeys(item["name"] for item in entity_records))
 
     return {
         "blueprint_version": "1.0",
         "jd_hash": jd_hash(jd_text),
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         "job": {
             "target_title": extraction.target_title,
             "company": extraction.company_name,
@@ -712,27 +723,43 @@ def build_blueprint(jd_text: str, extraction: JDExtraction, registry: dict, laya
     }
 
 
-def save_blueprint(blueprint: dict) -> Path:
+def save_blueprint(
+    blueprint: dict,
+    *,
+    blueprint_dir: Path | None = None,
+    history_file: Path | None = None,
+    write_history: bool = True,
+    filename: str | None = None,
+) -> Path:
     ensure_project_dirs()
-    path = BLUEPRINT_DIR / f"{blueprint['jd_hash']}.json"
+    out_dir = blueprint_dir or BLUEPRINT_DIR
+    out_dir.mkdir(parents=True, exist_ok=True)
+    if filename:
+        path = out_dir / filename
+    elif blueprint_dir is not None:
+        path = out_dir / "blueprint.json"
+    else:
+        path = out_dir / f"{blueprint['jd_hash']}.json"
 
     with open(path, "w", encoding="utf-8") as f:
         json.dump(blueprint, f, indent=2, ensure_ascii=False)
 
-    history_record = {
-        "jd_hash": blueprint["jd_hash"],
-        "created_at": blueprint["created_at"],
-        "target_title": blueprint["job"]["target_title"],
-        "primary_family": blueprint["job"]["primary_family"],
-        "secondary_family": blueprint["job"]["secondary_family"],
-        "P1": blueprint["priority_skills"]["P1"],
-        "P2": blueprint["priority_skills"]["P2"],
-        "P3": blueprint["priority_skills"]["P3"],
-        "P4": blueprint["priority_skills"]["P4"],
-    }
-
-    with open(HISTORY_FILE, "a", encoding="utf-8") as f:
-        f.write(json.dumps(history_record, ensure_ascii=False) + "\n")
+    if write_history:
+        history_record = {
+            "jd_hash": blueprint["jd_hash"],
+            "created_at": blueprint["created_at"],
+            "target_title": blueprint["job"]["target_title"],
+            "primary_family": blueprint["job"]["primary_family"],
+            "secondary_family": blueprint["job"]["secondary_family"],
+            "P1": blueprint["priority_skills"]["P1"],
+            "P2": blueprint["priority_skills"]["P2"],
+            "P3": blueprint["priority_skills"]["P3"],
+            "P4": blueprint["priority_skills"]["P4"],
+        }
+        hist = history_file or HISTORY_FILE
+        hist.parent.mkdir(parents=True, exist_ok=True)
+        with open(hist, "a", encoding="utf-8") as f:
+            f.write(json.dumps(history_record, ensure_ascii=False) + "\n")
 
     return path
 

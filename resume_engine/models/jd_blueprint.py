@@ -1,16 +1,16 @@
-from typing import Any, Literal, Optional, Union
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
 
 class BlueprintJob(BaseModel):
-    target_title: Optional[str] = None
-    company: Optional[str] = None
+    target_title: str | None = None
+    company: str | None = None
     primary_family: str
-    primary_confidence: Optional[float] = None
+    primary_confidence: float | None = None
     secondary_family: str = "none"
     seniority: str
-    seniority_confidence: Optional[float] = None
+    seniority_confidence: float | None = None
     hybrid_probability: float = 0.0
 
 
@@ -19,11 +19,11 @@ class BlueprintEntity(BaseModel):
     category: str
     priority: str
     source: str
-    requirement: Optional[str] = None
-    evidence: Optional[str] = None
-    confidence: Optional[float] = None
+    requirement: str | None = None
+    evidence: str | None = None
+    confidence: float | None = None
     placement: list[str] = Field(default_factory=list)
-    parent_skill: Optional[str] = None
+    parent_skill: str | None = None
 
 
 class CertificationRequirement(BaseModel):
@@ -31,8 +31,8 @@ class CertificationRequirement(BaseModel):
 
     name: str
     requirement: Literal["mandatory", "required", "preferred", "mentioned"] = "mentioned"
-    evidence: Optional[str] = None
-    source: Optional[str] = "jd_direct"
+    evidence: str | None = None
+    source: str | None = "jd_direct"
     candidate_verified: bool = False
 
 
@@ -52,7 +52,7 @@ class QualityGates(BaseModel):
     technology_drift_allowed: bool = False
 
 
-def coerce_certification(item: Union[str, dict, CertificationRequirement]) -> CertificationRequirement:
+def coerce_certification(item: str | dict | CertificationRequirement) -> CertificationRequirement:
     if isinstance(item, CertificationRequirement):
         return item
     if isinstance(item, str):

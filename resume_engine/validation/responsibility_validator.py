@@ -1,10 +1,9 @@
 from resume_engine.config import thresholds
+from resume_engine.generation.bullet_enrichment import attach_bullet_metadata
 from resume_engine.models.jd_blueprint import JDBlueprint
 from resume_engine.models.resume_schema import ResumeJSON
 from resume_engine.models.validation_schema import ValidationIssue, ValidatorResult
-from resume_engine.generation.bullet_enrichment import attach_bullet_metadata
 from resume_engine.validation.text_utils import normalize_text
-
 
 STOPWORDS = {
     "the",

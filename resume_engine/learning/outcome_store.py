@@ -1,9 +1,8 @@
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from resume_engine.config.settings import LEARNING_STORAGE_DIR, ensure_storage_dirs
-
 
 OUTCOMES_FILE = LEARNING_STORAGE_DIR / "outcomes.jsonl"
 
@@ -21,7 +20,7 @@ def append_outcome_jsonl_only(record: dict) -> Path:
     """Low-level JSONL append used by tests / migration helpers."""
     ensure_storage_dirs()
     enriched = {
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         **record,
     }
     with open(OUTCOMES_FILE, "a", encoding="utf-8") as f:

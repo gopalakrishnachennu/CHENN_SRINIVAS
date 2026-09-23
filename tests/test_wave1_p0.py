@@ -44,7 +44,6 @@ from resume_engine.validation.coverage_validator import validate_coverage
 from resume_engine.validation.p4_usage_validator import validate_p4_usage
 
 
-
 def _uid(prefix: str) -> str:
     return f"{prefix}-{uuid.uuid4().hex[:10]}"
 
@@ -361,7 +360,10 @@ def test_run_id_in_metadata(blueprint):
 
 def test_run_id_in_learning_record_if_learning_is_written(blueprint, tmp_path, monkeypatch):
     from resume_engine.learning import outcome_store
-    from resume_engine.learning.repository import LearningRepository, reset_default_repository_for_tests
+    from resume_engine.learning.repository import (
+        LearningRepository,
+        reset_default_repository_for_tests,
+    )
 
     learning_file = tmp_path / "outcomes.jsonl"
     monkeypatch.setattr(outcome_store, "OUTCOMES_FILE", learning_file)

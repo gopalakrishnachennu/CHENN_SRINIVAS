@@ -2,7 +2,6 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 STORAGE_DIR = PROJECT_ROOT / "resume_engine" / "storage"
 RUNS_STORAGE_DIR = STORAGE_DIR / "runs"
@@ -53,7 +52,7 @@ def portable_path(path: Path | str | None) -> str | None:
     # Prefer unresolved relative strings already under the project.
     if not raw.is_absolute():
         as_posix = raw.as_posix()
-        if as_posix.startswith("resume_engine/") or as_posix.startswith("tests/") or as_posix.startswith("docs/"):
+        if as_posix.startswith(("resume_engine/", "tests/", "docs/")):
             return as_posix
     resolved = raw.resolve()
     try:

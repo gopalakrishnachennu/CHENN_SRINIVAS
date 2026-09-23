@@ -87,8 +87,12 @@ def test_different_content_not_near_duplicate():
 
 
 def test_cross_run_signature_flags_near_duplicate(tmp_path, monkeypatch):
-    from resume_engine.learning import fingerprint_store, repository as repo_mod
-    from resume_engine.learning.repository import LearningRepository, reset_default_repository_for_tests
+    from resume_engine.learning import fingerprint_store
+    from resume_engine.learning import repository as repo_mod
+    from resume_engine.learning.repository import (
+        LearningRepository,
+        reset_default_repository_for_tests,
+    )
 
     fp_file = tmp_path / "fps.jsonl"
     monkeypatch.setattr(fingerprint_store, "FINGERPRINTS_FILE", fp_file)
@@ -209,7 +213,10 @@ def test_responsibility_bigram_boost_helps_phrase_match():
 
 
 def test_load_outcome_records_prefers_sqlite(tmp_path):
-    from resume_engine.learning.repository import LearningRepository, reset_default_repository_for_tests
+    from resume_engine.learning.repository import (
+        LearningRepository,
+        reset_default_repository_for_tests,
+    )
 
     db = tmp_path / "sot.sqlite3"
     orphan = tmp_path / "orphan.jsonl"

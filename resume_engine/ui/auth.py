@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import os
 import secrets
+from collections.abc import Callable
 from functools import wraps
-from typing import Callable
 
 from flask import Flask, redirect, request, session, url_for
 
@@ -78,3 +78,26 @@ def require_auth(view: Callable):
         return redirect(url_for("login", next=request.path))
 
     return wrapped
+
+
+def safe_next_url(value: str | None, *, fallback: str | None = None) -> str:
+    """
+    Allow only local application-relative redirect targets.
+
+    Rejects absolute URLs, protocol-relative URLs, and javascript/data schemes.
+    """
+    default = fallback if fallback is not None else url_for("index")
+    if value is None:
+        return default
+    candidate = str(value).strip()
+    if not candidate:
+        return default
+    # Must be a relative path starting with a single slash (not //).
+    if not candidate.startswith("/") or candidate.startswith("//"):
+        return default
+    if "\\" in candidate or "://" in candidate:
+        return default
+    path_only = candidate.split("?", 1)[0].split("#", 1)[0]
+    if path_only.lower().startswith(("/javascript:", "/data:", "/vbscript:")):
+        return default
+    return candidate

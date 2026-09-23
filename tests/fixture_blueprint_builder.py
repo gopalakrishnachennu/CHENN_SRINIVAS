@@ -71,7 +71,7 @@ def _make_blueprint(
     entities = []
     for priority, skills in [("P1", p1), ("P2", p2), ("P3", p3), ("P4", p4)]:
         for skill in skills:
-            cat = "ai_tool" if any(h in skill.lower() for h in {"openai", "claude", "anthropic", "langchain", "langgraph", "bedrock", "vertex", "mosaic"}) else "technology"
+            cat = "ai_tool" if any(h in skill.lower() for h in ("openai", "claude", "anthropic", "langchain", "langgraph", "bedrock", "vertex", "mosaic")) else "technology"
             entities.append({
                 "name": skill,
                 "category": cat,

@@ -5,7 +5,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from resume_engine.models.resume_schema import ResumeJSON
-from resume_engine.models.validation_schema import ValidationBundle, ValidationIssue, ValidatorResult
+from resume_engine.models.validation_schema import (
+    ValidationBundle,
+    ValidationIssue,
+    ValidatorResult,
+)
 
 
 @dataclass

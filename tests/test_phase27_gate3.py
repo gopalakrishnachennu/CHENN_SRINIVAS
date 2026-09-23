@@ -33,7 +33,8 @@ def _sample_resume() -> ResumeJSON:
 
 
 def test_default_repository_does_not_dual_write_jsonl(tmp_path, monkeypatch):
-    from resume_engine.learning import outcome_store, repository as repo_mod
+    from resume_engine.learning import outcome_store
+    from resume_engine.learning import repository as repo_mod
     from resume_engine.learning.outcome_store import save_learning_outcome
 
     outcomes = tmp_path / "outcomes.jsonl"

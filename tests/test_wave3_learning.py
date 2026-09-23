@@ -58,8 +58,7 @@ def _eligible_record(
 def _write_outcomes(path: Path, records: list[dict]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
-        for record in records:
-            f.write(json.dumps(record) + "\n")
+        f.writelines(json.dumps(record) + "\n" for record in records)
 
 
 def _positionings(blueprint, outcomes_path: Path | None) -> list[str]:

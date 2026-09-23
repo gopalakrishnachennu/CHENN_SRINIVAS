@@ -6,7 +6,12 @@ from pathlib import Path
 
 from flask import Flask, abort, redirect, render_template_string, request, send_file, url_for
 
-from resume_engine.config.settings import EXPORT_STORAGE_DIR, PROJECT_ROOT, RUNS_STORAGE_DIR, ensure_storage_dirs
+from resume_engine.config.settings import (
+    EXPORT_STORAGE_DIR,
+    PROJECT_ROOT,
+    RUNS_STORAGE_DIR,
+    ensure_storage_dirs,
+)
 from resume_engine.export.document_model import ContactHeader
 from resume_engine.export.service import export_resume, load_resume
 from resume_engine.ui.auth import (
@@ -16,9 +21,11 @@ from resume_engine.ui.auth import (
     login_user,
     logout_user,
     require_auth,
+    safe_next_url,
     ui_username,
     verify_credentials,
 )
+from resume_engine.ui.paths import InvalidResumePath, resolve_validated_resume_path
 
 app = Flask(__name__)
 configure_app_secret(app)
@@ -296,13 +303,13 @@ def login():
     if is_authenticated():
         return redirect(url_for("index"))
     error = None
-    next_url = request.values.get("next") or url_for("index")
+    next_url = safe_next_url(request.values.get("next"))
     if request.method == "POST":
         username = request.form.get("username") or ""
         password = request.form.get("password") or ""
         if verify_credentials(username, password):
             login_user(username)
-            return redirect(next_url)
+            return redirect(safe_next_url(request.form.get("next") or next_url))
         error = "Invalid username or password."
     return render_template_string(
         LOGIN_PAGE,
@@ -330,8 +337,9 @@ def index():
 @require_auth
 def view_resume():
     rel = request.args.get("path", "")
-    path = (PROJECT_ROOT / rel).resolve()
-    if not str(path).startswith(str(RUNS_STORAGE_DIR.resolve())) or not path.exists():
+    try:
+        path = resolve_validated_resume_path(rel)
+    except InvalidResumePath:
         abort(404)
     resume = load_resume(path)
     return _page(items=[], resume=resume, resume_path=_relative(path))
@@ -344,8 +352,9 @@ def export_one():
     from io import BytesIO
 
     rel = request.form.get("resume_path", "")
-    path = (PROJECT_ROOT / rel).resolve()
-    if not str(path).startswith(str(RUNS_STORAGE_DIR.resolve())) or not path.exists():
+    try:
+        path = resolve_validated_resume_path(rel)
+    except InvalidResumePath:
         abort(404)
 
     fmt = (request.form.get("format") or "both").lower()

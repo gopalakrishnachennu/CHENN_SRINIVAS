@@ -6,7 +6,10 @@ from resume_engine.config.settings import STRATEGY_STORAGE_DIR, ensure_storage_d
 from resume_engine.models.jd_blueprint import JDBlueprint
 from resume_engine.models.resume_strategy import ResumeStrategy
 from resume_engine.strategy.role_positioning import build_positioning, forbidden_role_drift
-from resume_engine.strategy.skill_placement import build_placement_requirements, group_skills_by_category
+from resume_engine.strategy.skill_placement import (
+    build_placement_requirements,
+    group_skills_by_category,
+)
 
 
 def _priority(blueprint: JDBlueprint, level: str) -> list[str]:

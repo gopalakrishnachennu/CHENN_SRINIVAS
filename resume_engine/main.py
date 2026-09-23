@@ -6,7 +6,10 @@ from pathlib import Path
 
 from resume_engine.pipeline.phase2_pipeline import run_phase2_pipeline
 from resume_engine.reports.behavioral_audit import run_behavioral_audit, save_behavioral_audit
-from resume_engine.reports.implementation_audit import run_implementation_audit, save_implementation_audit
+from resume_engine.reports.implementation_audit import (
+    run_implementation_audit,
+    save_implementation_audit,
+)
 
 
 def _run_fixture_tests() -> bool:
@@ -16,6 +19,7 @@ def _run_fixture_tests() -> bool:
         [sys.executable, "-m", "pytest", "tests/test_behavioral_fixtures.py", "-v", "--tb=short"],
         cwd=str(project_root),
         capture_output=False,
+        check=False,
     )
     return result.returncode == 0
 

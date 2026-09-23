@@ -293,13 +293,14 @@ def _assert_technology_allowed(value: str, allowed: set[str] | None) -> None:
             "Empty technology value is not allowed in repair.",
         )
     allowed_norm = {_normalize_skill(item) for item in allowed}
-    if _normalize_skill(value) not in allowed_norm:
-        # Also allow exact case-insensitive containment in allowed list names.
-        if not any(_normalize_skill(value) == _normalize_skill(item) for item in allowed):
-            raise PatchApplicationError(
-                "FAIL_REPAIR_UNAPPROVED_TECHNOLOGY",
-                f"Repair attempted to introduce unapproved technology: {value}",
-            )
+    # Also allow exact case-insensitive containment in allowed list names.
+    if _normalize_skill(value) not in allowed_norm and not any(
+        _normalize_skill(value) == _normalize_skill(item) for item in allowed
+    ):
+        raise PatchApplicationError(
+            "FAIL_REPAIR_UNAPPROVED_TECHNOLOGY",
+            f"Repair attempted to introduce unapproved technology: {value}",
+        )
 
 
 def apply_repair_operation(
@@ -506,23 +507,21 @@ def apply_resume_operations(
             operation.bullet_index,
             operation.project_index,
         )
-        if repair_plan is not None:
-            if key not in plan_op_keys:
-                if operation.operation == "REPLACE_TEXT" and operation.location in legacy_allowed:
-                    pass
-                elif plan_ops or legacy_allowed:
-                    # Allow exact planned skill ops already converted.
-                    if not any(
-                        op.operation == operation.operation
-                        and (op.value or "") == (operation.value or "")
-                        and (op.group or None) == (operation.group or None)
-                        for op in plan_ops
-                    ):
-                        raise PatchApplicationError(
-                            "FAIL_OUT_OF_SCOPE_PATCH",
-                            f"Repair operation not present in repair plan: {operation.operation}",
-                            operation.location,
-                        )
+        if repair_plan is not None and key not in plan_op_keys:
+            if operation.operation == "REPLACE_TEXT" and operation.location in legacy_allowed:
+                pass
+            elif (plan_ops or legacy_allowed) and not any(
+                op.operation == operation.operation
+                and (op.value or "") == (operation.value or "")
+                and (op.group or None) == (operation.group or None)
+                for op in plan_ops
+            ):
+                # Allow exact planned skill ops already converted.
+                raise PatchApplicationError(
+                    "FAIL_OUT_OF_SCOPE_PATCH",
+                    f"Repair operation not present in repair plan: {operation.operation}",
+                    operation.location,
+                )
         apply_repair_operation(
             patched,
             operation,
@@ -553,38 +552,30 @@ def apply_resume_operations(
         if key in target_keys:
             continue
         # Skill ops may change technical_skills container; handled below.
-        if key.startswith("experience[") or key.startswith("projects[") or key in {"summary", "target_title"}:
-            if before_value != after_snapshot.get(key):
-                # Allow append: old bullets unchanged, new index only.
-                if ".bullets[" in key:
-                    # If this bullet index existed before and wasn't targeted, must match.
-                    issues.append(
-                        ValidationIssue(
-                            code="FAIL_REPAIR_SCOPE_VIOLATION",
-                            severity="error",
-                            message=f"Non-target field changed during repair: {key}",
-                            location=key,
-                        )
+        if (
+            (key.startswith(("experience[", "projects[")) or key in {"summary", "target_title"})
+            and before_value != after_snapshot.get(key)
+        ):
+            # Allow append: old bullets unchanged, new index only.
+            if ".bullets[" in key:
+                # If this bullet index existed before and wasn't targeted, must match.
+                issues.append(
+                    ValidationIssue(
+                        code="FAIL_REPAIR_SCOPE_VIOLATION",
+                        severity="error",
+                        message=f"Non-target field changed during repair: {key}",
+                        location=key,
                     )
-                elif key in {"summary", "target_title"} and key not in target_keys:
-                    issues.append(
-                        ValidationIssue(
-                            code="FAIL_REPAIR_SCOPE_VIOLATION",
-                            severity="error",
-                            message=f"Non-target field changed during repair: {key}",
-                            location=key,
-                        )
+                )
+            elif key in {"summary", "target_title"} and key not in target_keys or key.endswith((".company", ".title", ".name", ".summary")):
+                issues.append(
+                    ValidationIssue(
+                        code="FAIL_REPAIR_SCOPE_VIOLATION",
+                        severity="error",
+                        message=f"Non-target field changed during repair: {key}",
+                        location=key,
                     )
-                elif key.endswith(".company") or key.endswith(".title") or key.endswith(".name") or key.endswith(".summary"):
-                    if not key.endswith(".bullets_len"):
-                        issues.append(
-                            ValidationIssue(
-                                code="FAIL_REPAIR_SCOPE_VIOLATION",
-                                severity="error",
-                                message=f"Non-target field changed during repair: {key}",
-                                location=key,
-                            )
-                        )
+                )
 
     return patched, issues
 

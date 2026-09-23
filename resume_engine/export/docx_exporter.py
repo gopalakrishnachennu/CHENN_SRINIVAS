@@ -168,4 +168,4 @@ def export_resume_docx(
     return path
 
 
-__all__ = ["export_resume_docx", "ResumeDocumentView"]
+__all__ = ["ResumeDocumentView", "export_resume_docx"]

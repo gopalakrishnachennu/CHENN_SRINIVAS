@@ -12,7 +12,6 @@ from resume_engine.models.resume_schema import (
 )
 from resume_engine.validation.text_utils import contains_term, normalize_text
 
-
 STOPWORDS = {
     "the",
     "and",
@@ -227,10 +226,9 @@ def find_unknown_proper_tools(resume: ResumeJSON, allowed: list[str]) -> list[st
                     continue
                 # Skip common English Title Case words
                 if match in {"AWS", "CI", "CD", "SQL", "API", "ETL", "AI", "ML", "LLM", "RAG"}:
+                    # acronyms still need to be allowed if present
                     if normalize_text(match) not in allowed_norm and match not in allowed:
-                        # acronyms still need to be allowed if present
-                        if normalize_text(match) not in allowed_norm:
-                            unknown.append(match)
+                        unknown.append(match)
                     continue
                 if len(match) < 3:
                     continue

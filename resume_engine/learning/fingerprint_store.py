@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from resume_engine.config import thresholds
@@ -17,7 +18,6 @@ from resume_engine.learning.fingerprint_signatures import (
 from resume_engine.models.resume_schema import ResumeJSON
 from resume_engine.models.validation_schema import ValidationIssue, ValidatorResult
 from resume_engine.validation.text_utils import flatten_resume_text, normalize_text, similarity
-
 
 FINGERPRINTS_FILE = LEARNING_STORAGE_DIR / "resume_fingerprints.jsonl"
 PREVIEW_LEN = 240
@@ -38,7 +38,7 @@ def build_fingerprint_record(
 ) -> dict:
     normalized = normalize_text(flatten_resume_text(resume))
     return {
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         "jd_hash": jd_hash,
         "run_id": run_id,
         "variant_id": variant_id,
@@ -94,7 +94,10 @@ def _load_fingerprints_jsonl(jd_hash: str, exclude_run_id: str | None = None) ->
 
 def load_prior_successful_fingerprints(jd_hash: str, exclude_run_id: str | None = None) -> list[dict]:
     # Prefer SQLite when available; fall back to legacy JSONL.
-    try:
+    prior: list[dict] | None = None
+    with contextlib.suppress(
+        OSError, ValueError, TypeError, ImportError, AttributeError, KeyError, RuntimeError
+    ):
         from resume_engine.learning.repository import get_default_repository
 
         prior = get_default_repository().get_prior_variants(
@@ -102,10 +105,8 @@ def load_prior_successful_fingerprints(jd_hash: str, exclude_run_id: str | None 
             exclude_run_id=exclude_run_id,
             passed_only=True,
         )
-        if prior:
-            return prior
-    except Exception:
-        pass
+    if prior:
+        return prior
     return _load_fingerprints_jsonl(jd_hash, exclude_run_id=exclude_run_id)
 
 

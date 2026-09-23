@@ -6,7 +6,6 @@ from resume_engine.models.resume_schema import ResumeJSON
 from resume_engine.models.validation_schema import ValidationIssue, ValidatorResult
 from resume_engine.validation.text_utils import normalize_text
 
-
 KNOWN_TECH_WORDS = {
     "aws",
     "azure",

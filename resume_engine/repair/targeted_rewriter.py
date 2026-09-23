@@ -21,18 +21,16 @@ def _deterministic_operations(repair_plan: dict) -> list[RepairOperation]:
     for item in repair_plan.get("operations", []):
         op = RepairOperation.model_validate(item)
         # Skill append/remove and valued ops are applied in Python without LLM.
-        if op.operation in {"APPEND_SKILL", "REMOVE_SKILL", "REPLACE_SKILL"}:
-            if op.value:
-                ops.append(op)
+        if op.operation in {"APPEND_SKILL", "REMOVE_SKILL", "REPLACE_SKILL"} and op.value:
+            ops.append(op)
         elif op.operation in {
             "REPLACE_TEXT",
             "REPLACE_EXPERIENCE_BULLET",
             "REPLACE_PROJECT_BULLET",
             "APPEND_EXPERIENCE_BULLET",
-        }:
+        } and op.value:
             # Only apply if a concrete non-empty value is already provided.
-            if op.value:
-                ops.append(op)
+            ops.append(op)
     return ops
 
 
@@ -47,9 +45,7 @@ def _needs_llm_text(repair_plan: dict) -> bool:
         } and not op.value:
             return True
     # Legacy failed bullets without typed ops still need LLM text.
-    if repair_plan.get("failed_bullets") and not repair_plan.get("operations"):
-        return True
-    return False
+    return bool(repair_plan.get("failed_bullets") and not repair_plan.get("operations"))
 
 
 def rewrite_targeted_resume_parts(

@@ -25,7 +25,7 @@ def word_shingles(text: str, size: int | None = None) -> list[str]:
 
 def _stable_hash64(value: str, seed: int = 0) -> int:
     digest = hashlib.blake2b(
-        f"{seed}:{value}".encode("utf-8"),
+        f"{seed}:{value}".encode(),
         digest_size=8,
     ).digest()
     return struct.unpack(">Q", digest)[0]

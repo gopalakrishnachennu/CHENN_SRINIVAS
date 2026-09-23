@@ -27,15 +27,14 @@ from resume_engine.validation.hybrid_family_validator import validate_hybrid_fam
 from resume_engine.validation.role_drift_validator import validate_role_drift
 from resume_engine.validation.technology_firewall import validate_technology_firewall
 from resume_engine.validation.variant_similarity_validator import validate_variant_similarity
-
-from tests.fixture_blueprint_builder import get_blueprint, load_assertions, all_fixture_ids
+from tests.fixture_blueprint_builder import all_fixture_ids, get_blueprint, load_assertions
 from tests.fixture_resume_builder import (
-    good_resume_for,
-    bad_resume_missing_p1,
-    bad_resume_with_hallucination,
-    bad_resume_with_duplicates,
     bad_resume_missing_ai_tools,
+    bad_resume_missing_p1,
+    bad_resume_with_duplicates,
+    bad_resume_with_hallucination,
     bad_resume_wrong_family,
+    good_resume_for,
 )
 
 # ---------------------------------------------------------------------------

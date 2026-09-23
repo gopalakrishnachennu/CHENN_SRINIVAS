@@ -2,7 +2,6 @@ from pathlib import Path
 
 from resume_engine.config.settings import LEARNING_STORAGE_DIR, ensure_storage_dirs
 
-
 FAILURES_FILE = LEARNING_STORAGE_DIR / "failures.jsonl"
 
 

@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -9,7 +9,7 @@ class ResumeBullet(BaseModel):
     technologies: list[str] = Field(default_factory=list)
     responsibility_ids: list[str] = Field(default_factory=list)
     priority_skills: list[str] = Field(default_factory=list)
-    family: Optional[str] = None
+    family: str | None = None
     provenance: list[str] = Field(default_factory=list)
 
 
@@ -17,7 +17,7 @@ class ResumeCertification(BaseModel):
     name: str
     status: Literal["possessed", "recommended", "jd_requirement"] = "recommended"
     candidate_verified: bool = False
-    requirement: Optional[str] = None
+    requirement: str | None = None
 
 
 class ResumeExperience(BaseModel):
@@ -69,8 +69,8 @@ class ResumeJSON(BaseModel):
     certifications: list[str] = Field(default_factory=list)
     certification_records: list[ResumeCertification] = Field(default_factory=list)
     skill_provenance: list[SkillProvenance] = Field(default_factory=list)
-    variant_id: Optional[str] = None
-    source_blueprint_hash: Optional[str] = None
+    variant_id: str | None = None
+    source_blueprint_hash: str | None = None
 
 
 class OpenAIResumeJSON(BaseModel):

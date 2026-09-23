@@ -3,23 +3,32 @@ import uuid
 from pathlib import Path
 
 from resume_engine.config import thresholds
-from resume_engine.config.settings import PROJECT_ROOT, REPORT_STORAGE_DIR, ensure_storage_dirs, portable_path
+from resume_engine.config.settings import (
+    PROJECT_ROOT,
+    REPORT_STORAGE_DIR,
+    ensure_storage_dirs,
+    portable_path,
+)
 from resume_engine.generation.provenance import attach_skill_provenance
 from resume_engine.models.jd_blueprint import JDBlueprint
 from resume_engine.models.resume_schema import ResumeJSON
 from resume_engine.models.validation_schema import ValidationBundle
 from resume_engine.pipeline.phase2_pipeline import build_generation_context, run_validators
-from resume_engine.repair.patch_applier import ResumePatch, apply_resume_patches
+from resume_engine.repair.patch_applier import (
+    PatchApplicationError,
+    ResumePatch,
+    apply_resume_patches,
+)
 from resume_engine.repair.repair_planner import build_repair_plan
 from resume_engine.repair.version_selector import select_best_resume_version
 from resume_engine.storage.run_store import create_run_paths, save_raw_resume, save_repaired_resume
 from resume_engine.strategy.strategy_builder import build_strategy
 from resume_engine.strategy.variant_planner import create_variants
+from resume_engine.validation.ai_tool_placement_validator import validate_ai_tool_placement
 from resume_engine.validation.coverage_validator import validate_coverage
+from resume_engine.validation.hybrid_family_validator import validate_hybrid_family_retention
 from resume_engine.validation.p4_usage_validator import validate_p4_usage
 from resume_engine.validation.technology_firewall import validate_technology_firewall
-from resume_engine.validation.ai_tool_placement_validator import validate_ai_tool_placement
-from resume_engine.validation.hybrid_family_validator import validate_hybrid_family_retention
 from resume_engine.validation.variant_similarity_validator import validate_variant_similarity
 
 
@@ -343,7 +352,7 @@ def run_behavioral_audit() -> dict:
                 "failed_bullets": ["experience[0].bullets[1]"],
             },
         )
-    except Exception:
+    except PatchApplicationError:
         out_of_scope_rejected = True
 
     repaired = attach_skill_provenance(blueprint, _good_resume("VREPAIR", "AI-enabled data platform"))
@@ -421,10 +430,13 @@ def run_behavioral_audit() -> dict:
     ]
     critical_detection = {skill: skill in full_text for skill in critical_skills}
 
+    all_skill_values = [
+        skill for skills in good_resume.technical_skills.values() for skill in skills
+    ]
     placement_validation = {
-        "OpenAI_in_skills": "OpenAI API" in sum(good_resume.technical_skills.values(), []),
+        "OpenAI_in_skills": "OpenAI API" in all_skill_values,
         "OpenAI_in_responsibilities": "OpenAI API" in "\n".join(b for exp in good_resume.experience for b in exp.bullets),
-        "Claude_in_skills": "Claude API" in sum(good_resume.technical_skills.values(), []),
+        "Claude_in_skills": "Claude API" in all_skill_values,
         "Claude_in_responsibilities": "Claude API" in "\n".join(b for exp in good_resume.experience for b in exp.bullets),
         "explicit_ai_validator_passed": ai_placement_result.passed,
     }

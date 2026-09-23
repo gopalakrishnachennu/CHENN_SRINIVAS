@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import json
 from collections import defaultdict
 from pathlib import Path
@@ -186,10 +187,10 @@ def save_strategy_memory_summary() -> Path:
     }
     with open(path, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)
-    try:
+    with contextlib.suppress(
+        OSError, ValueError, TypeError, ImportError, AttributeError, KeyError, RuntimeError
+    ):
         from resume_engine.learning.repository import get_default_repository
 
         get_default_repository().save_strategy_memory_snapshot(payload.get("eligible") or {})
-    except Exception:
-        pass
     return path

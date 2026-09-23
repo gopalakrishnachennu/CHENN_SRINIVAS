@@ -397,7 +397,10 @@ def test_variant_focus_score_prefers_angle_terms():
 
 def test_cross_run_duplication_detected(tmp_path, monkeypatch):
     from resume_engine.learning import fingerprint_store
-    from resume_engine.learning.repository import LearningRepository, reset_default_repository_for_tests
+    from resume_engine.learning.repository import (
+        LearningRepository,
+        reset_default_repository_for_tests,
+    )
 
     monkeypatch.setattr(fingerprint_store, "FINGERPRINTS_FILE", tmp_path / "fps.jsonl")
     reset_default_repository_for_tests(
@@ -414,7 +417,10 @@ def test_cross_run_duplication_detected(tmp_path, monkeypatch):
 
 def test_cross_run_different_content_passes(tmp_path, monkeypatch):
     from resume_engine.learning import fingerprint_store
-    from resume_engine.learning.repository import LearningRepository, reset_default_repository_for_tests
+    from resume_engine.learning.repository import (
+        LearningRepository,
+        reset_default_repository_for_tests,
+    )
 
     monkeypatch.setattr(fingerprint_store, "FINGERPRINTS_FILE", tmp_path / "fps.jsonl")
     reset_default_repository_for_tests(
@@ -438,7 +444,7 @@ def test_cross_run_different_content_passes(tmp_path, monkeypatch):
 def test_implementation_audit_does_not_mark_import_as_tested():
     audit = run_implementation_audit()
     assert audit.modules
-    for name, status in audit.modules.items():
+    for status in audit.modules.values():
         assert status.tested is False
         assert status.live_test_status == "LIVE_TEST_NOT_RUN"
         payload = json.loads(status.details)

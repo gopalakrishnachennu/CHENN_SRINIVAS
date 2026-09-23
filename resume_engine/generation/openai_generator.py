@@ -1,6 +1,10 @@
 import os
 
-from resume_engine.config.settings import DEFAULT_OPENAI_MODEL, PROMPT_VERSION, load_local_environment
+from resume_engine.config.settings import (
+    DEFAULT_OPENAI_MODEL,
+    PROMPT_VERSION,
+    load_local_environment,
+)
 from resume_engine.generation.prompt_builder import build_resume_generation_prompt
 from resume_engine.llm.client import LLMClient, build_llm_client
 from resume_engine.models.jd_blueprint import JDBlueprint

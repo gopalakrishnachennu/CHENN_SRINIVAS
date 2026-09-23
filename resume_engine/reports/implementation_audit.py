@@ -5,7 +5,6 @@ from pathlib import Path
 from resume_engine.config.settings import PROJECT_ROOT, REPORT_STORAGE_DIR, ensure_storage_dirs
 from resume_engine.models.report_schema import ImplementationAudit, ImplementationModuleStatus
 
-
 REQUIRED_MODULES = {
     "strategy_builder": "resume_engine.strategy.strategy_builder",
     "variant_planner": "resume_engine.strategy.variant_planner",
@@ -123,7 +122,7 @@ def run_implementation_audit() -> ImplementationAudit:
         try:
             importlib.import_module(import_path)
             imports_ok = True
-        except Exception as exc:
+        except (ImportError, ModuleNotFoundError, AttributeError, TypeError, ValueError, OSError, RuntimeError) as exc:
             import_error = f"{type(exc).__name__}: {exc}"
 
         unit_exists = _unit_test_exists(name)
