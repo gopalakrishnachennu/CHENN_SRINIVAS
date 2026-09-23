@@ -1,10 +1,11 @@
 # Phase 3.1 — Full Resume Engine Control Center Report
 
-**Status:** pending CI  
+**Status:** PASS  
 **Starting commit:** `b7c06ba330ef0e97f9f0c410872f1df23cfba324`  
-**Ending commit:** _(filled after commit)_  
+**Ending commit:** `514ee9ddc05bdb6f4203f7f31b92ccc5f4cc65ac`  
 **Branch:** `main`  
-**River mode:** `shadow` (active production ranking **LOCKED / OFF**)
+**River mode:** `shadow` (active production ranking **LOCKED / OFF**)  
+**CI:** https://github.com/gopalakrishnachennu/CHENN_SRINIVAS/actions/runs/35898886820
 
 See also:
 
@@ -42,8 +43,9 @@ docs/PHASE_3_1_UI_REPORT.md
 ## Files modified
 
 ```text
-resume_engine/ui/app.py          (factory + blueprint registration; slimmed)
-resume_engine/ui/auth.py         (compat / fallbacks)
+.gitignore
+resume_engine/ui/app.py
+resume_engine/ui/auth.py
 tests/test_phase3_export.py
 tests/test_phase27_gate3.py
 tests/test_phase27_gate4.py
@@ -125,10 +127,10 @@ tests/test_phase27_gate4_1.py
 
 | Matrix | Status |
 |--------|--------|
-| Python 3.11 | _(pending)_ |
-| Python 3.12 | _(pending)_ |
+| Python 3.11 | **SUCCESS** |
+| Python 3.12 | **SUCCESS** |
 
-CI run: _(pending)_
+CI run: https://github.com/gopalakrishnachennu/CHENN_SRINIVAS/actions/runs/35898886820
 
 ---
 
@@ -167,8 +169,8 @@ CI run: _(pending)_
 | Offline Tests | PASS |
 | Coverage ≥70 | PASS |
 | Ruff | PASS |
-| GitHub Python 3.11 | PENDING |
-| GitHub Python 3.12 | PENDING |
+| GitHub Python 3.11 | PASS |
+| GitHub Python 3.12 | PASS |
 
 ---
 
@@ -184,6 +186,4 @@ CI run: _(pending)_
 
 ---
 
-## PHASE 3.1 FULL CONTROL CENTER UI STATUS: INCOMPLETE
-
-Blockers: GitHub Python 3.11 / 3.12 CI not yet green for this commit.
+## PHASE 3.1 FULL CONTROL CENTER UI STATUS: PASS
