@@ -1,3 +1,4 @@
+import contextlib
 import json
 from pathlib import Path
 
@@ -505,6 +506,16 @@ def run_phase2_pipeline(
         learning_insights=learning_insights,
     )[:variant_limit]
 
+    # Phase 2.8: shadow ranking only — production order unchanged.
+    with contextlib.suppress(Exception):
+        from resume_engine.learning.online.shadow_runner import record_shadow_decision
+
+        record_shadow_decision(
+            blueprint=blueprint,
+            production_order=[v.positioning for v in variants],
+            run_id=run_paths.run_id,
+        )
+
     resolved_model = model or DEFAULT_OPENAI_MODEL
     write_run_metadata(
         run_paths,
@@ -640,6 +651,11 @@ def run_phase2_pipeline(
         item["superseded"] = False
         item["_learning_record"] = record
         save_learning_outcome(record)
+        # Phase 2.8: observe River only after finalization + eligibility.
+        with contextlib.suppress(Exception):
+            from resume_engine.learning.online.shadow_runner import observe_final_outcome
+
+            observe_final_outcome(blueprint=blueprint, learning_record=record)
         if item.get("passed") and item.get("_resume_object") is not None:
             save_fingerprint(
                 jd_hash=blueprint.jd_hash,

@@ -91,6 +91,53 @@ CREATE INDEX IF NOT EXISTS idx_outcomes_family
     ON variant_outcomes(primary_family, secondary_family, seniority, passed);
 CREATE INDEX IF NOT EXISTS idx_fingerprints_jd
     ON resume_fingerprints(jd_hash, passed);
+
+CREATE TABLE IF NOT EXISTS online_policy_decisions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id TEXT,
+    jd_hash TEXT,
+    variant_id TEXT,
+    policy_version TEXT,
+    mode TEXT,
+    production_action TEXT,
+    shadow_top_action TEXT,
+    shadow_agrees INTEGER,
+    context_json TEXT,
+    available_actions_json TEXT,
+    prediction_json TEXT,
+    created_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS online_policy_observations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    decision_id INTEGER,
+    run_id TEXT,
+    jd_hash TEXT,
+    variant_id TEXT,
+    action TEXT,
+    reward REAL,
+    reward_components_json TEXT,
+    eligible INTEGER,
+    policy_version TEXT,
+    created_at TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_online_decisions_run
+    ON online_policy_decisions(run_id);
+CREATE INDEX IF NOT EXISTS idx_online_decisions_jd
+    ON online_policy_decisions(jd_hash);
+CREATE INDEX IF NOT EXISTS idx_online_decisions_policy
+    ON online_policy_decisions(policy_version);
+CREATE INDEX IF NOT EXISTS idx_online_obs_run
+    ON online_policy_observations(run_id);
+CREATE INDEX IF NOT EXISTS idx_online_obs_jd
+    ON online_policy_observations(jd_hash);
+CREATE INDEX IF NOT EXISTS idx_online_obs_action
+    ON online_policy_observations(action);
+CREATE INDEX IF NOT EXISTS idx_online_obs_policy
+    ON online_policy_observations(policy_version);
+CREATE INDEX IF NOT EXISTS idx_online_obs_eligible
+    ON online_policy_observations(eligible);
 """
 
 
@@ -356,6 +403,91 @@ class LearningRepository:
                     ),
                 )
             conn.commit()
+
+    def save_online_decision(self, decision: dict[str, Any]) -> int:
+        created = decision.get("created_at") or self._now()
+        ranked = decision.get("shadow_ranked_actions") or []
+        with self._connect() as conn:
+            cursor = conn.execute(
+                """
+                INSERT INTO online_policy_decisions (
+                    run_id, jd_hash, variant_id, policy_version, mode,
+                    production_action, shadow_top_action, shadow_agrees,
+                    context_json, available_actions_json, prediction_json, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    decision.get("run_id"),
+                    decision.get("jd_hash"),
+                    decision.get("variant_id"),
+                    decision.get("policy_version"),
+                    decision.get("mode"),
+                    decision.get("production_action"),
+                    decision.get("shadow_top_action"),
+                    1 if decision.get("shadow_agrees_with_production") else 0,
+                    json.dumps(decision.get("context") or {}, ensure_ascii=False),
+                    json.dumps(decision.get("available_actions") or [], ensure_ascii=False),
+                    json.dumps(
+                        {
+                            "ranked": ranked,
+                            "production_order": decision.get("production_order") or [],
+                            "fallback_reason": decision.get("fallback_reason"),
+                        },
+                        ensure_ascii=False,
+                    ),
+                    created,
+                ),
+            )
+            conn.commit()
+            return int(cursor.lastrowid)
+
+    def save_online_observation(self, observation: dict[str, Any]) -> int:
+        created = observation.get("created_at") or self._now()
+        with self._connect() as conn:
+            cursor = conn.execute(
+                """
+                INSERT INTO online_policy_observations (
+                    decision_id, run_id, jd_hash, variant_id, action, reward,
+                    reward_components_json, eligible, policy_version, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    observation.get("decision_id"),
+                    observation.get("run_id"),
+                    observation.get("jd_hash"),
+                    observation.get("variant_id"),
+                    observation.get("action"),
+                    float(observation.get("reward") or 0.0),
+                    json.dumps(observation.get("reward_components") or {}, ensure_ascii=False),
+                    1 if observation.get("eligible") else 0,
+                    observation.get("policy_version"),
+                    created,
+                ),
+            )
+            conn.commit()
+            return int(cursor.lastrowid)
+
+    def list_online_decisions(self, *, limit: int = 100) -> list[dict[str, Any]]:
+        with self._connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT * FROM online_policy_decisions
+                ORDER BY id DESC LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+        return [dict(row) for row in rows]
+
+    def list_online_observations(self, *, limit: int = 100) -> list[dict[str, Any]]:
+        with self._connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT * FROM online_policy_observations
+                ORDER BY id DESC LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+        return [dict(row) for row in rows]
 
     def db_portable_path(self) -> str | None:
         return portable_path(self.db_path)

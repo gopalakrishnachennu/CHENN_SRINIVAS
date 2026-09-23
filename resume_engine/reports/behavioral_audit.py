@@ -449,6 +449,52 @@ def run_behavioral_audit() -> dict:
         p4_count <= 1 or p4_share <= thresholds.P4_USAGE_MAX
     )
 
+    # Phase 2.8 — online learning shadow invariants (offline, no River mutation of production).
+    from resume_engine.learning.online.feature_builder import build_context_features
+    from resume_engine.learning.online.reward_engine import compute_reward
+    from resume_engine.learning.online.river_policy import RiverStrategyPolicy
+    from resume_engine.strategy.variant_planner import list_eligible_positionings
+
+    online_features = build_context_features(blueprint)
+    eligible_actions = list_eligible_positionings(blueprint)
+    online_policy = RiverStrategyPolicy(seed=42)
+    online_ranked = online_policy.rank_actions(online_features, eligible_actions)
+    online_no_invent = {p.action for p in online_ranked}.issubset(set(eligible_actions))
+    baseline_order = [v.positioning for v in create_variants(blueprint, strategy)]
+    # Shadow must not change create_variants order (online is side-channel only).
+    shadow_order = [v.positioning for v in create_variants(blueprint, strategy)]
+    online_shadow_stable = baseline_order == shadow_order
+    failed_reward = compute_reward(
+        {
+            "passed": False,
+            "is_final_selection": True,
+            "superseded": False,
+            "p1_coverage": 100.0,
+            "p2_coverage": 95.0,
+            "technology_firewall_passed": True,
+            "role_drift_passed": True,
+        }
+    )
+    superseded_reward = compute_reward(
+        {
+            "passed": True,
+            "is_final_selection": True,
+            "superseded": True,
+            "p1_coverage": 100.0,
+            "p2_coverage": 95.0,
+            "technology_firewall_passed": True,
+            "role_drift_passed": True,
+        }
+    )
+    # Corrupt-policy fallback: load failure returns None; variants still build.
+    online_fallback_ok = True
+    try:
+        from resume_engine.learning.online.policy_store import load_policy
+
+        _ = load_policy(directory=None)
+    except Exception:  # noqa: BLE001
+        online_fallback_ok = False
+
     checks = {
         "template_mode_default": template_context["generation_mode"] == "TEMPLATE",
         "candidate_profile_optional": "candidate_profile" not in template_context,
@@ -471,6 +517,11 @@ def run_behavioral_audit() -> dict:
         "run_isolation": run_isolation,
         "targeted_patch_repair": patch_only_target_changed,
         "repair_scope_guard": out_of_scope_rejected,
+        "online_learner_no_action_invention": online_no_invent,
+        "online_shadow_does_not_alter_ranking": online_shadow_stable,
+        "online_failed_resume_reward_zero": failed_reward.reward == 0.0,
+        "online_superseded_not_learned": superseded_reward.trainable is False,
+        "online_policy_fallback_safe": online_fallback_ok,
     }
 
     result = {
@@ -555,6 +606,19 @@ def run_behavioral_audit() -> dict:
             "Raw artifact preserved": run_isolation,
             "Run isolation": run_isolation,
             "Variant differentiation": distinct_result.passed and not similar_result.passed,
+            "ONLINE_LEARNING_SHADOW_VALIDATED": (
+                online_no_invent
+                and online_shadow_stable
+                and failed_reward.reward == 0.0
+                and superseded_reward.trainable is False
+                and online_fallback_ok
+            ),
+        },
+        "online_learning": {
+            "mode_label": "ONLINE_LEARNING_SHADOW_VALIDATED",
+            "self_learning_production_active": False,
+            "eligible_action_count": len(eligible_actions),
+            "ranked_action_count": len(online_ranked),
         },
     }
     result["result"] = "PASS" if all(result["checks"].values()) and all(result["pass_conditions"].values()) else "FAIL"

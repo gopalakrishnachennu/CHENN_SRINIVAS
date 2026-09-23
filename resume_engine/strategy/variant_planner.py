@@ -415,6 +415,11 @@ def _apply_historical_ranking(
     return rescored
 
 
+def list_eligible_positionings(blueprint: JDBlueprint) -> list[str]:
+    """Public eligible angle set for online learning (no invention allowed)."""
+    return [angle.positioning for _, angle in _eligible_angles(blueprint)]
+
+
 def select_angle_templates(
     blueprint: JDBlueprint,
     variant_count: int | None = None,

@@ -47,6 +47,12 @@ REQUIRED_MODULES = {
     "phase3_ui": "resume_engine.ui.app",
     "ui_auth": "resume_engine.ui.auth",
     "phase1_live_harness": "resume_engine.live.phase1_harness",
+    "online_feature_builder": "resume_engine.learning.online.feature_builder",
+    "online_reward_engine": "resume_engine.learning.online.reward_engine",
+    "online_river_policy": "resume_engine.learning.online.river_policy",
+    "online_policy_store": "resume_engine.learning.online.policy_store",
+    "online_shadow_runner": "resume_engine.learning.online.shadow_runner",
+    "online_replay": "resume_engine.learning.online.replay",
     "resume_validation_report": "resume_engine.reports.resume_validation_report",
     "behavioral_audit": "resume_engine.reports.behavioral_audit",
     "phase2_pipeline": "resume_engine.pipeline.phase2_pipeline",
@@ -78,6 +84,12 @@ UNIT_TEST_HINTS = {
     "phase3_ui": ["tests/test_phase3_export.py", "tests/test_phase27_gate4.py"],
     "ui_auth": ["tests/test_phase27_gate4.py"],
     "phase1_live_harness": ["tests/test_phase27_gate4.py", "tests/test_phase1_offline.py"],
+    "online_feature_builder": ["tests/test_phase28_online_learning.py"],
+    "online_reward_engine": ["tests/test_phase28_online_learning.py"],
+    "online_river_policy": ["tests/test_phase28_online_learning.py"],
+    "online_policy_store": ["tests/test_phase28_online_learning.py"],
+    "online_shadow_runner": ["tests/test_phase28_online_learning.py"],
+    "online_replay": ["tests/test_phase28_online_learning.py"],
 }
 
 
