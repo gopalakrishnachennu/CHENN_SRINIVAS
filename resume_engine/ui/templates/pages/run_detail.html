@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block page_title %}Run {{ run_id }}{% endblock %}
+{% block content %}
+<div class="card">
+  <p><strong>JD:</strong> <span class="mono">{{ jd_hash }}</span></p>
+  <p><strong>Mode:</strong> {{ summary.generation_mode }}</p>
+  <p><strong>Online:</strong> {{ (summary.online_learning or {})|tojson }}</p>
+</div>
+<div class="tabs">
+  {% for v in variants %}
+    <a class="tab {% if loop.first %}active{% endif %}" href="#{{ v.variant_id }}">{{ v.variant_id }}</a>
+  {% endfor %}
+</div>
+{% for v in variants %}
+<div class="card" id="{{ v.variant_id }}" style="margin-bottom:0.8rem;">
+  <h2>{{ v.variant_id }} · {{ v.variant_positioning or v.get('diagnostics', {}).get('variant_positioning') }}</h2>
+  <p>
+    Status: <span class="pill {% if v.passed %}ok{% else %}fail{% endif %}">{{ v.status }}</span>
+    · passed={{ v.passed }}
+    · score {{ v.score_after_repair or v.score_before_repair or '—' }}
+  </p>
+  <p class="muted tiny">Internal JD Compatibility Score (not an official ATS score).</p>
+  <div class="actions">
+    {% if v.final_resume %}<a class="btn secondary" href="{{ url_for('runs.artifact', path=v.final_resume) }}">Final</a>{% endif %}
+    {% if v.raw_resume or v.generated_resume %}<a class="btn secondary" href="{{ url_for('runs.artifact', path=v.raw_resume or v.generated_resume) }}">Raw</a>{% endif %}
+    {% if v.repaired_resume %}<a class="btn secondary" href="{{ url_for('runs.artifact', path=v.repaired_resume) }}">Repaired</a>{% endif %}
+  </div>
+</div>
+{% endfor %}
+<details class="card collapsible"><summary>Artifacts</summary><pre class="json">{{ artifacts_json }}</pre></details>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block page_title %}Generate{% endblock %}
+{% block page_sub %}Blueprint → Strategy → Variants → Validate → Repair → Learn → Export{% endblock %}
+{% block content %}
+<div class="banner warn">Online learning mode forced to <strong>shadow</strong>. River active production ranking is locked.</div>
+<div class="card">
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+    <div class="form-grid">
+      <div><label>Blueprint path</label><input name="blueprint_path" value="{{ blueprint_path or '' }}" required/></div>
+      <div>
+        <label>Generation mode</label>
+        <select name="generation_mode">
+          <option value="TEMPLATE">TEMPLATE</option>
+          <option value="CANDIDATE">CANDIDATE</option>
+        </select>
+      </div>
+      <div><label>Candidate profile path (CANDIDATE mode)</label><input name="candidate_profile_path" value="{{ candidate_profile_path or 'candidate_profile.json' }}"/></div>
+      <div><label>Variant count</label><input type="number" min="1" max="10" name="variant_count" value="{{ defaults.variant_count }}"/></div>
+      <div><label>OpenAI model</label><input name="model" value="{{ defaults.model }}"/></div>
+      <div><label>Custom run ID (optional)</label><input name="run_id" placeholder="uuid"/></div>
+    </div>
+    <div class="actions" style="margin-top:0.8rem;">
+      <label><input type="checkbox" name="use_laya" value="1" {% if defaults.laya %}checked{% endif %}/> Laya</label>
+      <label><input type="checkbox" name="repair" value="1" {% if defaults.repair %}checked{% endif %}/> Repair</label>
+      <label><input type="checkbox" name="export_docx" value="1" {% if defaults.docx %}checked{% endif %}/> DOCX</label>
+      <label><input type="checkbox" name="export_pdf" value="1" {% if defaults.pdf %}checked{% endif %}/> PDF</label>
+    </div>
+    <div class="actions" style="margin-top:1rem;">
+      <button class="btn" type="submit">START GENERATION</button>
+    </div>
+  </form>
+</div>
+{% if jobs %}
+<div class="card" style="margin-top:0.8rem;">
+  <h2>Recent jobs</h2>
+  <table>
+    <thead><tr><th>Job</th><th>Run</th><th>Status</th><th>Stage</th><th></th></tr></thead>
+    <tbody>
+    {% for j in jobs %}
+      <tr>
+        <td class="mono">{{ j.job_id[:8] }}…</td>
+        <td class="mono">{{ (j.run_id or '')[:8] }}…</td>
+        <td><span class="pill">{{ j.status }}</span></td>
+        <td>{{ j.stage }}</td>
+        <td><a href="{{ url_for('generation.live', job_id=j.job_id) }}">Live</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

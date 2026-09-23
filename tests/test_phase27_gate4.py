@@ -147,10 +147,22 @@ def test_auth_login_success(monkeypatch):
     assert verify_credentials("operator", "s3cret") is True
     assert verify_credentials("operator", "wrong") is False
     client = create_app().test_client()
+    login_page = client.get("/login")
+    assert login_page.status_code == 200
+    html = login_page.data.decode("utf-8", errors="ignore")
+    import re
+
+    match = re.search(r'name="csrf_token"[^>]*value="([^"]+)"', html)
+    assert match, "csrf token missing on login page"
     response = client.post(
         "/login",
-        data={"username": "operator", "password": "s3cret", "next": "/"},
+        data={
+            "username": "operator",
+            "password": "s3cret",
+            "next": "/",
+            "csrf_token": match.group(1),
+        },
         follow_redirects=True,
     )
     assert response.status_code == 200
-    assert b"Validated resumes" in response.data or b"Resume Engine Export" in response.data
+    assert b"Dashboard" in response.data or b"Control Center" in response.data

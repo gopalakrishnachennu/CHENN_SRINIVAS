@@ -147,7 +147,7 @@ def test_login_next_external_url_rejected(monkeypatch):
     monkeypatch.setenv("RESUME_ENGINE_UI_PASSWORD", "s3cret")
     app = create_app()
     with app.test_request_context():
-        assert safe_next_url("https://evil.example") == "/"
+        assert safe_next_url("https://evil.example") in {"/", app.url_for("dashboard.index")}
 
 
 def test_login_next_protocol_relative_rejected(monkeypatch):
@@ -166,10 +166,21 @@ def test_login_next_javascript_rejected(monkeypatch):
 
 def test_login_next_missing_defaults_index(monkeypatch):
     monkeypatch.setenv("RESUME_ENGINE_UI_PASSWORD", "s3cret")
+    monkeypatch.setenv("RESUME_ENGINE_UI_USER", "operator")
     client = create_app().test_client()
+    login_page = client.get("/login")
+    import re
+
+    html = login_page.data.decode("utf-8", errors="ignore")
+    match = re.search(r'name="csrf_token"[^>]*value="([^"]+)"', html)
+    assert match
     response = client.post(
         "/login",
-        data={"username": "operator", "password": "s3cret"},
+        data={
+            "username": "operator",
+            "password": "s3cret",
+            "csrf_token": match.group(1),
+        },
         follow_redirects=False,
     )
     assert response.status_code in {302, 303}

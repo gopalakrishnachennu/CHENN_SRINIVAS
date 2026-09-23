@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block page_title %}Decision {{ decision.id }}{% endblock %}
+{% block content %}
+<div class="card"><pre class="json">{{ decision_json }}</pre></div>
+{% endblock %}

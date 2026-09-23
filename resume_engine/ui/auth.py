@@ -86,7 +86,16 @@ def safe_next_url(value: str | None, *, fallback: str | None = None) -> str:
 
     Rejects absolute URLs, protocol-relative URLs, and javascript/data schemes.
     """
-    default = fallback if fallback is not None else url_for("index")
+    if fallback is not None:
+        default = fallback
+    else:
+        try:
+            default = url_for("dashboard.index")
+        except Exception:  # noqa: BLE001 — app may not have dashboard during early import
+            try:
+                default = url_for("index")
+            except Exception:  # noqa: BLE001
+                default = "/"
     if value is None:
         return default
     candidate = str(value).strip()

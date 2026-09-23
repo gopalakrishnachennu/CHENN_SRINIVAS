@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block page_title %}Blueprint {{ jd_hash }}{% endblock %}
+{% block content %}
+<div class="banner">Saving creates a <strong>new version</strong>. Historical versions are preserved.</div>
+<div class="grid two">
+  <div class="card">
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+      <div class="form-grid">
+        <div><label>Target title</label><input type="text" name="target_title" value="{{ job.target_title or '' }}"/></div>
+        <div><label>Seniority</label><input type="text" name="seniority" value="{{ job.seniority or '' }}"/></div>
+        <div><label>Primary family</label><input type="text" name="primary_family" value="{{ job.primary_family or '' }}"/></div>
+        <div><label>Secondary family</label><input type="text" name="secondary_family" value="{{ job.secondary_family or '' }}"/></div>
+        <div><label>Hybrid probability</label><input type="number" step="0.01" min="0" max="1" name="hybrid_probability" value="{{ job.hybrid_probability or 0 }}"/></div>
+      </div>
+      <label>P1 (comma-separated)</label><textarea name="p1">{{ (skills.P1 or [])|join(', ') }}</textarea>
+      <label>P2</label><textarea name="p2">{{ (skills.P2 or [])|join(', ') }}</textarea>
+      <label>P3</label><textarea name="p3">{{ (skills.P3 or [])|join(', ') }}</textarea>
+      <label>P4</label><textarea name="p4">{{ (skills.P4 or [])|join(', ') }}</textarea>
+      <label>Allowed technologies</label><textarea name="allowed">{{ (allowed or [])|join(', ') }}</textarea>
+      <label>Note</label><input type="text" name="note" placeholder="optional version note"/>
+      <div class="actions" style="margin-top:0.8rem;">
+        <button class="btn" type="submit">Save New Version</button>
+        <a class="btn secondary" href="{{ url_for('blueprints.download', jd_hash=jd_hash) }}">Download JSON</a>
+      </div>
+    </form>
+  </div>
+  <div class="card">
+    <h2>Versions</h2>
+    <table>
+      <thead><tr><th>#</th><th>When</th><th>Actor</th><th>Note</th></tr></thead>
+      <tbody>
+      {% for v in versions %}
+        <tr><td>{{ v.version }}</td><td class="tiny">{{ v.created_at }}</td><td>{{ v.actor or '—' }}</td><td>{{ v.note or '' }}</td></tr>
+      {% else %}
+        <tr><td colspan="4" class="muted">No version history yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

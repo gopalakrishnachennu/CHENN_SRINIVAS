@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block page_title %}Prompt Manager{% endblock %}
+{% block content %}
+<div class="card">
+  <table>
+    <thead><tr><th>Prompt</th><th>Latest</th><th>Active count</th><th></th></tr></thead>
+    <tbody>
+    {% for p in prompts %}
+      <tr>
+        <td class="mono">{{ p.prompt_id }}</td>
+        <td>{{ p.latest_version }}</td>
+        <td>{{ p.active_count }}</td>
+        <td><a href="{{ url_for('prompts.detail', prompt_id=p.prompt_id) }}">Versions</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block page_title %}Document Designer{% endblock %}
+{% block content %}
+<div class="card">
+  <table>
+    <thead><tr><th>Template</th><th>Font</th><th>Body</th><th>Margins</th><th>Default</th></tr></thead>
+    <tbody>
+    {% for t in templates %}
+      <tr>
+        <td>{{ t.payload.name }}</td>
+        <td>{{ t.payload.font }}</td>
+        <td>{{ t.payload.body_font_size }}</td>
+        <td>{{ t.payload.margins_in }}</td>
+        <td>{% if t.is_default %}yes{% else %}—{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="muted tiny">Defaults preserve current exporter behavior. No tables/graphics in resume body.</p>
+</div>
+{% endblock %}

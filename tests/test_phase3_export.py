@@ -102,7 +102,7 @@ def test_ui_index_loads():
     client = create_app().test_client()
     response = client.get("/")
     assert response.status_code == 200
-    assert b"Resume Engine Export" in response.data
+    assert b"Control Center" in response.data or b"Dashboard" in response.data
 
 
 def test_list_validated_resumes_returns_list():

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block page_title %}Strategies{% endblock %}
+{% block content %}
+<div class="card">
+  <form method="get" class="actions">
+    <input type="text" name="blueprint" value="{{ blueprint_path or '' }}" placeholder="Path to blueprint JSON" style="min-width:28rem"/>
+    <button class="btn" type="submit">Load</button>
+  </form>
+</div>
+{% if overview %}
+<div class="card" style="margin-top:0.8rem;">
+  <p><strong>Family:</strong> {{ overview.primary_family }} / {{ overview.secondary_family }} · hybrid {{ overview.hybrid_probability }}</p>
+  <table>
+    <thead><tr><th>Positioning</th><th>Family</th><th>Eligible</th><th>Prod rank</th><th>Description</th></tr></thead>
+    <tbody>
+    {% for s in overview.strategies %}
+      <tr>
+        <td class="mono">{{ s.positioning }}</td>
+        <td>{{ s.family or '—' }}</td>
+        <td>{% if s.eligible %}<span class="pill ok">yes</span>{% else %}<span class="pill">no</span>{% endif %}</td>
+        <td>{{ s.production_rank or '—' }}</td>
+        <td class="muted">{{ s.description or '' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="muted tiny">Manual reordering is limited to eligible/candidate positionings. Technologies cannot be invented here.</p>
+</div>
+{% endif %}
+{% endblock %}

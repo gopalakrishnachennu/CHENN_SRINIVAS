@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block page_title %}Candidates{% endblock %}
+{% block page_sub %}Verified facts only — generated resumes never auto-become profile truth{% endblock %}
+{% block content %}
+<div class="actions" style="margin-bottom:0.8rem;">
+  <a class="btn" href="{{ url_for('candidates.create') }}">Create</a>
+</div>
+<div class="card">
+  <table>
+    <thead><tr><th>Name</th><th>Status</th><th>Updated</th><th></th></tr></thead>
+    <tbody>
+    {% for p in profiles %}
+      <tr>
+        <td>{{ p.name }}</td>
+        <td><span class="pill">{{ p.status }}</span></td>
+        <td class="tiny">{{ p.updated_at }}</td>
+        <td class="actions">
+          <a href="{{ url_for('candidates.edit', profile_id=p.id) }}">Edit</a>
+          <form method="post" action="{{ url_for('candidates.duplicate', profile_id=p.id) }}" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+            <button class="btn secondary" type="submit">Duplicate</button>
+          </form>
+          <form method="post" action="{{ url_for('candidates.archive', profile_id=p.id) }}" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+            <button class="btn secondary" type="submit" data-confirm="Archive this profile?">Archive</button>
+          </form>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="4" class="muted">No candidate profiles yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

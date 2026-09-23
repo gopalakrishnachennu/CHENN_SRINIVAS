@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block page_title %}Online Learning{% endblock %}
+{% block content %}
+<div class="banner danger">
+  <strong>River Production Control: OFF</strong> · Mode: SHADOW<br/>
+  {{ data.active_mode_message }}
+</div>
+<div class="grid cards">
+  <div class="card"><div class="muted tiny">Policy</div><div class="metric" style="font-size:1rem;">{{ data.policy_version }}</div></div>
+  <div class="card"><div class="muted tiny">River</div><div class="metric" style="font-size:1rem;">{{ data.river_version }}</div></div>
+  <div class="card"><div class="muted tiny">Eligible obs</div><div class="metric">{{ data.evaluation.eligible_observations }}</div></div>
+  <div class="card"><div class="muted tiny">Linked</div><div class="metric">{{ data.evaluation.linked_observations }}</div></div>
+  <div class="card"><div class="muted tiny">Agreement</div><div class="metric">{% if data.evaluation.shadow_agreement_rate is not none %}{{ '%.0f'|format(data.evaluation.shadow_agreement_rate*100) }}%{% else %}—{% endif %}</div></div>
+  <div class="card"><div class="muted tiny">Mean reward</div><div class="metric">{% if data.evaluation.mean_reward_all is not none %}{{ '%.3f'|format(data.evaluation.mean_reward_all) }}{% else %}—{% endif %}</div></div>
+</div>
+<div class="card" style="margin-top:0.8rem;">
+  <p>Required observations: {{ data.required_observations }} · Current eligible: {{ data.evaluation.eligible_observations }}</p>
+  <p>Activation evidence ready: <strong>{% if data.evaluation.activation_ready %}YES{% else %}NO{% endif %}</strong> (UI will not enable active mode)</p>
+  <div class="actions">
+    <form method="post" action="{{ url_for('learning.refresh') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"/><button class="btn secondary" type="submit">Refresh Evaluation</button></form>
+    <form method="post" action="{{ url_for('learning.write_report') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"/><button class="btn secondary" type="submit">Write Evaluation Report</button></form>
+    <form method="post" action="{{ url_for('learning.replay_dry') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"/><button class="btn secondary" type="submit">Replay Dry Run</button></form>
+    <form method="post" action="{{ url_for('learning.replay_train') }}" data-confirm="Train River from historical observations? This mutates policy.">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+      <input type="hidden" name="confirm" value="1"/>
+      <button class="btn danger" type="submit">Historical Replay Train</button>
+    </form>
+  </div>
+  <p class="muted tiny" style="margin-top:0.8rem;">ACTIVE MODE LOCKED UNTIL FUTURE GATE</p>
+</div>
+<div class="card" style="margin-top:0.8rem;">
+  <h2>Observations</h2>
+  <table>
+    <thead><tr><th>ID</th><th>Run</th><th>Var</th><th>Action</th><th>Reward</th><th>Eligible</th><th>Decision</th></tr></thead>
+    <tbody>
+    {% for o in observations %}
+      <tr>
+        <td>{{ o.id }}</td>
+        <td class="mono">{{ (o.run_id or '')[:8] }}…</td>
+        <td>{{ o.variant_id }}</td>
+        <td>{{ o.action }}</td>
+        <td>{{ o.reward }}</td>
+        <td>{{ o.eligible }}</td>
+        <td>{% if o.decision_id %}<a href="{{ url_for('learning.decision', decision_id=o.decision_id) }}">{{ o.decision_id }}</a>{% else %}—{% endif %}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" class="muted">No observations yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block page_title %}Prompt {{ prompt_id }}{% endblock %}
+{% block content %}
+<div class="grid two">
+  <div class="card">
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+      <label>New version content</label>
+      <textarea name="content" required>{{ active_content or '' }}</textarea>
+      <label><input type="checkbox" name="activate" value="1"/> Activate immediately</label>
+      <div class="actions" style="margin-top:0.8rem;"><button class="btn" type="submit">Create Version</button></div>
+    </form>
+  </div>
+  <div class="card">
+    <h2>History</h2>
+    <table>
+      <thead><tr><th>#</th><th>Status</th><th>When</th><th></th></tr></thead>
+      <tbody>
+      {% for v in versions %}
+        <tr>
+          <td>{{ v.version }}</td>
+          <td><span class="pill">{{ v.status }}</span></td>
+          <td class="tiny">{{ v.created_at }}</td>
+          <td>
+            <form method="post" action="{{ url_for('prompts.activate', prompt_id=prompt_id, version=v.version) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+              <button class="btn secondary" type="submit">Activate</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

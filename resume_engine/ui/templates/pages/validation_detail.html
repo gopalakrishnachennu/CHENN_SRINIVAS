@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block page_title %}Validation detail{% endblock %}
+{% block content %}
+<div class="card">
+  <p><strong>Variant:</strong> {{ report.variant_id }} · Internal score {{ report.optimization_score }}</p>
+  <table>
+    <thead><tr><th>Validator</th><th>Status</th><th>Score</th><th>Issues</th></tr></thead>
+    <tbody>
+    {% for row in rows %}
+      <tr>
+        <td>{{ row.name }}</td>
+        <td><span class="pill {% if row.status=='PASS' %}ok{% else %}fail{% endif %}">{{ row.status }}</span></td>
+        <td>{{ row.score }}</td>
+        <td>{{ row.issue_count }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <details class="collapsible" style="margin-top:1rem;"><summary>Raw report</summary><pre class="json">{{ report_json }}</pre></details>
+</div>
+{% endblock %}

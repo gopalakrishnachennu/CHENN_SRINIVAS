@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block page_title %}Error{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="banner danger">
+    <strong>Operation failed</strong><br/>
+    {% if run_id %}Run ID: {{ run_id }}<br/>{% endif %}
+    {% if stage %}Stage: {{ stage }}<br/>{% endif %}
+    Category: {{ category or 'error' }}
+  </div>
+  <p class="muted">{{ message }}</p>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block page_title %}Repairs{% endblock %}
+{% block content %}
+<div class="banner">Manual edits cannot bypass the technology firewall. Revalidation still required.</div>
+<div class="card">
+  <table>
+    <thead><tr><th>Variant</th><th>JD</th><th>Score</th><th>Issues</th><th>Ops</th></tr></thead>
+    <tbody>
+    {% for r in repairs %}
+      <tr>
+        <td>{{ r.variant_id }}</td>
+        <td class="mono">{{ r.jd_hash }}</td>
+        <td>{{ r.optimization_score or '—' }}</td>
+        <td>{{ r.issue_count or 0 }}</td>
+        <td class="tiny mono">{{ (r.operations or [])|length }} ops / {{ (r.failed_bullets or [])|length }} bullets</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5" class="muted">No repair reports found.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

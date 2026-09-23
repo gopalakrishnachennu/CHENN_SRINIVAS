@@ -24,6 +24,7 @@ resume_engine/storage/reports/
 resume_engine/storage/strategies/
 resume_engine/storage/db/
 resume_engine/storage/exports/
+resume_engine/storage/ui/
 *.sqlite3
 *.sqlite
 

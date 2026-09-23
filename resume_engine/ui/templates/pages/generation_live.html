@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block page_title %}Live run{% endblock %}
+{% block content %}
+<div class="card">
+  <p><strong>Job:</strong> <span class="mono">{{ job.job_id }}</span></p>
+  <p><strong>Run:</strong> <span class="mono">{{ job.run_id }}</span></p>
+  <p><strong>Status:</strong> <span class="pill">{{ job.status }}</span> · {{ job.stage }}</p>
+  {% if job.error %}<div class="banner danger">{{ job.error }}</div>{% endif %}
+  <pre id="job-status" class="json">{{ job_json }}</pre>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/generation.js') }}"></script>
+<script>pollRunStatus({{ job.job_id|tojson }}, "job-status");</script>
+{% endblock %}

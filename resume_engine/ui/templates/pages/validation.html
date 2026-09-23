@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block page_title %}Validation{% endblock %}
+{% block page_sub %}Internal JD Compatibility Score — never labeled Official ATS Score{% endblock %}
+{% block content %}
+<div class="card">
+  <table>
+    <thead><tr><th>Variant</th><th>JD</th><th>Run</th><th>Passed</th><th>Action</th><th>Score</th><th></th></tr></thead>
+    <tbody>
+    {% for r in reports %}
+      <tr>
+        <td>{{ r.variant_id }}</td>
+        <td class="mono">{{ r.jd_hash }}</td>
+        <td class="mono">{{ r.run_id[:8] }}…</td>
+        <td>{% if r.passed %}<span class="pill ok">PASS</span>{% else %}<span class="pill fail">FAIL</span>{% endif %}</td>
+        <td>{{ r.action }}</td>
+        <td>{{ r.optimization_score or '—' }}</td>
+        <td><a href="{{ url_for('validation.detail', path=r.path) }}">Open</a></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" class="muted">No validation reports found.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

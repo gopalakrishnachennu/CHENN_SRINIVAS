@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block page_title %}Blueprints{% endblock %}
+{% block content %}
+<div class="card">
+  <table>
+    <thead><tr><th>Title</th><th>JD hash</th><th>Family</th><th></th></tr></thead>
+    <tbody>
+    {% for b in blueprints %}
+      <tr>
+        <td>{{ b.target_title or '—' }}</td>
+        <td class="mono">{{ b.jd_hash }}</td>
+        <td>{{ b.primary_family }}{% if b.secondary_family and b.secondary_family != 'none' %} / {{ b.secondary_family }}{% endif %}</td>
+        <td><a href="{{ url_for('blueprints.detail', jd_hash=b.jd_hash) }}">Edit</a></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="4" class="muted">No blueprints yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

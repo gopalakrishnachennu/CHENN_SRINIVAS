@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block page_title %}{{ 'Edit' if profile else 'Create' }} Candidate{% endblock %}
+{% block content %}
+<div class="card">
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+    {% set p = profile.payload if profile else {} %}
+    <div class="form-grid">
+      <div><label>Name</label><input name="candidate_name" value="{{ p.candidate_name or '' }}"/></div>
+      <div><label>Email</label><input name="email" value="{{ p.email or '' }}"/></div>
+      <div><label>Phone</label><input name="phone" value="{{ p.phone or '' }}"/></div>
+      <div><label>Location</label><input name="location" value="{{ p.location or '' }}"/></div>
+      <div><label>LinkedIn</label><input name="linkedin" value="{{ p.linkedin or '' }}"/></div>
+      <div><label>Website</label><input name="website" value="{{ p.website or '' }}"/></div>
+    </div>
+    <label>Professional summary</label>
+    <textarea name="target_background_summary">{{ p.target_background_summary or '' }}</textarea>
+    <label>Skills (comma-separated)</label>
+    <textarea name="technical_skills">{{ (p.technical_skills or [])|join(', ') }}</textarea>
+    <label>Experience JSON</label>
+    <textarea name="experience_json">{{ experience_json }}</textarea>
+    <label>Projects JSON</label>
+    <textarea name="projects_json">{{ projects_json }}</textarea>
+    <label>Education JSON</label>
+    <textarea name="education_json">{{ education_json }}</textarea>
+    <label>Certifications (comma-separated)</label>
+    <input name="certifications" value="{{ (p.certifications or [])|join(', ') }}"/>
+    <div class="actions" style="margin-top:0.8rem;">
+      <button class="btn" type="submit">Save</button>
+      <a class="btn secondary" href="{{ url_for('candidates.index') }}">Back</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

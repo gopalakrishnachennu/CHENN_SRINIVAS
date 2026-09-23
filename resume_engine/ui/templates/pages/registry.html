@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block page_title %}Technology Registry{% endblock %}
+{% block content %}
+<div class="card">
+  <form method="get" class="actions">
+    <input name="q" value="{{ q or '' }}" placeholder="Search technologies"/>
+    <button class="btn" type="submit">Search</button>
+  </form>
+  <form method="post" class="form-grid" style="margin-top:1rem;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+    <div><label>Canonical</label><input name="canonical" required/></div>
+    <div><label>Alias</label><input name="alias" required/></div>
+    <div style="align-self:end"><button class="btn" name="action" value="add_alias" type="submit">Add Alias</button></div>
+  </form>
+</div>
+<div class="card" style="margin-top:0.8rem;">
+  <table>
+    <thead><tr><th>Name</th><th>Meta</th></tr></thead>
+    <tbody>
+    {% for t in technologies %}
+      <tr><td>{{ t.canonical_name or t.name }}</td><td class="tiny mono">{{ t }}</td></tr>
+    {% else %}
+      <tr><td colspan="2" class="muted">No technologies matched.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="muted tiny">Registry edits are audited. They do not auto-promote skills into JD P1–P4.</p>
+</div>
+{% endblock %}

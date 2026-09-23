@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block page_title %}Settings{% endblock %}
+{% block content %}
+<div class="banner">LOCKED settings cannot be changed in the UI (firewall, truthfulness, River active).</div>
+<div class="card">
+  <p><strong>OpenAI Key:</strong> {{ openai_status }}</p>
+  <table>
+    <thead><tr><th>Key</th><th>Class</th><th>Value</th><th></th></tr></thead>
+    <tbody>
+    {% for s in settings %}
+      <tr>
+        <td class="mono">{{ s.key }}</td>
+        <td><span class="pill {% if s.locked %}fail{% elif s.classification=='ADVANCED' %}warn{% else %}ok{% endif %}">{{ s.classification }}</span></td>
+        <td>{{ s.value }}</td>
+        <td>
+          {% if not s.locked %}
+          <form method="post" class="actions">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+            <input type="hidden" name="key" value="{{ s.key }}"/>
+            <input name="value" value="{{ s.value }}" style="width:8rem"/>
+            <button class="btn secondary" type="submit">Save</button>
+          </form>
+          {% else %}
+          <span class="muted tiny">locked</span>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div class="card" style="margin-top:0.8rem;">
+  <h2>Configuration versions</h2>
+  <table>
+    <thead><tr><th>ID</th><th>Key</th><th>Old</th><th>New</th><th>When</th><th></th></tr></thead>
+    <tbody>
+    {% for v in versions %}
+      <tr>
+        <td>{{ v.id }}</td>
+        <td class="mono">{{ v.key }}</td>
+        <td class="tiny">{{ v.old_value }}</td>
+        <td class="tiny">{{ v.new_value }}</td>
+        <td class="tiny">{{ v.created_at }}</td>
+        <td>
+          <form method="post" action="{{ url_for('settings.rollback') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+            <input type="hidden" name="version_id" value="{{ v.id }}"/>
+            <button class="btn secondary" type="submit">Rollback</button>
+          </form>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="muted">No config changes yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

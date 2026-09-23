@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block page_title %}System{% endblock %}
+{% block content %}
+<div class="grid two">
+  <div class="card">
+    <h2>Runtime</h2>
+    <table>
+      <tr><th>App</th><td>{{ info.app_version }}</td></tr>
+      <tr><th>Git</th><td class="mono">{{ info.git_commit or '—' }}</td></tr>
+      <tr><th>Python</th><td>{{ info.versions.python }}</td></tr>
+      <tr><th>River</th><td>{{ info.versions.river }}</td></tr>
+      <tr><th>OpenAI pkg</th><td>{{ info.versions.openai or '—' }}</td></tr>
+      <tr><th>Laya</th><td>{{ info.versions.laya or '—' }}</td></tr>
+      <tr><th>Flask</th><td>{{ info.versions.flask or '—' }}</td></tr>
+      <tr><th>OpenAI key</th><td>{{ info.openai_key_status }}</td></tr>
+      <tr><th>River active</th><td><span class="pill fail">OFF</span></td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h2>Paths / health</h2>
+    <table>
+      <tr><th>SQLite</th><td class="mono tiny">{{ info.sqlite_location }}</td></tr>
+      <tr><th>Storage</th><td class="mono tiny">{{ info.storage_location }}</td></tr>
+      <tr><th>Policy</th><td>{{ info.policy_version }}</td></tr>
+      <tr><th>Feature</th><td>{{ info.feature_schema_version or '—' }}</td></tr>
+      <tr><th>Reward</th><td>{{ info.reward_schema_version }}</td></tr>
+      <tr><th>Policy file</th><td>{{ 'present' if info.policy_file_exists else 'missing' }}</td></tr>
+    </table>
+    <h3 style="margin-top:1rem;">Health</h3>
+    <table>
+      {% for k,v in info.health.items() %}
+      <tr><th>{{ k }}</th><td>{{ v }}</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

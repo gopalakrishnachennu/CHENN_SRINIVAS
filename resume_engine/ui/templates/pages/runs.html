@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block page_title %}Runs{% endblock %}
+{% block content %}
+<div class="card">
+  <form method="get" class="form-grid">
+    <div><label>JD / title</label><input name="jd" value="{{ filters.jd or '' }}"/></div>
+    <div><label>Run ID</label><input name="run_id" value="{{ filters.run_id or '' }}"/></div>
+    <div>
+      <label>Status</label>
+      <select name="status">
+        <option value="">Any</option>
+        <option value="pass" {% if filters.status=='pass' %}selected{% endif %}>Has validated</option>
+        <option value="fail" {% if filters.status=='fail' %}selected{% endif %}>No validated</option>
+      </select>
+    </div>
+    <div style="align-self:end"><button class="btn" type="submit">Filter</button></div>
+  </form>
+</div>
+<div class="card" style="margin-top:0.8rem;">
+  <table>
+    <thead><tr><th>Role</th><th>JD</th><th>Run</th><th>Mode</th><th>Var</th><th>OK</th><th>Avg</th><th></th></tr></thead>
+    <tbody>
+    {% for run in runs %}
+      <tr>
+        <td>{{ run.target_title or '—' }}</td>
+        <td class="mono">{{ run.jd_hash }}</td>
+        <td class="mono">{{ run.run_id[:10] }}…</td>
+        <td>{{ run.generation_mode }}</td>
+        <td>{{ run.variants }}</td>
+        <td>{{ run.validated }}</td>
+        <td>{% if run.average_score is not none %}{{ '%.1f'|format(run.average_score) }}{% else %}—{% endif %}</td>
+        <td><a href="{{ url_for('runs.detail', jd_hash=run.jd_hash, run_id=run.run_id) }}">Open</a></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="8" class="muted">No runs found.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

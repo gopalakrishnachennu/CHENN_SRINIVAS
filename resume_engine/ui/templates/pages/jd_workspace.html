@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block page_title %}JD Workspace{% endblock %}
+{% block page_sub %}Phase 1 analysis only — resume generation stays separate{% endblock %}
+{% block content %}
+<div class="grid two">
+  <div class="card">
+    <form method="post" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+      <label>Job description</label>
+      <textarea name="jd_text" placeholder="Paste full JD…">{{ jd_text or '' }}</textarea>
+      <label>Upload .txt / .docx / .pdf</label>
+      <input type="file" name="jd_file" accept=".txt,.md,.docx,.pdf"/>
+      <div class="actions" style="margin-top:0.8rem;">
+        <button class="btn" name="action" value="analyze" type="submit">Analyze JD</button>
+        <button class="btn secondary" name="action" value="save_draft" type="submit">Save Draft</button>
+        <button class="btn secondary" name="action" value="load_example" type="submit">Load Example</button>
+        <button class="btn secondary" name="action" value="clear" type="submit">Clear</button>
+      </div>
+    </form>
+    {% if drafts %}
+    <h3 style="margin-top:1rem;">Drafts / previous</h3>
+    <ul class="muted">
+      {% for d in drafts %}<li>{{ d.name }} ({{ d.chars }} bytes)</li>{% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+  <div class="card">
+    {% if blueprint %}
+      {% set job = blueprint.job or {} %}
+      {% set skills = blueprint.priority_skills or {} %}
+      <h2>{{ job.target_title or 'Blueprint' }}</h2>
+      <p class="muted">{{ job.primary_family }} {% if job.secondary_family and job.secondary_family != 'none' %}/ {{ job.secondary_family }}{% endif %} · hybrid {{ job.hybrid_probability }}</p>
+      <p><strong>P1:</strong> {{ (skills.P1 or [])|join(', ') or '—' }}</p>
+      <p><strong>P2:</strong> {{ (skills.P2 or [])|join(', ') or '—' }}</p>
+      <p><strong>P3:</strong> {{ (skills.P3 or [])|join(', ') or '—' }}</p>
+      <p><strong>P4:</strong> {{ (skills.P4 or [])|join(', ') or '—' }}</p>
+      <p><strong>Allowed:</strong> {{ ((blueprint.generation_contract or {}).allowed_technologies or [])|join(', ') }}</p>
+      <details class="collapsible"><summary>Raw blueprint JSON</summary><pre class="json">{{ blueprint_json }}</pre></details>
+      <div class="actions" style="margin-top:0.8rem;">
+        <a class="btn secondary" href="{{ url_for('blueprints.detail', jd_hash=blueprint.jd_hash) }}">Open in Blueprints</a>
+        <a class="btn" href="{{ url_for('generation.index', blueprint=blueprint_path) }}">Continue to Generate</a>
+      </div>
+    {% else %}
+      <p class="muted">Analyze a JD to see Phase 1 output here. Generation is not started automatically.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

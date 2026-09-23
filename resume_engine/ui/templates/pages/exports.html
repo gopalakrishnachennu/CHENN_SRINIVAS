@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block page_title %}Exports{% endblock %}
+{% block content %}
+<div class="card">
+  <table>
+    <thead><tr><th>File</th><th>Type</th><th>Size</th><th></th></tr></thead>
+    <tbody>
+    {% for e in exports %}
+      <tr>
+        <td class="mono">{{ e.name }}</td>
+        <td>{{ e.suffix }}</td>
+        <td>{{ e.size or '—' }}</td>
+        <td><a href="{{ url_for('exports.download', path=e.path) }}">Download</a></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="4" class="muted">No exports found.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
