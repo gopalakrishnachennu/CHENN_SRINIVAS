@@ -133,12 +133,28 @@ def import_workbook(xlsx: Path, *, clear: bool = True) -> dict:
                 (cid, json.dumps(payload), now),
             )
 
-        # --- Jobs ---
+        # --- Jobs (idempotent by id / URL / content hash) ---
+        from resume_engine.ui.services.blueprint_lifecycle import jd_content_hash as _jch
+
         for row in jobs:
             jid = str(row["JD_ID"])
+            jd_text = str(row.get("JD_Input_Text") or "")
+            content_hash = _jch(jd_text) if jd_text else None
+            job_url = str(row.get("Source_URL") or "") or None
+            if conn.execute("SELECT id FROM jd_library WHERE id = ?", (jid,)).fetchone():
+                continue
+            if job_url and conn.execute(
+                "SELECT id FROM jd_library WHERE job_url = ? LIMIT 1", (job_url,)
+            ).fetchone():
+                continue
+            if content_hash and conn.execute(
+                "SELECT id FROM jd_library WHERE jd_content_hash = ? LIMIT 1",
+                (content_hash,),
+            ).fetchone():
+                continue
             primary = resolve_family(row.get("Primary_Family")) or ""
             secondary = resolve_family(row.get("Secondary_Family")) or ""
-            if secondary in {"none", "null"}:
+            if secondary in {"none", "null", ""}:
                 secondary = None
             meta = {
                 "external_id": jid,
@@ -179,17 +195,17 @@ def import_workbook(xlsx: Path, *, clear: bool = True) -> dict:
                     str(row.get("Job_Title") or "Untitled"),
                     str(row.get("Company") or ""),
                     str(row.get("Location") or ""),
-                    str(row.get("Source_URL") or ""),
+                    job_url or "",
                     "workbook",
                     str(row.get("Seniority") or ""),
                     primary,
                     secondary,
                     None,  # no blueprint until analyzed
-                    str(row.get("JD_Input_Text") or ""),
+                    jd_text,
                     json.dumps(meta),
                     now,
                     now,
-                    None,
+                    content_hash,
                 ),
             )
 

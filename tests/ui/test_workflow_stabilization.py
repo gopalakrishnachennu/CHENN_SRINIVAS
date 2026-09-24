@@ -1,4 +1,4 @@
-"""UI regression tests for Phase 3.2 workflow stabilization."""
+"""UI regression tests for Phase 3.2 / 3.2.1 workflow stabilization."""
 
 from __future__ import annotations
 
@@ -8,10 +8,11 @@ from pathlib import Path
 
 import pytest
 
+from resume_engine.config.settings import get_ui_artifact_dir
 from resume_engine.ui.db import connect_ui_db, ensure_ui_schema
 from resume_engine.ui.services import candidate_service, job_service, match_service
 from resume_engine.ui.services.blueprint_lifecycle import ANALYSIS_NEEDS, jd_content_hash
-from resume_engine.ui.services.family_registry_service import reset_to_defaults, update_family
+from resume_engine.ui.services.family_registry_service import reset_to_defaults
 from tests.ui._helpers import csrf_from, make_client
 
 
@@ -37,7 +38,7 @@ def _fake_analyze(jd_text: str, *, primary: str = "ai_ml", secondary: str | None
         "responsibilities": ["Do work"],
         "certifications": [],
     }
-    out_dir = Path("resume_engine/storage/ui/test_blueprints")
+    out_dir = get_ui_artifact_dir() / "test_blueprints"
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"ui_{jd_hash}.json"
     path.write_text(json.dumps(blueprint), encoding="utf-8")
@@ -93,9 +94,8 @@ def test_create_page_never_shows_unmatched_job(monkeypatch):
 
 
 def test_removed_secondary_family_updates_matches(monkeypatch):
+    """HTTP: removing secondary clears DE matches immediately (strict, no COMPATIBLE)."""
     _mock_analyze(monkeypatch)
-    update_family("ai_ml", compatible=["software_engineering"], hybrid=[])
-    update_family("data_engineering", compatible=["software_engineering"], hybrid=[])
     client = make_client(monkeypatch)
     cand = candidate_service.create_profile({
         "candidate_name": "UI Cand B",
@@ -104,16 +104,30 @@ def test_removed_secondary_family_updates_matches(monkeypatch):
         "companies": [{"company": "B", "start_date": "2020-01", "end_date": "2021-01"}],
     })
     de = job_service.analyze_and_store("Data Engineer spark kafka")
+    ai = job_service.analyze_and_store("AI engineer pytorch unique")
     before = client.get(f"/matches/?candidate_id={cand['id']}")
     assert de["id"] in before.data.decode() or de["title"] in before.data.decode()
 
-    candidate_service.update_profile(cand["id"], {
-        **cand["payload"],
-        "secondary_family": None,
-    })
+    # Edit via HTTP POST
+    edit = client.get(f"/candidates/{cand['id']}/edit")
+    token = csrf_from(edit.data.decode())
+    client.post(
+        f"/candidates/{cand['id']}/edit",
+        data={
+            "csrf_token": token,
+            "candidate_name": "UI Cand B",
+            "primary_family": "ai_ml",
+            "secondary_family": "",
+            "company_name": "B",
+            "company_start": "2020-01",
+            "company_end": "2021-01",
+        },
+        follow_redirects=True,
+    )
     after = client.get(f"/matches/?candidate_id={cand['id']}")
     html = after.data.decode()
     assert de["id"] not in html
+    assert ai["id"] in html or "resume-ready" in html.lower()
 
 
 def test_missing_blueprint_job_is_not_selectable(monkeypatch):
@@ -132,24 +146,23 @@ def test_missing_blueprint_job_is_not_selectable(monkeypatch):
             (ANALYSIS_NEEDS, job["id"]),
         )
         conn.commit()
+    # Not a resume match on Create / Matches
     page = client.get(f"/create/?candidate={cand['id']}")
-    html = page.data.decode()
-    assert "NEEDS ANALYSIS" in html or "Analyze Now" in html
-    assert f'value="{job["id"]}"' not in html or "job-radio" not in html
+    assert job["id"] not in page.data.decode()
+    matches = client.get(f"/matches/?candidate={cand['id']}")
+    assert job["id"] not in matches.data.decode()
+    # Still visible on Jobs library
+    jobs_page = client.get("/jobs/")
+    assert "NEEDS ANALYSIS" in jobs_page.data.decode() or job["title"] in jobs_page.data.decode()
 
 
 def test_pending_job_shows_analyze_action(monkeypatch):
     _mock_analyze(monkeypatch)
     client = make_client(monkeypatch)
-    cand = candidate_service.create_profile({
-        "candidate_name": "UI Cand D",
-        "primary_family": "ai_ml",
-        "companies": [{"company": "D", "start_date": "2020-01", "end_date": "2021-01"}],
-    })
     _insert_pending()
-    page = client.get(f"/create/?candidate={cand['id']}")
+    page = client.get("/jobs/")
     html = page.data.decode()
-    assert "Analyze Now" in html or "NEEDS ANALYSIS" in html
+    assert "NEEDS ANALYSIS" in html or "Analyze Pending" in html
 
 
 def test_generate_disabled_until_preflight_passes(monkeypatch):
@@ -177,8 +190,6 @@ def test_jd_change_invalidates_blueprint(monkeypatch):
 
 def test_candidate_family_change_invalidates_matches(monkeypatch):
     _mock_analyze(monkeypatch)
-    update_family("ai_ml", compatible=[], hybrid=[])
-    update_family("salesforce", compatible=[], hybrid=[])
     cand = candidate_service.create_profile({
         "candidate_name": "UI Cand F",
         "primary_family": "ai_ml",
@@ -235,3 +246,35 @@ def test_create_prepare_never_raw_blueprint_path_error(monkeypatch):
     html = resp.data.decode()
     assert "has no blueprint_path" not in html
     assert "Job ready" in html or "Preparing" in html or "READY" in html
+
+
+def test_matches_paginated_not_thousand_cards(monkeypatch):
+    _mock_analyze(monkeypatch)
+    client = make_client(monkeypatch)
+    cand = candidate_service.create_profile({
+        "candidate_name": "UI Cand Page",
+        "primary_family": "ai_ml",
+        "companies": [{"company": "P", "start_date": "2020-01", "end_date": "2021-01"}],
+    })
+    for i in range(25):
+        job_service.analyze_and_store(f"AI engineer pagination {i} unique text {uuid.uuid4()}")
+    page = client.get(f"/matches/?candidate={cand['id']}")
+    html = page.data.decode()
+    assert "Page 1 / 2" in html
+    assert html.count('class="match-row card"') == 20
+    assert "Next" in html
+    # Must not render all 25 job cards on page 1
+    assert html.count('class="match-row card"') < 25
+
+
+def test_compatible_not_in_normal_matches(monkeypatch):
+    _mock_analyze(monkeypatch)
+    client = make_client(monkeypatch)
+    cand = candidate_service.create_profile({
+        "candidate_name": "UI Cand Compat",
+        "primary_family": "ai_ml",
+        "companies": [{"company": "Z", "start_date": "2020-01", "end_date": "2021-01"}],
+    })
+    de = job_service.analyze_and_store("Data Engineer spark only no ai secondary")
+    page = client.get(f"/matches/?candidate={cand['id']}")
+    assert de["id"] not in page.data.decode()

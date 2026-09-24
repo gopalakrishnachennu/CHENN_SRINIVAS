@@ -7,7 +7,7 @@ import platform
 import subprocess
 from typing import Any
 
-from resume_engine.config.settings import PROJECT_ROOT, SQLITE_DB_PATH, STORAGE_DIR
+from resume_engine.config.settings import PROJECT_ROOT, STORAGE_DIR, get_sqlite_db_path
 from resume_engine.learning.online import config as online_config
 from resume_engine.learning.online.policy_store import load_metadata, policy_dir
 from resume_engine.ui.services.dashboard_service import system_status_lite as system_status
@@ -92,7 +92,7 @@ def system_info() -> dict[str, Any]:
         "app_version": "phase-3.2",
         "git_commit": git_commit(),
         "versions": versions,
-        "sqlite_location": str(SQLITE_DB_PATH),
+        "sqlite_location": str(get_sqlite_db_path()),
         "storage_location": str(STORAGE_DIR),
         "policy_version": online_config.ONLINE_POLICY_VERSION,
         "feature_schema_version": meta.get("feature_schema_version"),

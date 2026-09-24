@@ -314,13 +314,16 @@ def create_app() -> Flask:
     return app
 
 
-# Module-level app for `python -m` / phase_3_export compatibility
-app = create_app()
+# Intentionally NOT created at import time.
+# Import-time create_app() would open the production SQLite before pytest
+# isolation fixtures can redirect RESUME_ENGINE_DB_PATH.
+app = None
 
 
 def main(host: str = "127.0.0.1", port: int = 8765, debug: bool = False) -> None:
+    global app
     ensure_storage_dirs()
-    ensure_ui_schema()
+    app = create_app()
     mode = "password-protected" if auth_enabled() else "open (no RESUME_ENGINE_UI_PASSWORD)"
     print(f"Resume Engine ({mode}): http://{host}:{port}")
     app.run(host=host, port=port, debug=debug)

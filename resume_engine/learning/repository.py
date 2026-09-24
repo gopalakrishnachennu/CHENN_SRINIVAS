@@ -9,8 +9,8 @@ from pathlib import Path
 from typing import Any
 
 from resume_engine.config.settings import (
-    SQLITE_DB_PATH,
     ensure_storage_dirs,
+    get_sqlite_db_path,
     portable_path,
 )
 
@@ -160,7 +160,7 @@ class LearningRepository:
         dual_write_jsonl: bool = False,
     ) -> None:
         ensure_storage_dirs()
-        self.db_path = Path(db_path) if db_path else SQLITE_DB_PATH
+        self.db_path = Path(db_path) if db_path else get_sqlite_db_path()
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.dual_write_jsonl = dual_write_jsonl
         self._init_schema()

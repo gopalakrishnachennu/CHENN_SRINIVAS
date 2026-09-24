@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -16,7 +17,9 @@ REPORT_STORAGE_DIR = STORAGE_DIR / "reports"
 LEARNING_STORAGE_DIR = STORAGE_DIR / "learning"
 ONLINE_LEARNING_STORAGE_DIR = LEARNING_STORAGE_DIR / "online"
 DB_STORAGE_DIR = STORAGE_DIR / "db"
-SQLITE_DB_PATH = DB_STORAGE_DIR / "resume_engine.sqlite3"
+DEFAULT_SQLITE_DB_PATH = DB_STORAGE_DIR / "resume_engine.sqlite3"
+# Backward-compatible alias — prefer get_sqlite_db_path() at runtime.
+SQLITE_DB_PATH = DEFAULT_SQLITE_DB_PATH
 EXPORT_STORAGE_DIR = STORAGE_DIR / "exports"
 
 DEFAULT_OPENAI_MODEL = "gpt-5.6"
@@ -27,6 +30,45 @@ PROMPT_VERSION = "phase2_wave4_v1"
 def load_local_environment() -> None:
     load_dotenv(PROJECT_ROOT / ".env.local")
     load_dotenv(PROJECT_ROOT / ".env")
+
+
+def production_sqlite_db_path() -> Path:
+    """Canonical production UI/engine SQLite path (never overridden by env)."""
+    return DEFAULT_SQLITE_DB_PATH.resolve()
+
+
+def get_sqlite_db_path() -> Path:
+    """Runtime SQLite path. Honors RESUME_ENGINE_DB_PATH for test isolation."""
+    override = (os.getenv("RESUME_ENGINE_DB_PATH") or "").strip()
+    if override:
+        return Path(override).expanduser().resolve()
+    return production_sqlite_db_path()
+
+
+def get_ui_artifact_dir(name: str = "ui") -> Path:
+    """Runtime UI artifact root. Honors RESUME_ENGINE_UI_STORAGE."""
+    override = (os.getenv("RESUME_ENGINE_UI_STORAGE") or "").strip()
+    if override:
+        root = Path(override).expanduser().resolve()
+    else:
+        root = (STORAGE_DIR / name).resolve()
+    root.mkdir(parents=True, exist_ok=True)
+    return root
+
+
+def assert_db_path_not_production(*, context: str = "operation") -> Path:
+    """Hard guard: refuse when pytest would hit the production DB."""
+    path = get_sqlite_db_path().resolve()
+    prod = production_sqlite_db_path()
+    under_pytest = bool(
+        os.getenv("PYTEST_CURRENT_TEST") or os.getenv("RESUME_ENGINE_FORCE_TEST_ISOLATION")
+    )
+    if under_pytest and path == prod:
+        raise RuntimeError(
+            "TEST_DATABASE_ISOLATION_VIOLATION: "
+            f"{context} resolved DB path equals production SQLite ({prod})"
+        )
+    return path
 
 
 def ensure_storage_dirs() -> None:
@@ -44,6 +86,7 @@ def ensure_storage_dirs() -> None:
         EXPORT_STORAGE_DIR,
     ]:
         path.mkdir(parents=True, exist_ok=True)
+    get_sqlite_db_path().parent.mkdir(parents=True, exist_ok=True)
 
 
 def portable_path(path: Path | str | None) -> str | None:
@@ -51,7 +94,6 @@ def portable_path(path: Path | str | None) -> str | None:
     if path is None:
         return None
     raw = Path(path)
-    # Prefer unresolved relative strings already under the project.
     if not raw.is_absolute():
         as_posix = raw.as_posix()
         if as_posix.startswith(("resume_engine/", "tests/", "docs/")):

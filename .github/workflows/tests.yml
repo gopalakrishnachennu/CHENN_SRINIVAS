@@ -33,11 +33,27 @@ jobs:
           python -c "import resume_engine.llm.client"
           python -c "import resume_engine.learning.repository"
 
+      - name: Assert test DB isolation wiring
+        run: |
+          python - <<'PY'
+          import os
+          os.environ["RESUME_ENGINE_DB_PATH"] = "/tmp/ci_test_resume_engine.sqlite3"
+          os.environ["RESUME_ENGINE_FORCE_TEST_ISOLATION"] = "1"
+          from resume_engine.config.settings import get_sqlite_db_path, production_sqlite_db_path
+          assert get_sqlite_db_path().resolve() != production_sqlite_db_path()
+          print("OK: test DB path != production default")
+          PY
+
       - name: Unit + behavioral tests with coverage floor (no live)
         env:
           RUN_LIVE_TESTS: "0"
         run: |
+          PROD_DB="resume_engine/storage/db/resume_engine.sqlite3"
+          if [ -f "$PROD_DB" ]; then BEFORE=$(shasum -a 256 "$PROD_DB" | awk '{print $1}'); else BEFORE=MISSING; fi
           pytest -m "not live" --tb=short --cov=resume_engine --cov-report=term-missing --cov-fail-under=70
+          if [ -f "$PROD_DB" ]; then AFTER=$(shasum -a 256 "$PROD_DB" | awk '{print $1}'); else AFTER=MISSING; fi
+          echo "PROD_DB before=$BEFORE after=$AFTER"
+          test "$BEFORE" = "$AFTER"
 
       - name: Ruff
         run: |

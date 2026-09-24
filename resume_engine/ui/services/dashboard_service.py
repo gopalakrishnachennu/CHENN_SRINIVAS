@@ -9,7 +9,7 @@ from resume_engine.ui.services import candidate_service, job_service, match_serv
 
 def dashboard_payload() -> dict[str, Any]:
     candidates = candidate_service.list_profiles()
-    jobs = job_service.list_jobs(limit=2000)
+    jobs = job_service.list_jobs_lite(limit=5000)
     runs = []
     try:
         runs = run_service.list_runs(limit=200)
@@ -24,20 +24,17 @@ def dashboard_payload() -> dict[str, Any]:
     recent_matches = []
     total_new = 0
     for cand in candidates[:12]:
-        matched = match_service.matches_for_candidate(cand, jobs)
-        # "new" = matched jobs updated after candidate created (best-effort)
-        new_count = 0
+        summary = match_service.match_summary_for_candidate(cand, jobs)
+        matched = summary["matches"]
         created = cand.get("created_at") or ""
-        for m in matched:
-            if (m.get("updated_at") or "") > created:
-                new_count += 1
+        new_count = sum(1 for m in matched if (m.get("updated_at") or "") > created)
         total_new += new_count
         recent_matches.append({
             "id": cand["id"],
             "name": cand["name"],
             "family": cand.get("primary_family_display"),
             "secondary": cand.get("secondary_family_display"),
-            "match_count": len(matched),
+            "match_count": summary["matched_jobs"],
             "new_count": new_count,
         })
 

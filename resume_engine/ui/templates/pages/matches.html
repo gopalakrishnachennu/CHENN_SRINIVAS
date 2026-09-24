@@ -1,17 +1,45 @@
 {% extends "base.html" %}
 {% block title %}Matches · Resume Engine{% endblock %}
 {% block page_title %}Matches{% endblock %}
-{% block page_sub %}Family-compatible jobs for the selected candidate{% endblock %}
+{% block page_sub %}Strict family matches for resume-ready jobs{% endblock %}
 {% block content %}
 <div class="stack">
-  <form class="card" method="get">
-    <label>Candidate</label>
-    <select name="candidate" onchange="this.form.submit()">
-      <option value="">Select…</option>
-      {% for c in candidates %}
-        <option value="{{ c.id }}" {% if selected and selected.id == c.id %}selected{% endif %}>{{ c.name }}</option>
-      {% endfor %}
-    </select>
+  <form class="card filters" method="get">
+    <div>
+      <label>Candidate</label>
+      <select name="candidate" onchange="this.form.submit()">
+        <option value="">Select…</option>
+        {% for c in candidates %}
+          <option value="{{ c.id }}" {% if selected and selected.id == c.id %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Company</label>
+      <input type="text" name="company" value="{{ filters.company }}"/>
+    </div>
+    <div>
+      <label>Family</label>
+      <select name="family">
+        <option value="">All</option>
+        {% for fid, label in family_options %}
+          <option value="{{ fid }}" {% if filters.family==fid %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Match type</label>
+      <select name="match_type">
+        <option value="">All</option>
+        {% for mt in ['DIRECT','SECONDARY','HYBRID'] %}
+          <option value="{{ mt }}" {% if filters.match_type==mt %}selected{% endif %}>{{ mt }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div style="padding-top:1.4rem;">
+      <label><input type="checkbox" name="adjacent" value="1" {% if filters.adjacent %}checked{% endif %}/> Include adjacent families</label>
+    </div>
+    <div style="padding-top:1.4rem;"><button class="btn secondary" type="submit">Filter</button></div>
   </form>
 
   {% if selected %}
@@ -19,38 +47,65 @@
     <h2 style="margin:0;">{{ selected.name }}</h2>
     <p class="muted" style="margin:0.35rem 0 0;">
       {{ selected.primary_family_display }}{% if selected.payload.secondary_family %} + {{ selected.secondary_family_display }}{% endif %}
-      · <strong>{{ matched|length }} matching jobs</strong>
+    </p>
+    <p style="margin:0.55rem 0 0;">
+      <strong>{{ summary.matched_jobs }}</strong> resume-ready matches
+      from <strong>{{ summary.total_jobs }}</strong> active jobs
+      ({{ summary.ready_jobs }} READY{% if summary.needs_analysis_jobs %}, {{ summary.needs_analysis_jobs }} need analysis{% endif %})
+    </p>
+    <p class="muted tiny" style="margin:0.25rem 0 0;">
+      Direct {{ summary.direct }} · Secondary {{ summary.secondary }} · Hybrid {{ summary.hybrid }}
     </p>
   </div>
 
   {% if not matched %}
-    <div class="empty">No matching jobs yet. Add more JDs in the Jobs library.</div>
+    <div class="empty">No resume-ready family matches.</div>
   {% else %}
-  <div class="grid product">
+  <div class="match-list">
     {% for m in matched %}
-    <div class="card">
-      <h3 style="margin-bottom:0.25rem;">{{ m.title }}</h3>
-      <div class="muted" style="margin-bottom:0.65rem;">{{ m.company or '—' }}{% if m.location %} · {{ m.location }}{% endif %}</div>
-      <div style="margin-bottom:0.75rem;">
-        <span class="match-badge {{ m.match_type|lower|replace('_','') }}">{{ m.match_type|replace('_',' ') }} MATCH</span>
-        {% set st = (m.analysis_status or 'NEEDS_ANALYSIS')|upper %}
-        {% if st == 'READY' %}<span class="pill pass">READY</span>
-        {% elif st == 'FAILED' %}<span class="pill fail">FAILED</span>
-        {% else %}<span class="pill warn">{{ st|replace('_',' ') }}</span>{% endif %}
-      </div>
-      <div class="meta-row">
-        <div><strong>{{ m.primary_family_display }}</strong>{% if m.secondary_family %} + {{ m.secondary_family_display }}{% endif %}</div>
+    <div class="match-row card">
+      <div class="match-row-main">
+        <div>
+          <strong>{{ m.title }}</strong>
+          <span class="muted"> · {{ m.company or '—' }}{% if m.location %} · {{ m.location }}{% endif %}</span>
+        </div>
+        <div class="match-row-badges">
+          <span class="muted tiny">{{ m.primary_family_display }}{% if m.secondary_family %} + {{ m.secondary_family_display }}{% endif %}</span>
+          <span class="match-badge {{ m.match_type|lower|replace('_','') }}">{{ m.match_type|replace('_',' ') }}</span>
+          <span class="pill pass">READY</span>
+        </div>
       </div>
       <div class="actions">
         <a class="btn" href="{{ url_for('create_resume.index', candidate=selected.id, jd=m.id) }}">Create Resume</a>
-        <a class="btn ghost" href="{{ url_for('jobs.detail', job_id=m.id) }}">View Job</a>
+        <a class="btn ghost" href="{{ url_for('jobs.detail', job_id=m.id) }}">View</a>
       </div>
     </div>
     {% endfor %}
   </div>
+
+  {% if total_pages > 1 %}
+  <div class="pagination actions">
+    {% if page > 1 %}
+      <a class="btn secondary" href="{{ url_for('matches.index', candidate=selected.id, page=page-1, company=filters.company, family=filters.family, match_type=filters.match_type, adjacent='1' if filters.adjacent else None) }}">Previous</a>
+    {% endif %}
+    <span class="muted">Page {{ page }} / {{ total_pages }}</span>
+    {% if page < total_pages %}
+      <a class="btn secondary" href="{{ url_for('matches.index', candidate=selected.id, page=page+1, company=filters.company, family=filters.family, match_type=filters.match_type, adjacent='1' if filters.adjacent else None) }}">Next</a>
+    {% endif %}
+  </div>
+  {% endif %}
   {% endif %}
   {% else %}
     <div class="empty">Select a candidate to see matches.</div>
   {% endif %}
 </div>
+<style>
+.match-list { display:flex; flex-direction:column; gap:0.5rem; }
+.match-row { display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:0.75rem 1rem; }
+.match-row-main { display:flex; flex-direction:column; gap:0.25rem; min-width:0; }
+.match-row-badges { display:flex; gap:0.45rem; align-items:center; flex-wrap:wrap; }
+@media (max-width:720px) {
+  .match-row { flex-direction:column; align-items:flex-start; }
+}
+</style>
 {% endblock %}

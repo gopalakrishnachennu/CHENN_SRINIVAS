@@ -21,7 +21,7 @@ from resume_engine.ui.services.create_resume_service import (
     PreflightError,
     preflight_create_resume,
 )
-from resume_engine.ui.services.family_registry_service import reset_to_defaults, update_family
+from resume_engine.ui.services.family_registry_service import reset_to_defaults
 from resume_engine.ui.services.match_service import (
     MATCH_NONE,
     MATCH_SECONDARY,
@@ -52,7 +52,9 @@ def _fake_analyze(jd_text: str, *, primary: str = "ai_ml", secondary: str | None
         "responsibilities": ["Build things"],
         "certifications": [],
     }
-    out_dir = Path("resume_engine/storage/ui/test_blueprints")
+    from resume_engine.config.settings import get_ui_artifact_dir
+
+    out_dir = get_ui_artifact_dir() / "test_blueprints"
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"{jd_hash}.json"
     path.write_text(json.dumps(blueprint, indent=2), encoding="utf-8")
@@ -133,9 +135,7 @@ def test_end_to_end_happy_path_then_secondary_removal(mock_analyze):
     check = preflight_create_resume(cand["id"], ai_job["id"])
     assert check["ok"] is True
 
-    update_family("ai_ml", compatible=["data_analytics", "software_engineering"], hybrid=["devops_cloud"])
-    update_family("data_engineering", compatible=["data_analytics", "software_engineering"], hybrid=["devops_cloud"])
-
+    # Remove secondary — DE must disappear under STRICT matching (no COMPATIBLE fallback)
     updated = candidate_service.update_profile(cand["id"], {
         **cand["payload"],
         "secondary_family": None,
@@ -235,10 +235,7 @@ def test_imported_job_not_auto_ready():
 
 
 def test_secondary_only_match_then_removed():
-    """Regression: secondary removal clears SECONDARY match when not compatible."""
-    update_family("ai_ml", compatible=["software_engineering"], hybrid=[])
-    update_family("data_engineering", compatible=["software_engineering"], hybrid=[])
-
+    """Regression: secondary removal clears SECONDARY match (COMPATIBLE ignored)."""
     cand = {
         "payload": {"primary_family": "ai_ml", "secondary_family": "data_engineering"},
     }

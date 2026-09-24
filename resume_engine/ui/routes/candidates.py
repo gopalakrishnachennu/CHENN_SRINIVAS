@@ -57,12 +57,17 @@ def index():
     from resume_engine.ui.services import create_resume_service, job_service, match_service
 
     profiles = candidate_service.list_profiles()
-    jobs = job_service.list_jobs(limit=2000)
+    jobs = job_service.list_jobs_lite(limit=5000)
     cards = []
     for p in profiles:
-        matched = match_service.matches_for_candidate(p, jobs)
+        summary = match_service.match_summary_for_candidate(p, jobs)
         resumes = [r for r in create_resume_service.list_resume_library(200) if r.get("candidate_id") == p["id"]]
-        cards.append({**p, "match_count": len(matched), "resume_count": len(resumes)})
+        cards.append({
+            **p,
+            "match_count": summary["matched_jobs"],
+            "match_summary": summary,
+            "resume_count": len(resumes),
+        })
     return render_template("pages/candidates.html", cards=cards)
 
 
@@ -86,8 +91,15 @@ def view(profile_id: str):
     profile = candidate_service.get_profile(profile_id)
     from resume_engine.ui.services import job_service, match_service
 
-    matched = match_service.matches_for_candidate(profile, job_service.list_jobs(limit=2000))
-    return render_template("pages/candidate_view.html", profile=profile, match_count=len(matched))
+    summary = match_service.match_summary_for_candidate(
+        profile, job_service.list_jobs_lite(limit=5000)
+    )
+    return render_template(
+        "pages/candidate_view.html",
+        profile=profile,
+        match_count=summary["matched_jobs"],
+        match_summary=summary,
+    )
 
 
 @bp.route("/<profile_id>/edit", methods=["GET", "POST"])

@@ -57,19 +57,25 @@ def test_deterministic_matching():
     assert direct["match_type"] == "DIRECT"
     assert direct["score"] == 1.0
 
-    hybrid = compute_match_type("data_engineering", None, "ai_ml", None)
-    assert hybrid["match_type"] in ("HYBRID", "COMPATIBLE")
+    # Strict: no set overlap → NO_MATCH (COMPATIBLE disabled by default)
+    no_overlap = compute_match_type("data_engineering", None, "ai_ml", None)
+    assert no_overlap["match_type"] == "NO_MATCH"
+
+    # Adjacent / compatible only when opted in
+    adjacent = compute_match_type(
+        "data_engineering", None, "ai_ml", None, include_compatible=True
+    )
+    assert adjacent["match_type"] == "COMPATIBLE"
 
     secondary = compute_match_type(
-        "data_engineering", "ai_ml", "ai_ml", None,
-    )
-    assert secondary["match_type"] in ("DIRECT", "HYBRID", "SECONDARY", "COMPATIBLE")
-
-    # Secondary-only path (families without blocked/compatible collision)
-    secondary_only = compute_match_type(
         "software_engineering", "data_analytics", "data_analytics", None,
     )
-    assert secondary_only["match_type"] == "SECONDARY"
+    assert secondary["match_type"] == "SECONDARY"
+
+    hybrid = compute_match_type(
+        "ai_ml", None, "data_engineering", "ai_ml",
+    )
+    assert hybrid["match_type"] == "HYBRID"
 
     no_match = compute_match_type(
         "salesforce", None, "ai_ml", None,

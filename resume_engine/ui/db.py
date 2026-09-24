@@ -5,7 +5,7 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-from resume_engine.config.settings import SQLITE_DB_PATH, ensure_storage_dirs
+from resume_engine.config.settings import assert_db_path_not_production, ensure_storage_dirs
 
 UI_SCHEMA = """
 CREATE TABLE IF NOT EXISTS ui_config (
@@ -193,6 +193,12 @@ _UI_SCHEMA_ALTERS = [
     "ALTER TABLE match_cache ADD COLUMN family_registry_version TEXT",
 ]
 
+_UI_SCHEMA_INDEXES = [
+    "CREATE INDEX IF NOT EXISTS idx_jd_library_content_hash ON jd_library(jd_content_hash)",
+    "CREATE INDEX IF NOT EXISTS idx_jd_library_job_url ON jd_library(job_url)",
+    "CREATE INDEX IF NOT EXISTS idx_jd_library_analysis ON jd_library(analysis_status)",
+]
+
 # Engine family_id → display. Matching uses family_id; UI shows display_name.
 DEFAULT_FAMILIES: list[dict] = [
     {
@@ -296,12 +302,22 @@ DEFAULT_FAMILIES: list[dict] = [
 
 def ui_db_path() -> Path:
     ensure_storage_dirs()
-    return Path(SQLITE_DB_PATH)
+    return assert_db_path_not_production(context="ui_db_path")
 
 
 def connect_ui_db() -> sqlite3.Connection:
+    import os
+
+    from resume_engine.config.settings import production_sqlite_db_path
+
     path = ui_db_path()
     path.parent.mkdir(parents=True, exist_ok=True)
+    if (
+        os.getenv("PYTEST_CURRENT_TEST") or os.getenv("RESUME_ENGINE_FORCE_TEST_ISOLATION")
+    ) and path.resolve() == production_sqlite_db_path():
+        raise RuntimeError(
+            "TEST_DATABASE_ISOLATION_VIOLATION: connect_ui_db refused production DB"
+        )
     conn = sqlite3.connect(str(path), check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
@@ -350,6 +366,11 @@ def ensure_ui_schema(conn: sqlite3.Connection | None = None) -> None:
                 conn.execute(stmt)
             except sqlite3.OperationalError:
                 pass  # column already exists
+        for stmt in _UI_SCHEMA_INDEXES:
+            try:
+                conn.execute(stmt)
+            except sqlite3.OperationalError:
+                pass
         seed_family_registry(conn)
         conn.commit()
     finally:

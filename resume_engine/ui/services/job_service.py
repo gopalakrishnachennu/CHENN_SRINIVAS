@@ -31,6 +31,92 @@ def list_jobs(*, status: str = "active", limit: int = 100) -> list[dict[str, Any
     return [_row_to_dict(r) for r in rows]
 
 
+def list_jobs_lite(*, status: str = "active", limit: int = 5000) -> list[dict[str, Any]]:
+    """Lightweight job rows for matching — no filesystem blueprint revalidation."""
+    ensure_ui_schema()
+    with connect_ui_db() as conn:
+        if status == "all":
+            rows = conn.execute(
+                """
+                SELECT id, title, company, location, primary_family, secondary_family,
+                       status, analysis_status, analysis_version, blueprint_path,
+                       jd_content_hash, job_url, seniority, source, updated_at
+                FROM jd_library ORDER BY updated_at DESC LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                """
+                SELECT id, title, company, location, primary_family, secondary_family,
+                       status, analysis_status, analysis_version, blueprint_path,
+                       jd_content_hash, job_url, seniority, source, updated_at
+                FROM jd_library WHERE status = ? ORDER BY updated_at DESC LIMIT ?
+                """,
+                (status, limit),
+            ).fetchall()
+    out = []
+    for row in rows:
+        sf = row["secondary_family"]
+        out.append({
+            "id": row["id"],
+            "title": row["title"],
+            "company": row["company"],
+            "location": row["location"],
+            "primary_family": row["primary_family"],
+            "secondary_family": None if sf in ("", "none", "null", None) else sf,
+            "status": row["status"],
+            "analysis_status": row["analysis_status"] or "NEEDS_ANALYSIS",
+            "analysis_version": int(row["analysis_version"] or 0),
+            "blueprint_path": row["blueprint_path"],
+            "jd_content_hash": row["jd_content_hash"],
+            "job_url": row["job_url"],
+            "seniority": row["seniority"],
+            "source": row["source"],
+            "updated_at": row["updated_at"],
+        })
+    return out
+
+
+def find_duplicate_job(
+    *,
+    jd_text: str | None = None,
+    job_url: str | None = None,
+    content_hash: str | None = None,
+) -> dict[str, Any] | None:
+    """Return existing job if content hash or canonical URL already present."""
+    from resume_engine.ui.services.blueprint_lifecycle import jd_content_hash
+
+    ensure_ui_schema()
+    url = (job_url or "").strip() or None
+    ch = content_hash
+    if not ch and jd_text:
+        ch = jd_content_hash(jd_text)
+    with connect_ui_db() as conn:
+        if url:
+            row = conn.execute(
+                "SELECT id FROM jd_library WHERE job_url = ? AND status != 'archived' LIMIT 1",
+                (url,),
+            ).fetchone()
+            if row:
+                return get_job(row["id"])
+        if ch:
+            row = conn.execute(
+                "SELECT id FROM jd_library WHERE jd_content_hash = ? AND status != 'archived' LIMIT 1",
+                (ch,),
+            ).fetchone()
+            if row:
+                return get_job(row["id"])
+            # Also match on hash of stored jd_text when jd_content_hash unset
+            rows = conn.execute(
+                "SELECT id, jd_text FROM jd_library WHERE status != 'archived' AND jd_text IS NOT NULL"
+            ).fetchall()
+            for r in rows:
+                if jd_content_hash(r["jd_text"] or "") == ch:
+                    return get_job(r["id"])
+    return None
+
+
 def get_job(job_id: str) -> dict[str, Any]:
     ensure_ui_schema()
     with connect_ui_db() as conn:
@@ -80,9 +166,16 @@ def analyze_and_store(
     job_url: str | None = None,
     source: str = "manual",
     actor: str | None = None,
+    allow_duplicate: bool = False,
 ) -> dict[str, Any]:
-    """Run Phase 1 on JD text, store result in the JD library."""
+    """Run Phase 1 on JD text, store result in the JD library (deduped by default)."""
+    from resume_engine.ui.services.blueprint_lifecycle import jd_content_hash
     from resume_engine.ui.services.jd_service import analyze_jd
+
+    if not allow_duplicate:
+        existing = find_duplicate_job(jd_text=jd_text, job_url=job_url)
+        if existing is not None:
+            return existing
 
     result = analyze_jd(jd_text, actor=actor)
     blueprint = result["blueprint"]
@@ -114,7 +207,7 @@ def analyze_and_store(
 
     now = _now()
     ensure_ui_schema()
-    from resume_engine.ui.services.blueprint_lifecycle import ANALYSIS_READY, jd_content_hash
+    from resume_engine.ui.services.blueprint_lifecycle import ANALYSIS_READY
 
     secondary_family = None if secondary_family in {"none", "null", None, ""} else secondary_family
     with connect_ui_db() as conn:
@@ -331,17 +424,17 @@ def extract_upload(filename: str, raw: bytes) -> str:
 
 
 def count_candidates_matched(job: dict[str, Any], candidates: list[dict[str, Any]]) -> int:
-    from resume_engine.ui.services.match_service import MATCH_NONE, classify_match
+    from resume_engine.ui.services.match_service import (
+        MATCH_NONE,
+        load_family_registry_snapshot,
+        match_candidate_to_job,
+    )
+
+    reg = load_family_registry_snapshot()
     n = 0
     for cand in candidates:
-        payload = cand.get("payload") or {}
-        result = classify_match(
-            candidate_primary=payload.get("primary_family"),
-            candidate_secondary=payload.get("secondary_family"),
-            jd_primary=job.get("primary_family"),
-            jd_secondary=job.get("secondary_family"),
-        )
-        if result["match_type"] != MATCH_NONE:
+        result = match_candidate_to_job(cand, job, registry=reg, include_compatible=False)
+        if result.match_type != MATCH_NONE and result.is_strict_match:
             n += 1
     return n
 

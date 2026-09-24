@@ -12,10 +12,7 @@ from resume_engine.ui.services import (
     job_service,
     match_service,
 )
-from resume_engine.ui.services.blueprint_lifecycle import (
-    ANALYSIS_READY,
-    ensure_job_blueprint,
-)
+from resume_engine.ui.services.blueprint_lifecycle import ensure_job_blueprint
 from resume_engine.ui.services.create_resume_service import PreflightError
 
 bp = Blueprint("create_resume", __name__, url_prefix="/create")
@@ -26,17 +23,17 @@ def _matched_for(candidate_id: str | None):
     selected = None
     matched = []
     ready_count = 0
+    summary = None
     if candidate_id:
         try:
             selected = candidate_service.get_profile(candidate_id)
-            jobs = job_service.list_jobs(limit=2000)
-            matched = match_service.list_matches_for_candidate(selected, jobs)
-            ready_count = sum(
-                1 for m in matched if (m.get("analysis_status") or "").upper() == ANALYSIS_READY
-            )
+            jobs = job_service.list_jobs_lite(limit=2000)
+            summary = match_service.match_summary_for_candidate(selected, jobs)
+            matched = summary["matches"]
+            ready_count = summary["matched_jobs"]
         except KeyError:
             selected = None
-    return candidates, selected, matched, ready_count
+    return candidates, selected, matched, ready_count, summary
 
 
 @bp.route("/", methods=["GET", "POST"])
@@ -74,18 +71,16 @@ def index():
             else:
                 flash(text, "error")
 
-    candidates, selected, matched, ready_count = _matched_for(candidate_id)
+    candidates, selected, matched, ready_count, summary = _matched_for(candidate_id)
     preselect_jd = request.args.get("jd") or request.form.get("jd_id")
-    first_ready_id = next(
-        (m["id"] for m in matched if (m.get("analysis_status") or "").upper() == ANALYSIS_READY),
-        None,
-    )
+    first_ready_id = next((m["id"] for m in matched), None)
     return render_template(
         "pages/create.html",
         candidates=candidates,
         selected=selected,
         matched=matched,
         ready_count=ready_count,
+        summary=summary,
         preselect_jd=preselect_jd,
         first_ready_id=first_ready_id,
     )
