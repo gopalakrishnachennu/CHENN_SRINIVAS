@@ -7,7 +7,7 @@ Phase 3.2 — End-to-End Data & Workflow Stabilization
 | | SHA |
 |---|---|
 | Starting commit | `ce808c0d31d51f2451accea7514e92ced3364101` |
-| Ending commit | `PENDING_FINALIZE` |
+| Ending commit | `32169e8d0dc323440f3253bb7d4bf8f3b1a09287` |
 
 ## Root causes found
 
