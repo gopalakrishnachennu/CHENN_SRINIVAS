@@ -11,57 +11,65 @@
   <div class="shell">
     <aside class="sidebar">
       <div class="brand">
-        <div class="brand-mark">RE</div>
+        <div class="brand-mark">RI</div>
         <div>
-          <div class="brand-title">Resume Engine</div>
-          <div class="brand-sub">Candidates → Jobs → Resumes</div>
+          <div class="brand-title">Resume Intelligence</div>
+          <div class="brand-sub">JD to verified resume ops</div>
         </div>
       </div>
+      <div class="ops-status">
+        <span class="status-dot"></span>
+        <span>Shadow learning locked</span>
+      </div>
       <nav class="nav">
+        <div class="nav-section">Command</div>
         <a class="nav-link {% if request.endpoint == 'dashboard.index' %}active{% endif %}"
-           href="{{ url_for('dashboard.index') }}">Dashboard</a>
+           href="{{ url_for('dashboard.index') }}"><span class="nav-icon">01</span><span>Dashboard</span></a>
         <a class="nav-link nav-cta {% if request.endpoint and request.endpoint.startswith('create_resume.') %}active{% endif %}"
-           href="{{ url_for('create_resume.index') }}">+ Create Resume</a>
-        <div class="nav-section">People &amp; Jobs</div>
+           href="{{ url_for('create_resume.index') }}"><span class="nav-icon">GO</span><span>Create Resume</span></a>
+        <div class="nav-section">Core Workflow</div>
         <a class="nav-link {% if request.endpoint and request.endpoint.startswith('candidates.') %}active{% endif %}"
-           href="{{ url_for('candidates.index') }}">Candidates</a>
+           href="{{ url_for('candidates.index') }}"><span class="nav-icon">IN</span><span>Candidates</span></a>
         <a class="nav-link {% if request.endpoint and request.endpoint.startswith('jobs.') %}active{% endif %}"
-           href="{{ url_for('jobs.index') }}">Jobs</a>
+           href="{{ url_for('jobs.index') }}"><span class="nav-icon">JD</span><span>Jobs</span></a>
         <a class="nav-link {% if request.endpoint and request.endpoint.startswith('matches.') %}active{% endif %}"
-           href="{{ url_for('matches.index') }}">Matches</a>
+           href="{{ url_for('matches.index') }}"><span class="nav-icon">MT</span><span>Matches</span></a>
         <a class="nav-link {% if request.endpoint and request.endpoint.startswith('resumes.') %}active{% endif %}"
-           href="{{ url_for('resumes.index') }}">Resumes</a>
+           href="{{ url_for('resumes.index') }}"><span class="nav-icon">EX</span><span>Resumes</span></a>
 
         <details class="nav-advanced" {% if '/advanced' in request.path or (request.endpoint or '') in [
           'blueprints.index','strategies.index','validation.index','repairs.index','learning.index',
-          'registry.index','prompts.index','settings.index','audit.index','system.index',
+          'registry.index','prompts.index','openai_command.index','settings.index','audit.index','system.index',
           'families.index','laya.index'
         ] or (request.endpoint and request.endpoint.split('.')[0] in [
           'blueprints','strategies','validation','repairs','learning','registry','prompts',
-          'settings','audit','system','families','laya','documents','exports','runs','generation','jd_workspace'
+          'openai_command','settings','audit','system','families','laya','documents','exports','runs','generation','jd_workspace'
         ]) %}open{% endif %}>
           <summary>Advanced</summary>
           <div class="nav-advanced-links">
-            <a class="nav-link" href="{{ url_for('families.index') }}">Families</a>
-            <a class="nav-link" href="{{ url_for('blueprints.index') }}">Blueprints</a>
-            <a class="nav-link" href="{{ url_for('strategies.index') }}">Strategies</a>
-            <a class="nav-link" href="{{ url_for('validation.index') }}">Validation</a>
-            <a class="nav-link" href="{{ url_for('repairs.index') }}">Repairs</a>
-            <a class="nav-link" href="{{ url_for('laya.index') }}">Laya</a>
-            <a class="nav-link" href="{{ url_for('learning.index') }}">Learning</a>
-            <a class="nav-link" href="{{ url_for('registry.index') }}">Technology Registry</a>
-            <a class="nav-link" href="{{ url_for('prompts.index') }}">Prompts</a>
-            <a class="nav-link" href="{{ url_for('settings.index') }}">Settings</a>
-            <a class="nav-link" href="{{ url_for('audit.index') }}">Audit</a>
-            <a class="nav-link" href="{{ url_for('system.index') }}">System</a>
+            <a class="nav-link sub" href="{{ url_for('families.index') }}">Family Registry</a>
+            <a class="nav-link sub" href="{{ url_for('blueprints.index') }}">JD Blueprints</a>
+            <a class="nav-link sub" href="{{ url_for('strategies.index') }}">Strategies</a>
+            <a class="nav-link sub" href="{{ url_for('validation.index') }}">Validation Gates</a>
+            <a class="nav-link sub" href="{{ url_for('repairs.index') }}">Repair Center</a>
+            <a class="nav-link sub" href="{{ url_for('laya.index') }}">Laya Review</a>
+            <a class="nav-link sub" href="{{ url_for('learning.index') }}">Learning Lab</a>
+            <a class="nav-link sub" href="{{ url_for('registry.index') }}">Technology Registry</a>
+            <a class="nav-link sub" href="{{ url_for('prompts.index') }}">Prompt Control</a>
+            <a class="nav-link sub" href="{{ url_for('openai_command.index') }}">OpenAI Command</a>
+            <a class="nav-link sub" href="{{ url_for('settings.index') }}">Settings</a>
+            <a class="nav-link sub" href="{{ url_for('audit.index') }}">Audit Trail</a>
+            <a class="nav-link sub" href="{{ url_for('system.index') }}">System Health</a>
           </div>
         </details>
       </nav>
       <div class="sidebar-foot">
-        <div class="pill warn">River: SHADOW</div>
-        <div class="muted tiny">Active mode locked</div>
+        <div class="sidebar-card">
+          <strong>Governance</strong>
+          <span>Truth firewall, CSRF, exports, audit, and River shadow mode are enforced.</span>
+        </div>
         {% if not auth_on %}
-        <div class="muted tiny">Auth disabled</div>
+        <div class="muted tiny">Auth disabled for local operation</div>
         {% endif %}
       </div>
     </aside>
@@ -72,6 +80,8 @@
           <p class="page-sub">{% block page_sub %}{% endblock %}</p>
         </div>
         <div class="top-actions">
+          <a class="btn secondary" href="{{ url_for('jobs.create') }}">Add JD</a>
+          <a class="btn" href="{{ url_for('create_resume.index') }}">Create Resume</a>
           {% if auth_on %}
           <form method="post" action="{{ url_for('logout') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>

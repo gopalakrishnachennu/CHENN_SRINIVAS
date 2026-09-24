@@ -1,0 +1,224 @@
+
+        
+
+
+
+As a database specialist positioned in the heart of the Software Development function, you will offer support and architectural guidance to the teams in the field of data, as well as help to manage the quality of database work across the business. You will also ensure the upkeep and performance of the various database systems across the platform.
+
+
+
+
+The team is responsible for building low latency data and database solutions, using SQL Server for the current platform and Google Spanner and Kafka for the new platform. You will develop database code to maintain and enhance a wide variety of products for the website and app as well as the members and regulatory platforms. This role is focused on delivering software, not managing databases.
+
+
+
+
+In this role, every millisecond counts in the running of the website and our systems. Working in a hugely demanding data environment with thousands of transactions taking place every second, the opportunities to develop as a data professional at bet365 are second to none.
+
+
+
+
+This role is eligible for inclusion in the Company’s hybrid working from home policy.
+
+
+
+
+The salary range for this position is $85,000-$135,000 annually.
+
+
+
+
+
+
+
+Preferred Skills and Experience
+
+
+
+
+
+
+
+Experience with managed DBs like Spanner or Aurora
+
+
+
+
+
+
+
+
+Extensive commercial database development experience with MSSQL or similar
+
+
+
+
+
+
+
+
+Demonstrable experience in designing, developing, or working with Kafka-based data streaming solutions
+
+
+
+
+
+
+
+
+Experience with distributed systems and eventing
+
+
+
+
+
+
+
+
+Proven experience working with in a high concurrency and high throughput environment.
+
+
+
+
+
+
+
+
+Strong performance monitoring, tuning and troubleshooting skills.
+
+
+
+
+
+
+
+
+Ability to work in a fast-paced environment on multiple projects with independent deadlines and deliverables.
+
+
+
+
+
+
+
+
+Strong communication skills, both written and verbal with the ability to interact with all levels of stakeholders.
+
+
+
+
+
+
+
+
+Self-motivator who works well in a team or as an individual.
+
+
+
+
+
+
+
+
+Strong problem solving skills are desirable.
+
+
+
+
+
+
+
+
+
+
+
+What you will be doing
+
+
+
+
+
+
+
+Developing highly performant database systems across the Sports Trading Platform.
+
+
+
+
+
+
+
+
+Transforming product requirements into workable solutions, in collaboration with several development and testing teams.
+
+
+
+
+
+
+
+
+Writing robust functions, procedures and scripts using SQL.
+
+
+
+
+
+
+
+
+Utilizing query performance and tuning knowledge to optimize database code across the department.
+
+
+
+
+
+
+
+
+Being heavily involved in the day to day running of the business dealing with support and performance issues.
+
+
+
+
+
+
+
+
+Assisting in the continuous improvement and maintenance of data and database systems.
+
+
+
+
+
+
+
+
+Conducting functional and performance testing and QA to ensure code is both accurate and performant.
+
+
+
+
+
+
+
+
+Providing guidance, feedback and support to junior developers within the team.
+
+
+
+
+
+
+
+
+Creating and maintaining relevant documentation.
+
+
+
+
+
+
+
+
+      

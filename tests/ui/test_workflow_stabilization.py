@@ -146,11 +146,16 @@ def test_missing_blueprint_job_is_not_selectable(monkeypatch):
             (ANALYSIS_NEEDS, job["id"]),
         )
         conn.commit()
-    # Not a resume match on Create / Matches
+    # Visible as a family match, but not selectable for generation.
     page = client.get(f"/create/?candidate={cand['id']}")
-    assert job["id"] not in page.data.decode()
+    html = page.data.decode()
+    assert job["id"] in html
+    assert f'name="jd_id" value="{job["id"]}"' not in html
     matches = client.get(f"/matches/?candidate={cand['id']}")
-    assert job["id"] not in matches.data.decode()
+    match_html = matches.data.decode()
+    assert job["id"] in match_html
+    assert "Fix Intake" in match_html
+    assert f"/create/?candidate={cand['id']}&jd={job['id']}" not in match_html
     # Still visible on Jobs library
     jobs_page = client.get("/jobs/")
     assert "NEEDS ANALYSIS" in jobs_page.data.decode() or job["title"] in jobs_page.data.decode()

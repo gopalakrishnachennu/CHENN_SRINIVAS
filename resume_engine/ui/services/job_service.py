@@ -11,6 +11,69 @@ from resume_engine.ui.db import connect_ui_db, ensure_ui_schema
 from resume_engine.ui.services.audit_service import record_audit_event
 from resume_engine.ui.services.family_registry_service import resolve_family
 
+OVERRIDE_FIELDS = [
+    ("city", "City"),
+    ("state", "State"),
+    ("country", "Country"),
+    ("work_mode", "Work Mode"),
+    ("remote_scope", "Remote Scope"),
+    ("hybrid_days_per_week", "Hybrid Days"),
+    ("employment_type", "Employment Type"),
+    ("engagement_type", "Engagement Type"),
+    ("salary_min", "Salary Min"),
+    ("salary_max", "Salary Max"),
+    ("salary_currency", "Salary Currency"),
+    ("salary_period", "Salary Period"),
+    ("sponsorship_status", "Sponsorship"),
+    ("authorization_requirement", "Authorization Requirement"),
+    ("student_visa_status", "OPT/CPT"),
+    ("h1b_status", "H-1B"),
+    ("ead_status", "EAD"),
+    ("clearance_status", "Clearance Status"),
+    ("clearance_level", "Clearance Level"),
+    ("minimum_years_experience", "Minimum Years Experience"),
+    ("seniority", "Seniority"),
+    ("primary_family", "Primary Family"),
+    ("secondary_family", "Secondary Family"),
+]
+
+REQUIRED_JOB_INTAKE_FIELDS = [
+    ("title", "Job Title"),
+    ("company", "Company"),
+    ("location", "Location"),
+    ("job_url", "JD URL"),
+    ("jd_text", "Raw JD"),
+]
+
+
+def validate_required_intake(payload: dict[str, Any]) -> list[str]:
+    """Return missing fields that block a job from entering the workflow."""
+    missing: list[str] = []
+    for field, label in REQUIRED_JOB_INTAKE_FIELDS:
+        value = payload.get(field)
+        if value is None or not str(value).strip():
+            missing.append(label)
+    return missing
+
+
+def workflow_review(job: dict[str, Any]) -> dict[str, Any]:
+    """Return stored or computed Laya workflow review for a job."""
+    intelligence = job.get("job_intelligence") or {}
+    required_missing = validate_required_intake(job)
+    stored = (
+        intelligence.get("laya_workflow_review")
+        or (intelligence.get("laya_output") or {}).get("workflow_review")
+    )
+    if stored and not required_missing:
+        return stored
+    from resume_engine.ui.services.laya_service import review_job_workflow
+
+    return review_job_workflow(
+        job,
+        intelligence,
+        required_missing=required_missing,
+    )
+
 
 def _now() -> str:
     return datetime.now(UTC).isoformat()
@@ -40,7 +103,11 @@ def list_jobs_lite(*, status: str = "active", limit: int = 5000) -> list[dict[st
                 """
                 SELECT id, title, company, location, primary_family, secondary_family,
                        status, analysis_status, analysis_version, blueprint_path,
-                       jd_content_hash, job_url, seniority, source, updated_at
+                       jd_content_hash, job_url, seniority, source, updated_at, jd_text,
+                       country, state, city, work_mode, employment_type, engagement_type,
+                       salary_min, salary_max, salary_currency, salary_period,
+                       sponsorship_status, authorization_requirement, student_visa_status,
+                       clearance_status, minimum_years_experience
                 FROM jd_library ORDER BY updated_at DESC LIMIT ?
                 """,
                 (limit,),
@@ -50,7 +117,11 @@ def list_jobs_lite(*, status: str = "active", limit: int = 5000) -> list[dict[st
                 """
                 SELECT id, title, company, location, primary_family, secondary_family,
                        status, analysis_status, analysis_version, blueprint_path,
-                       jd_content_hash, job_url, seniority, source, updated_at
+                       jd_content_hash, job_url, seniority, source, updated_at, jd_text,
+                       country, state, city, work_mode, employment_type, engagement_type,
+                       salary_min, salary_max, salary_currency, salary_period,
+                       sponsorship_status, authorization_requirement, student_visa_status,
+                       clearance_status, minimum_years_experience
                 FROM jd_library WHERE status = ? ORDER BY updated_at DESC LIMIT ?
                 """,
                 (status, limit),
@@ -74,6 +145,22 @@ def list_jobs_lite(*, status: str = "active", limit: int = 5000) -> list[dict[st
             "seniority": row["seniority"],
             "source": row["source"],
             "updated_at": row["updated_at"],
+            "jd_text": row["jd_text"],
+            "country": row["country"],
+            "state": row["state"],
+            "city": row["city"],
+            "work_mode": row["work_mode"] or "UNKNOWN",
+            "employment_type": row["employment_type"] or "UNKNOWN",
+            "engagement_type": row["engagement_type"] or "UNKNOWN",
+            "salary_min": row["salary_min"],
+            "salary_max": row["salary_max"],
+            "salary_currency": row["salary_currency"],
+            "salary_period": row["salary_period"] or "UNKNOWN",
+            "sponsorship_status": row["sponsorship_status"] or "SPONSORSHIP_NOT_STATED",
+            "authorization_requirement": row["authorization_requirement"] or "NONE_STATED",
+            "student_visa_status": row["student_visa_status"] or "OPT_CPT_NOT_STATED",
+            "clearance_status": row["clearance_status"] or "NOT_STATED",
+            "minimum_years_experience": row["minimum_years_experience"],
         })
     return out
 
@@ -152,6 +239,23 @@ def _row_to_dict(row) -> dict[str, Any]:
         "analysis_status": row["analysis_status"] if "analysis_status" in keys else None,
         "analysis_version": int(row["analysis_version"] or 0) if "analysis_version" in keys else 0,
         "jd_content_hash": row["jd_content_hash"] if "jd_content_hash" in keys else None,
+        "job_intelligence": json.loads(row["job_intelligence_json"]) if "job_intelligence_json" in keys and row["job_intelligence_json"] else {},
+        "job_intelligence_schema_version": row["job_intelligence_schema_version"] if "job_intelligence_schema_version" in keys else None,
+        "country": row["country"] if "country" in keys else None,
+        "state": row["state"] if "state" in keys else None,
+        "city": row["city"] if "city" in keys else None,
+        "work_mode": row["work_mode"] if "work_mode" in keys else "UNKNOWN",
+        "employment_type": row["employment_type"] if "employment_type" in keys else "UNKNOWN",
+        "engagement_type": row["engagement_type"] if "engagement_type" in keys else "UNKNOWN",
+        "salary_min": row["salary_min"] if "salary_min" in keys else None,
+        "salary_max": row["salary_max"] if "salary_max" in keys else None,
+        "salary_currency": row["salary_currency"] if "salary_currency" in keys else None,
+        "salary_period": row["salary_period"] if "salary_period" in keys else "UNKNOWN",
+        "sponsorship_status": row["sponsorship_status"] if "sponsorship_status" in keys else "SPONSORSHIP_NOT_STATED",
+        "authorization_requirement": row["authorization_requirement"] if "authorization_requirement" in keys else "NONE_STATED",
+        "student_visa_status": row["student_visa_status"] if "student_visa_status" in keys else "OPT_CPT_NOT_STATED",
+        "clearance_status": row["clearance_status"] if "clearance_status" in keys else "NOT_STATED",
+        "minimum_years_experience": row["minimum_years_experience"] if "minimum_years_experience" in keys else None,
     }
     # Effective readiness (validates blueprint file / staleness)
     base["analysis_status"] = get_analysis_status(base)
@@ -161,6 +265,7 @@ def _row_to_dict(row) -> dict[str, Any]:
 def analyze_and_store(
     jd_text: str,
     *,
+    title: str | None = None,
     company: str | None = None,
     location: str | None = None,
     job_url: str | None = None,
@@ -184,7 +289,7 @@ def analyze_and_store(
 
     job_id = str(uuid.uuid4())
     jd_hash = blueprint.get("jd_hash") or job_id[:12]
-    title = job_data.get("target_title") or "Untitled Role"
+    title = job_data.get("target_title") or title or "Untitled Role"
     seniority = job_data.get("seniority") or "mid"
     pf = job_data.get("primary_family") or ""
     sf = job_data.get("secondary_family") or "none"
@@ -229,6 +334,17 @@ def analyze_and_store(
         )
         conn.commit()
 
+    _persist_job_intelligence(
+        job_id,
+        jd_text=jd_text,
+        company=company,
+        location=location,
+        source=source,
+        job_url=job_url,
+        title=title,
+        blueprint=blueprint,
+    )
+
     record_audit_event(
         action="job.analyze_store",
         actor=actor,
@@ -237,6 +353,384 @@ def analyze_and_store(
         metadata={"jd_hash": jd_hash, "title": title},
     )
     return get_job(job_id)
+
+
+def create_draft(
+    jd_text: str,
+    *,
+    title: str | None = None,
+    company: str | None = None,
+    location: str | None = None,
+    job_url: str | None = None,
+    source: str = "manual",
+    actor: str | None = None,
+    allow_duplicate: bool = False,
+) -> dict[str, Any]:
+    """Save a manually pasted JD without running model analysis."""
+    from resume_engine.ui.services.blueprint_lifecycle import ANALYSIS_NEEDS, jd_content_hash
+
+    if not allow_duplicate:
+        existing = find_duplicate_job(jd_text=jd_text, job_url=job_url)
+        if existing is not None:
+            return existing
+
+    job_id = str(uuid.uuid4())
+    now = _now()
+    ensure_ui_schema()
+    fallback_title = title or "Untitled Role"
+    with connect_ui_db() as conn:
+        conn.execute(
+            """
+            INSERT INTO jd_library(
+              id, jd_hash, title, company, location, job_url, source,
+              seniority, primary_family, secondary_family, status,
+              blueprint_path, jd_text, metadata_json, created_at, updated_at,
+              analysis_status, analysis_version, jd_content_hash
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            """,
+            (
+                job_id, jd_content_hash(jd_text), fallback_title, company, location,
+                job_url, source, None, None, None, "active", None, jd_text,
+                json.dumps({"display": {}, "full_blueprint": {}}), now, now,
+                ANALYSIS_NEEDS, 0, None,
+            ),
+        )
+        conn.commit()
+    _persist_job_intelligence(
+        job_id,
+        jd_text=jd_text,
+        company=company,
+        location=location,
+        source=source,
+        job_url=job_url,
+        title=fallback_title,
+        blueprint=None,
+    )
+    record_audit_event(
+        action="job.save_draft",
+        actor=actor,
+        entity_type="jd_library",
+        entity_id=job_id,
+        metadata={"title": fallback_title},
+    )
+    return get_job(job_id)
+
+
+def _persist_job_intelligence(
+    job_id: str,
+    *,
+    jd_text: str,
+    company: str | None = None,
+    location: str | None = None,
+    source: str | None = None,
+    job_url: str | None = None,
+    title: str | None = None,
+    blueprint: dict[str, Any] | None = None,
+    update_role_fields: bool = True,
+) -> dict[str, Any]:
+    from resume_engine.jd_intelligence.job_analyzer import analyze_text, filter_columns
+
+    intelligence = analyze_text(
+        jd_text,
+        job_id=job_id,
+        company=company,
+        location=location,
+        source=source,
+        job_url=job_url,
+        title=title,
+        blueprint=blueprint,
+    )
+    cols = filter_columns(intelligence)
+    with connect_ui_db() as conn:
+        current = conn.execute(
+            "SELECT analysis_version FROM jd_library WHERE id = ?", (job_id,)
+        ).fetchone()
+        version = int(current["analysis_version"] or 0) if current else 0
+        if update_role_fields:
+            conn.execute(
+                """
+                UPDATE jd_library SET
+                  job_intelligence_json=?,
+                  job_intelligence_schema_version=?,
+                  country=?, state=?, city=?,
+                  work_mode=?, employment_type=?, engagement_type=?,
+                  salary_min=?, salary_max=?, salary_currency=?, salary_period=?,
+                  sponsorship_status=?, authorization_requirement=?, student_visa_status=?,
+                  clearance_status=?, minimum_years_experience=?,
+                  seniority=?, primary_family=?, secondary_family=?
+                WHERE id=?
+                """,
+                (
+                    json.dumps(intelligence, sort_keys=True),
+                    cols["job_intelligence_schema_version"],
+                    cols["country"], cols["state"], cols["city"],
+                    cols["work_mode"], cols["employment_type"], cols["engagement_type"],
+                    cols["salary_min"], cols["salary_max"], cols["salary_currency"],
+                    cols["salary_period"], cols["sponsorship_status"],
+                    cols["authorization_requirement"], cols["student_visa_status"],
+                    cols["clearance_status"], cols["minimum_years_experience"],
+                    cols["seniority"], cols["primary_family"], cols["secondary_family"],
+                    job_id,
+                ),
+            )
+        else:
+            conn.execute(
+                """
+                UPDATE jd_library SET
+                  job_intelligence_json=?,
+                  job_intelligence_schema_version=?,
+                  country=?, state=?, city=?,
+                  work_mode=?, employment_type=?, engagement_type=?,
+                  salary_min=?, salary_max=?, salary_currency=?, salary_period=?,
+                  sponsorship_status=?, authorization_requirement=?, student_visa_status=?,
+                  clearance_status=?, minimum_years_experience=?
+                WHERE id=?
+                """,
+                (
+                    json.dumps(intelligence, sort_keys=True),
+                    cols["job_intelligence_schema_version"],
+                    cols["country"], cols["state"], cols["city"],
+                    cols["work_mode"], cols["employment_type"], cols["engagement_type"],
+                    cols["salary_min"], cols["salary_max"], cols["salary_currency"],
+                    cols["salary_period"], cols["sponsorship_status"],
+                    cols["authorization_requirement"], cols["student_visa_status"],
+                    cols["clearance_status"], cols["minimum_years_experience"],
+                    job_id,
+                ),
+            )
+        conn.execute(
+            """
+            INSERT INTO job_analysis_versions(
+              job_id, version, job_intelligence_json, blueprint_json, actor, note, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                job_id,
+                version,
+                json.dumps(intelligence, sort_keys=True),
+                json.dumps(blueprint, sort_keys=True) if blueprint else None,
+                None,
+                "analysis",
+                _now(),
+            ),
+        )
+        conn.commit()
+    return intelligence
+
+
+def persist_job_intelligence_for_job(
+    job_id: str,
+    *,
+    blueprint: dict[str, Any] | None = None,
+    update_role_fields: bool = True,
+) -> dict[str, Any]:
+    job = get_job(job_id)
+    return _persist_job_intelligence(
+        job_id,
+        jd_text=job.get("jd_text") or "",
+        company=job.get("company"),
+        location=job.get("location"),
+        source=job.get("source"),
+        job_url=job.get("job_url"),
+        title=job.get("title"),
+        blueprint=blueprint or load_blueprint(job) or None,
+        update_role_fields=update_role_fields,
+    )
+
+
+def _coerce_override_value(raw: str) -> Any:
+    value = (raw or "").strip()
+    if value == "":
+        return None
+    try:
+        return json.loads(value)
+    except json.JSONDecodeError:
+        pass
+    try:
+        if "." in value:
+            return float(value)
+        return int(value)
+    except ValueError:
+        return value
+
+
+def _display_value(value: Any) -> str:
+    if isinstance(value, dict) and "value" in value:
+        value = value.get("value")
+    if isinstance(value, (list, dict)):
+        return json.dumps(value, sort_keys=True)
+    return "" if value is None else str(value)
+
+
+def _apply_filter_columns(conn, job_id: str, intelligence: dict[str, Any]) -> None:
+    from resume_engine.jd_intelligence.job_analyzer import filter_columns
+
+    cols = filter_columns(intelligence)
+    conn.execute(
+        """
+        UPDATE jd_library SET
+          job_intelligence_json=?,
+          job_intelligence_schema_version=?,
+          country=?, state=?, city=?,
+          work_mode=?, employment_type=?, engagement_type=?,
+          salary_min=?, salary_max=?, salary_currency=?, salary_period=?,
+          sponsorship_status=?, authorization_requirement=?, student_visa_status=?,
+          clearance_status=?, minimum_years_experience=?,
+          seniority=?, primary_family=?, secondary_family=?,
+          updated_at=?
+        WHERE id=?
+        """,
+        (
+            json.dumps(intelligence, sort_keys=True),
+            cols["job_intelligence_schema_version"],
+            cols["country"], cols["state"], cols["city"],
+            cols["work_mode"], cols["employment_type"], cols["engagement_type"],
+            cols["salary_min"], cols["salary_max"], cols["salary_currency"],
+            cols["salary_period"], cols["sponsorship_status"],
+            cols["authorization_requirement"], cols["student_visa_status"],
+            cols["clearance_status"], cols["minimum_years_experience"],
+            cols["seniority"], cols["primary_family"], cols["secondary_family"],
+            _now(),
+            job_id,
+        ),
+    )
+
+
+def apply_manual_override(
+    job_id: str,
+    *,
+    field_name: str,
+    new_value_raw: str,
+    reason: str | None = None,
+    actor: str | None = None,
+) -> dict[str, Any]:
+    """Apply an admin override to the current intelligence JSON and record history."""
+    from resume_engine.jd_intelligence.schema import (
+        SOURCE_MANUAL,
+        STATUS_MANUAL_OVERRIDE,
+    )
+    from resume_engine.jd_intelligence.schema import field as intelligence_field
+
+    allowed = {name for name, _label in OVERRIDE_FIELDS}
+    if field_name not in allowed:
+        raise ValueError(f"Unsupported override field: {field_name}")
+    job = get_job(job_id)
+    intelligence = dict(job.get("job_intelligence") or {})
+    if not intelligence:
+        intelligence = persist_job_intelligence_for_job(job_id)
+
+    new_value = _coerce_override_value(new_value_raw)
+    old_value = intelligence.get(field_name)
+    evidence = f"Manual override: {reason}" if reason else "Manual override"
+    if isinstance(old_value, dict) and "value" in old_value:
+        intelligence[field_name] = intelligence_field(
+            new_value,
+            status=STATUS_MANUAL_OVERRIDE,
+            source=SOURCE_MANUAL,
+            evidence=evidence,
+            manual_override=True,
+        )
+    else:
+        intelligence[field_name] = new_value
+    override = {
+        "field_name": field_name,
+        "old_value": _display_value(old_value),
+        "new_value": _display_value(new_value),
+        "actor": actor,
+        "timestamp": _now(),
+        "reason": reason,
+        "analysis_version": job.get("analysis_version") or 0,
+    }
+    overrides = list(intelligence.get("manual_overrides") or [])
+    overrides.append(override)
+    intelligence["manual_overrides"] = overrides
+
+    with connect_ui_db() as conn:
+        _apply_filter_columns(conn, job_id, intelligence)
+        conn.execute(
+            """
+            INSERT INTO job_manual_overrides(
+              job_id, field_name, old_value, new_value, actor, reason,
+              analysis_version, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                job_id,
+                field_name,
+                override["old_value"],
+                override["new_value"],
+                actor,
+                reason,
+                override["analysis_version"],
+                override["timestamp"],
+            ),
+        )
+        conn.execute(
+            """
+            INSERT INTO job_analysis_versions(
+              job_id, version, job_intelligence_json, blueprint_json, actor, note, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                job_id,
+                int(job.get("analysis_version") or 0),
+                json.dumps(intelligence, sort_keys=True),
+                None,
+                actor,
+                f"manual override: {field_name}",
+                override["timestamp"],
+            ),
+        )
+        conn.commit()
+    record_audit_event(
+        action="job.manual_override",
+        actor=actor,
+        entity_type="jd_library",
+        entity_id=job_id,
+        metadata=override,
+    )
+    return get_job(job_id)
+
+
+def list_manual_overrides(job_id: str, *, limit: int = 50) -> list[dict[str, Any]]:
+    ensure_ui_schema()
+    with connect_ui_db() as conn:
+        rows = conn.execute(
+            """
+            SELECT * FROM job_manual_overrides
+            WHERE job_id = ?
+            ORDER BY created_at DESC, id DESC
+            LIMIT ?
+            """,
+            (job_id, limit),
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def list_analysis_versions(job_id: str, *, limit: int = 20) -> list[dict[str, Any]]:
+    ensure_ui_schema()
+    with connect_ui_db() as conn:
+        rows = conn.execute(
+            """
+            SELECT id, job_id, version, actor, note, created_at, job_intelligence_json
+            FROM job_analysis_versions
+            WHERE job_id = ?
+            ORDER BY created_at DESC, id DESC
+            LIMIT ?
+            """,
+            (job_id, limit),
+        ).fetchall()
+    out = []
+    for row in rows:
+        item = dict(row)
+        try:
+            payload = json.loads(item.pop("job_intelligence_json") or "{}")
+        except json.JSONDecodeError:
+            payload = {}
+        item["schema_version"] = payload.get("schema_version")
+        item["quality_flags"] = payload.get("quality_flags") or []
+        out.append(item)
+    return out
 
 
 def update_job(
@@ -250,6 +744,7 @@ def update_job(
     title = updates.get("title", existing["title"])
     company = updates.get("company", existing["company"])
     location = updates.get("location", existing["location"])
+    job_url = updates.get("job_url", existing["job_url"])
     seniority = updates.get("seniority", existing["seniority"])
     pf = updates.get("primary_family", existing["primary_family"])
     sf = updates.get("secondary_family", existing["secondary_family"])
@@ -258,6 +753,7 @@ def update_job(
     status = updates.get("status", existing["status"])
     new_jd_text = updates.get("jd_text")
     jd_text_changed = new_jd_text is not None and (new_jd_text or "") != (existing.get("jd_text") or "")
+    explicit_role_fields = any(key in updates for key in ("seniority", "primary_family", "secondary_family"))
 
     with connect_ui_db() as conn:
         if jd_text_changed:
@@ -266,14 +762,15 @@ def update_job(
             conn.execute(
                 """
                 UPDATE jd_library SET
-                  title=?, company=?, location=?, seniority=?,
+                  title=?, company=?, location=?, job_url=?, seniority=?,
                   primary_family=?, secondary_family=?, status=?,
                   jd_text=?, blueprint_path=NULL, analysis_status=?,
-                  jd_content_hash=NULL, updated_at=?
+                  jd_content_hash=NULL, job_intelligence_json=NULL,
+                  job_intelligence_schema_version=NULL, updated_at=?
                 WHERE id=?
                 """,
                 (
-                    title, company, location, seniority, pf, sf, status,
+                    title, company, location, job_url, seniority, pf, sf, status,
                     new_jd_text, ANALYSIS_NEEDS, now, job_id,
                 ),
             )
@@ -281,13 +778,18 @@ def update_job(
             conn.execute(
                 """
                 UPDATE jd_library SET
-                  title=?, company=?, location=?, seniority=?,
+                  title=?, company=?, location=?, job_url=?, seniority=?,
                   primary_family=?, secondary_family=?, status=?, updated_at=?
                 WHERE id=?
                 """,
-                (title, company, location, seniority, pf, sf, status, now, job_id),
+                (title, company, location, job_url, seniority, pf, sf, status, now, job_id),
             )
         conn.commit()
+
+    persist_job_intelligence_for_job(
+        job_id,
+        update_role_fields=jd_text_changed or not explicit_role_fields,
+    )
 
     from resume_engine.ui.services import match_service
 

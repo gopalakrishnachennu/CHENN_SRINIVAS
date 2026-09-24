@@ -1,0 +1,23 @@
+Database Engineer
+New York
+Permanent
+USD140000 - USD180000
+Financial Technology
+PR/577606_1776372627
+Database Engineer
+What You'll Be Doing
+Own and optimize large-scale columnar database systems, with Vertica as a core technology
+Design and build high-performance data pipelines supporting analytics and real-time decision-making
+Lead performance tuning, schema design, and automation efforts
+Work closely with engineering and business teams to support data-driven initiatives
+Balance independent ownership with collaboration across a global team
+
+
+Technical Skills & Requirements
+3-5 years of experience in database engineering, data infrastructure, or related roles
+Strong experience with columnar database systems, particularly Vertica (required)
+Hands-on experience with Apache Iceberg and modern table formats
+Strong understanding of Parquet and analytical data storage concepts
+Proficiency in SQL and Python
+Working knowledge of PowerShell and/or shell scripting
+Experience with performance tuning, data modeling, and large-scale analytical workloads

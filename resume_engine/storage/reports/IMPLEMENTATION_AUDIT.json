@@ -1,7 +1,7 @@
 {
   "phase": "Phase 2.6",
-  "implemented_count": 42,
-  "total_count": 42,
+  "implemented_count": 51,
+  "total_count": 51,
   "implementation_percent": 100.0,
   "modules": {
     "strategy_builder": {
@@ -423,6 +423,105 @@
       "tested": false
     },
     "phase3_ui": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
+    },
+    "ui_auth": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
+    },
+    "phase1_live_harness": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
+    },
+    "online_feature_builder": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
+    },
+    "online_reward_engine": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
+    },
+    "online_river_policy": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
+    },
+    "online_policy_store": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
+    },
+    "online_shadow_runner": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
+    },
+    "online_replay": {
+      "exists": true,
+      "imports_successfully": true,
+      "unit_test_exists": true,
+      "unit_test_passed": null,
+      "integration_test_exists": false,
+      "integration_test_passed": null,
+      "live_test_status": "LIVE_TEST_NOT_RUN",
+      "implemented": true,
+      "tested": false
+    },
+    "online_evaluator": {
       "exists": true,
       "imports_successfully": true,
       "unit_test_exists": true,

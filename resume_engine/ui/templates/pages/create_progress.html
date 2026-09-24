@@ -1,47 +1,224 @@
 {% extends "base.html" %}
 {% block title %}Creating Resume · Resume Engine{% endblock %}
-{% block page_title %}Creating resume…{% endblock %}
-{% block page_sub %}{{ progress.headline }}{% endblock %}
+{% block page_title %}Resume Run Console{% endblock %}
+{% block page_sub %}{{ progress.current_message }}{% endblock %}
 {% block content %}
-<div class="stack">
-  <div class="card">
-    <h2 id="headline">{{ progress.headline }}</h2>
-    <ul class="progress-list" id="steps">
-      {% for s in progress.steps %}
-      <li class="{% if s.done %}done{% endif %} {% if s.current %}current{% endif %}" data-key="{{ s.key }}">
-        <span class="check">{% if s.done %}✓{% endif %}</span>
-        <span>{{ s.label }}</span>
-      </li>
-      {% endfor %}
-    </ul>
-    {% if progress.ready %}
-      <div class="actions" style="margin-top:1.25rem;">
-        <a class="btn" href="{{ url_for('resumes.detail', run_id=progress.run_id) }}">Open Resume</a>
-        <a class="btn secondary" href="{{ url_for('resumes.index') }}">Resume Library</a>
+<div class="stack run-console">
+  <div class="card run-hero">
+    <div class="section-title">
+      <div>
+        <h2 id="headline">{{ progress.headline }}</h2>
+        <div class="muted tiny" id="current-message">{{ progress.current_message }}</div>
       </div>
-    {% endif %}
-    {% if progress.error %}
-      <div class="banner danger" style="margin-top:1rem;">{{ progress.error }}</div>
-    {% endif %}
-    <details class="details-block">
-      <summary>View Details</summary>
-      <pre class="tiny">status={{ job.status }} stage={{ job.stage }} run_id={{ job.run_id }}</pre>
-    </details>
+      <span class="pill {% if progress.warning %}warn{% elif progress.status == 'COMPLETED' %}pass{% elif progress.status == 'FAILED' %}fail{% else %}generating{% endif %}" id="status-pill">{{ progress.status }}</span>
+    </div>
+    <div class="progress-meter" aria-label="Resume generation progress">
+      <div class="progress-meter-fill" id="progress-fill" style="width: {{ progress.percent }}%;"></div>
+    </div>
+    <div class="run-kpis">
+      <div>
+        <span class="muted tiny">Model</span>
+        <strong id="model-name">{{ progress.model or '—' }}</strong>
+      </div>
+      <div>
+        <span class="muted tiny">Elapsed</span>
+        <strong id="elapsed">{{ progress.elapsed_seconds or 0 }}s</strong>
+      </div>
+      <div>
+        <span class="muted tiny">OpenAI Key</span>
+        <strong id="key-status">{{ progress.openai_key.label }}</strong>
+      </div>
+      <div>
+        <span class="muted tiny">Requests</span>
+        <strong id="request-count">{{ progress.openai_usage.totals.requests or 0 }}</strong>
+      </div>
+      <div>
+        <span class="muted tiny">Tokens</span>
+        <strong id="token-count">{{ "{:,}".format(progress.openai_usage.totals.total_tokens or 0) }}</strong>
+      </div>
+      <div>
+        <span class="muted tiny">Artifacts</span>
+        <strong id="artifact-formats">{{ progress.artifact_label }}</strong>
+      </div>
+    </div>
+    <div class="actions" id="ready-actions" style="margin-top:1rem; {% if not progress.ready %}display:none;{% endif %}">
+      <a class="btn" id="open-resume-link" href="{{ url_for('resumes.detail', run_id=progress.run_id) }}">Open Resume</a>
+      <a class="btn secondary" href="{{ url_for('resumes.index') }}">Resume Library</a>
+    </div>
+    <div class="banner {% if progress.error %}danger{% endif %}" id="error-banner" style="margin-top:1rem; {% if not progress.error and not progress.warning %}display:none;{% endif %}">
+      {{ progress.error or (progress.current_message if progress.warning else '') }}
+    </div>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <div class="section-title">
+        <div>
+          <h3>Live Pipeline</h3>
+          <div class="muted tiny">Each row is a real generation milestone, not a decorative spinner.</div>
+        </div>
+      </div>
+      <ul class="progress-list" id="steps">
+        {% for s in progress.steps %}
+        <li class="{% if s.done %}done{% endif %} {% if s.skipped %}skipped{% endif %} {% if s.current %}current{% endif %}" data-key="{{ s.key }}">
+          <span class="check">{% if s.done %}OK{% elif s.skipped %}--{% elif s.current %}...{% endif %}</span>
+          <span>{{ s.label }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="section-title">
+        <div>
+          <h3>Run Context</h3>
+          <div class="muted tiny">Why it can take time and what the worker is allowed to do.</div>
+        </div>
+      </div>
+      <div class="context-grid">
+        <div><span>Variants</span><strong id="variant-count">{{ progress.variant_count or '—' }}</strong></div>
+        <div><span>Repair</span><strong id="repair-enabled">{% if progress.repair %}ON{% else %}OFF{% endif %}</strong></div>
+        <div><span>Laya Validation</span><strong id="laya-enabled">{% if progress.laya %}ON{% else %}OFF{% endif %}</strong></div>
+        <div><span>Mode</span><strong>{{ progress.payload_summary.online_mode or 'shadow' }}</strong></div>
+        <div><span>OpenAI call policy</span><strong id="call-policy">{{ progress.call_policy }}</strong></div>
+      </div>
+      <div class="banner" style="margin-top:1rem;">
+        <strong>What is happening now:</strong>
+        <span id="detail-text">{{ progress.current_message }}</span>
+      </div>
+      <details class="details-block" open>
+        <summary>Technical Details</summary>
+        <pre class="tiny" id="technical-details">status={{ progress.status }}
+stage={{ progress.stage }}
+run_id={{ progress.run_id }}
+job_id={{ progress.job_id }}</pre>
+      </details>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">
+      <div>
+        <h3>OpenAI Activity</h3>
+        <div class="muted tiny">Requests and token counts appear here as soon as OpenAI responses return.</div>
+      </div>
+      <span class="pill" id="cost-pill">${{ "%.4f"|format(progress.openai_usage.totals.estimated_cost_usd or 0) }} est.</span>
+    </div>
+    <table>
+      <thead><tr><th>When</th><th>Workflow</th><th>Model</th><th>Status</th><th>Input</th><th>Output</th><th>Total</th></tr></thead>
+      <tbody id="openai-events">
+        {% for row in progress.openai_usage.recent %}
+        <tr>
+          <td class="tiny">{{ row.created_at }}</td>
+          <td>{{ row.operation|replace('_',' ')|title }}</td>
+          <td class="mono">{{ row.model }}</td>
+          <td><span class="pill {% if row.success %}pass{% else %}fail{% endif %}">{% if row.success %}OK{% else %}FAILED{% endif %}</span></td>
+          <td>{{ "{:,}".format(row.input_tokens or 0) }}</td>
+          <td>{{ "{:,}".format(row.output_tokens or 0) }}</td>
+          <td>{{ "{:,}".format(row.total_tokens or 0) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="muted">No OpenAI response has returned yet. If the run is on generation, the app is waiting on the selected model.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
 {% endblock %}
 {% block scripts %}
 <script>
 const jobId = {{ job.job_id|tojson }};
+const runId = {{ progress.run_id|tojson }};
+
+function fmtNum(value) {
+  return Number(value || 0).toLocaleString();
+}
+
+function fmtElapsed(seconds) {
+  seconds = Number(seconds || 0);
+  if (seconds < 60) return `${seconds}s`;
+  const mins = Math.floor(seconds / 60);
+  const rest = seconds % 60;
+  return `${mins}m ${rest}s`;
+}
+
+function renderEvents(events) {
+  const tbody = document.getElementById('openai-events');
+  if (!tbody) return;
+  if (!events || !events.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="muted">No OpenAI response has returned yet. If the run is on generation, the app is waiting on the selected model.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = events.map((row) => `
+    <tr>
+      <td class="tiny">${row.created_at || ''}</td>
+      <td>${String(row.operation || '').replaceAll('_', ' ')}</td>
+      <td class="mono">${row.model || '-'}</td>
+      <td><span class="pill ${row.success ? 'pass' : 'fail'}">${row.success ? 'OK' : 'FAILED'}</span></td>
+      <td>${fmtNum(row.input_tokens)}</td>
+      <td>${fmtNum(row.output_tokens)}</td>
+      <td>${fmtNum(row.total_tokens)}</td>
+    </tr>
+  `).join('');
+}
+
+function renderSteps(steps) {
+  const root = document.getElementById('steps');
+  if (!root) return;
+  root.innerHTML = steps.map((step) => `
+    <li class="${step.done ? 'done' : ''} ${step.skipped ? 'skipped' : ''} ${step.current ? 'current' : ''}" data-key="${step.key}">
+      <span class="check">${step.done ? 'OK' : step.skipped ? '--' : step.current ? '...' : ''}</span>
+      <span>${step.label}</span>
+    </li>
+  `).join('');
+}
+
+function render(data) {
+  document.getElementById('headline').textContent = data.headline || 'Creating resume...';
+  document.getElementById('current-message').textContent = data.current_message || '';
+  document.getElementById('detail-text').textContent = data.current_message || '';
+  const statusPill = document.getElementById('status-pill');
+  statusPill.textContent = data.status || 'RUNNING';
+  statusPill.className = `pill ${data.status === 'FAILED' ? 'fail' : data.warning ? 'warn' : data.status === 'COMPLETED' ? 'pass' : 'generating'}`;
+  document.getElementById('progress-fill').style.width = `${data.percent || 0}%`;
+  document.getElementById('model-name').textContent = data.model || '-';
+  document.getElementById('elapsed').textContent = fmtElapsed(data.elapsed_seconds);
+  document.getElementById('key-status').textContent = (data.openai_key && data.openai_key.label) || 'UNKNOWN';
+  document.getElementById('request-count').textContent = fmtNum(data.openai_usage && data.openai_usage.totals && data.openai_usage.totals.requests);
+  document.getElementById('token-count').textContent = fmtNum(data.openai_usage && data.openai_usage.totals && data.openai_usage.totals.total_tokens);
+  document.getElementById('cost-pill').textContent = `$${Number((data.openai_usage && data.openai_usage.totals && data.openai_usage.totals.estimated_cost_usd) || 0).toFixed(4)} est.`;
+  document.getElementById('artifact-formats').textContent = data.artifact_label || '-';
+  document.getElementById('variant-count').textContent = data.variant_count || '-';
+  document.getElementById('repair-enabled').textContent = data.repair ? 'ON' : 'OFF';
+  document.getElementById('laya-enabled').textContent = data.laya ? 'ON' : 'OFF';
+  document.getElementById('call-policy').textContent = data.call_policy || '-';
+  document.getElementById('technical-details').textContent = `status=${data.status}\nstage=${data.stage}\nrun_id=${data.run_id}\njob_id=${data.job_id}`;
+  renderSteps(data.steps || []);
+  renderEvents(data.openai_usage ? data.openai_usage.recent : []);
+  const error = document.getElementById('error-banner');
+  if (data.error || data.warning) {
+    error.style.display = '';
+    error.className = `banner ${data.error ? 'danger' : ''}`;
+    error.textContent = data.error || data.current_message || 'The run completed without artifacts.';
+  } else {
+    error.style.display = 'none';
+  }
+  const actions = document.getElementById('ready-actions');
+  if (actions) actions.style.display = data.ready ? '' : 'none';
+}
+
 async function poll() {
   const r = await fetch(`/create/api/progress/${jobId}`);
-  if (!r.ok) return;
+  if (!r.ok) {
+    setTimeout(poll, 2000);
+    return;
+  }
   const data = await r.json();
-  document.getElementById('headline').textContent = data.headline;
-  if (data.ready) location.href = `/resumes/${data.run_id}`;
-  if (data.status === 'FAILED') return;
-  setTimeout(poll, 1500);
+  render(data);
+  if (data.status !== 'COMPLETED' && data.status !== 'FAILED') {
+    setTimeout(poll, 1500);
+  }
 }
-setTimeout(poll, 1200);
+setTimeout(poll, 800);
 </script>
 {% endblock %}

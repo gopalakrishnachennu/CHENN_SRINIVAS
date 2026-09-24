@@ -1,0 +1,5 @@
+Data Engineer II, Fire TV
+Amazon · Bengaluru, Karnataka
+https://www.amazon.jobs/en/jobs/10512908/data-engineer-ii-fire-tv
+
+Amazon Fire TV is hiring a Bengaluru Data Engineer II to build data foundations supporting GenAI, RAG and agentic analytics. The role owns scalable data pipelines and quality controls, including guardrails that keep AI-generated SQL and metrics reliable. Required experience includes data engineering, modeling, warehousing, ETL, query languages and scripting such as Python or Scala. Preferred experience includes AWS data services, Hadoop/Spark, AI/ML infrastructure and using AI to build solutions or improve engineering productivity.

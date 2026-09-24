@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Edit {{ job.title or 'Job' }} · Resume Engine{% endblock %}
+{% block page_title %}Edit Job{% endblock %}
+{% block page_sub %}JD-owned fields are recalculated from the pasted description and preserved in history.{% endblock %}
+{% block content %}
+{% macro val(obj, default='—') -%}
+  {%- if obj is mapping -%}
+    {{ obj.value if obj.value is not none and obj.value != '' else default }}
+  {%- else -%}
+    {{ obj if obj is not none and obj != '' else default }}
+  {%- endif -%}
+{%- endmacro %}
+{% set form = form_values if form_values is defined and form_values else {} %}
+<div class="stack">
+  <form method="post" class="card">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+    <div class="section-title">
+      <div>
+        <h2>JD Intake Fields</h2>
+        <div class="muted tiny">Required before a job enters the workflow: Job Title, Company, Location, JD URL, and Raw JD.</div>
+      </div>
+      <span class="pill warn">Required intake</span>
+    </div>
+    {% if required_missing %}
+      <div class="flash error">Complete these fields before saving: {{ required_missing|join(', ') }}</div>
+    {% endif %}
+    <div class="form-grid">
+      <div><label>Job Title <span class="muted tiny">Required</span></label><input type="text" name="title" value="{{ form.get('title', job.title or '') }}" required/></div>
+      <div><label>Company <span class="muted tiny">Required</span></label><input type="text" name="company" value="{{ form.get('company', job.company or '') }}" required/></div>
+      <div><label>Location <span class="muted tiny">Required</span></label><input type="text" name="location" value="{{ form.get('location', job.location or '') }}" placeholder="City, State or City, State, Country" required/></div>
+      <div><label>JD URL <span class="muted tiny">Required</span></label><input type="url" name="job_url" value="{{ form.get('job_url', job.job_url or '') }}" placeholder="https://company.com/jobs/123" required/></div>
+      <div class="full">
+        <label>Raw JD <span class="muted tiny">Required</span></label>
+        <textarea name="jd_text" class="mono" rows="18" required>{{ form.get('jd_text', job.jd_text or '') }}</textarea>
+      </div>
+    </div>
+    <div class="actions" style="margin-top:1rem;">
+      <button class="btn" type="submit">Save Job</button>
+      <a class="btn ghost" href="{{ url_for('jobs.detail', job_id=job.id) }}">Cancel</a>
+    </div>
+  </form>
+
+  <div class="grid two">
+    <div class="card">
+      <div class="section-title">
+        <div>
+          <h2>Laya Role Assignment</h2>
+          <div class="muted tiny">Saved from JD analysis; use Advanced manual overrides only for audited corrections.</div>
+        </div>
+        <span class="pill ok">Auto</span>
+      </div>
+      <div class="meta-row">
+        <div>Primary Family: <strong>{{ job.primary_family_display or val(intel.primary_family) }}</strong></div>
+        <div>Secondary Family: <strong>{{ job.secondary_family_display or val(intel.secondary_family) }}</strong></div>
+        <div>Seniority: <strong>{{ val(intel.seniority, job.seniority) }}</strong></div>
+        <div>Experience Years: <strong>{{ val(intel.minimum_years_experience, job.minimum_years_experience) }}</strong></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">
+        <div>
+          <h2>Application Metrics</h2>
+          <div class="muted tiny">Useful fields for job application forms and recruiter calls.</div>
+        </div>
+        <span class="pill">Extracted</span>
+      </div>
+      <div class="meta-row">
+        <div>Salary: <strong>{% if job.salary_min %}{{ job.salary_currency or '' }} {{ '{:,.0f}'.format(job.salary_min) }}{% if job.salary_max and job.salary_max != job.salary_min %}-{{ '{:,.0f}'.format(job.salary_max) }}{% endif %} {{ job.salary_period or '' }}{% else %}{{ (intel.salary_status.value if intel.salary_status is mapping else intel.salary_status)|default('NOT_STATED', true) }}{% endif %}</strong></div>
+        <div>Work Mode: <strong>{{ val(intel.work_mode, job.work_mode) }}</strong></div>
+        <div>Employment: <strong>{{ val(intel.employment_type, job.employment_type) }}</strong></div>
+        <div>Engagement: <strong>{{ val(intel.engagement_type, job.engagement_type) }}</strong></div>
+        <div>Authorization: <strong>{{ val(intel.authorization_requirement, job.authorization_requirement) }}</strong></div>
+        <div>Sponsorship: <strong>{{ val(intel.sponsorship_status, job.sponsorship_status) }}</strong></div>
+        <div>OPT/CPT: <strong>{{ val(intel.student_visa_status, job.student_visa_status) }}</strong></div>
+        <div>Clearance: <strong>{{ val(intel.clearance_status, job.clearance_status) }}</strong></div>
+        <div>JD URL: <strong>{% if job.job_url %}<a href="{{ job.job_url }}" target="_blank" rel="noopener">{{ job.job_url }}</a>{% else %}—{% endif %}</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

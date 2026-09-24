@@ -1,27 +1,99 @@
 {
-  "candidate_name": "PASTE_CANDIDATE_NAME_HERE",
-  "target_background_summary": "Paste truthful candidate background here. Do not add anything the candidate has not actually done.",
+  "candidate_name": "Gopala Krishna Chennu",
+  "email": "chennugopalakrishna2@gmail.com",
+  "phone": "347-470-9287",
+  "location": "University Place, WA",
+  "target_background_summary": "Database Engineer / Database Administrator with 5+ years supporting Microsoft SQL Server, Azure SQL, and hybrid cloud database platforms. Experience includes performance tuning, AlwaysOn Availability Groups, monitoring, backup/DR, Azure DevOps deployments, and production incident response at ExxonMobil, Thomson Reuters, and Tiger Analytics.",
   "technical_skills": [
+    "Microsoft SQL Server",
+    "T-SQL",
+    "Azure",
+    "Azure SQL",
+    "Azure Synapse",
+    "AlwaysOn Availability Groups",
+    "PowerShell",
+    "CI/CD",
+    "Azure DevOps",
+    "MySQL",
+    "MongoDB",
+    "Snowflake",
+    "Indexing",
+    "Query tuning",
+    "Backup and disaster recovery",
+    "Database monitoring",
     "Python",
-    "SQL"
+    "AWS",
+    "Terraform",
+    "Docker",
+    "Kubernetes"
   ],
   "experience": [
     {
-      "company": "Company Name",
-      "title": "Job Title",
-      "dates": "YYYY-Present",
+      "company": "ExxonMobil",
+      "title": "Database Administrator / Database Engineer",
+      "dates": "Jul 2025 – Present",
       "truthful_facts": [
-        "Paste truthful experience facts here.",
-        "Include tools actually used, real responsibilities, and real outcomes."
+        "Supported QA and production Microsoft SQL Server environments through monitoring, maintenance, and incident response.",
+        "Designed and managed Azure Synapse infrastructure and analytics pipelines, promoting changes through Azure DevOps to production.",
+        "Tuned T-SQL queries, indexes, and stored procedures using execution plans and metrics.",
+        "Configured SQL Server monitoring utilities, alerts, and thresholds to detect blocking, locking, and performance issues.",
+        "Implemented and tested SQL Server backup and restore strategies aligned with RPO/RTO requirements.",
+        "Supported high availability and disaster recovery using AlwaysOn Availability Groups and failover testing.",
+        "Managed database security controls, permissions, and access policies.",
+        "Assisted with database deployments and CI/CD validation for controlled production releases."
+      ]
+    },
+    {
+      "company": "Thomson Reuters",
+      "title": "Cloud Database Engineer",
+      "dates": "Oct 2024 – May 2025",
+      "truthful_facts": [
+        "Supported production SQL Server environments with monitoring, maintenance, and incident support.",
+        "Optimized stored procedures, indexing strategies, and query execution plans.",
+        "Supported cloud migrations of legacy SQL Server databases to Microsoft Azure.",
+        "Implemented disaster recovery architectures targeting sub-hour RTO readiness.",
+        "Diagnosed reliability and performance issues using Extended Events, SQL Profiler, and DMV queries.",
+        "Collaborated with infrastructure, BI, and development teams on database best practices and security standards."
+      ]
+    },
+    {
+      "company": "Tiger Analytics",
+      "title": "Database Administrator",
+      "dates": "Sep 2019 – Jul 2023",
+      "truthful_facts": [
+        "Designed and maintained database schemas, normalization models, and indexing strategies.",
+        "Executed and validated database backup strategies, recovery testing, and disaster recovery plans.",
+        "Monitored SQL Server health and resolved locks, blocking, and concurrency issues.",
+        "Tuned T-SQL queries and optimized server configurations for throughput and stability.",
+        "Developed PowerShell automation scripts for repetitive administrative tasks.",
+        "Coordinated deployment of database change scripts with approval workflows and version control."
       ]
     }
   ],
   "projects": [
     {
-      "name": "Project Name",
+      "name": "Azure Synapse / Enterprise BI delivery",
       "truthful_facts": [
-        "Paste truthful project facts here."
+        "Built and managed Azure Synapse infrastructure and pipelines supporting Enterprise BI data delivery.",
+        "Promoted approved Synapse and database changes via Azure DevOps production pipelines."
       ]
+    },
+    {
+      "name": "SQL Server HA/DR and monitoring hardening",
+      "truthful_facts": [
+        "Implemented RPO/RTO-aligned backup/restore testing and AlwaysOn Availability Group failover validation.",
+        "Reduced monitoring noise and improved incident detection with tuned SQL Server alerts and thresholds."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "degree": "Master of Science – Information Technology Management",
+      "school": "Wilmington University, USA"
+    },
+    {
+      "degree": "Bachelor of Technology in Computer Science",
+      "school": "SRM University, India"
     }
   ],
   "certifications": []

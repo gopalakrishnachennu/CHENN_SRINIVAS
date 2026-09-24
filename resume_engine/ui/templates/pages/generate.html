@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block page_title %}Generate{% endblock %}
-{% block page_sub %}Blueprint → Strategy → Variants → Validate → Repair → Learn → Export{% endblock %}
+{% block page_sub %}One resume, one OpenAI generation attempt, local validation, and export.{% endblock %}
 {% block content %}
 <div class="banner warn">Online learning mode forced to <strong>shadow</strong>. River active production ranking is locked.</div>
 <div class="card">
@@ -16,13 +16,13 @@
         </select>
       </div>
       <div><label>Candidate profile path (CANDIDATE mode)</label><input name="candidate_profile_path" value="{{ candidate_profile_path or 'candidate_profile.json' }}"/></div>
-      <div><label>Variant count</label><input type="number" min="1" max="10" name="variant_count" value="{{ defaults.variant_count }}"/></div>
+      <div><label>Resume count</label><input type="number" min="1" max="10" name="variant_count" value="{{ defaults.variant_count }}"/></div>
       <div><label>OpenAI model</label><input name="model" value="{{ defaults.model }}"/></div>
       <div><label>Custom run ID (optional)</label><input name="run_id" placeholder="uuid"/></div>
     </div>
     <div class="actions" style="margin-top:0.8rem;">
       <label><input type="checkbox" name="use_laya" value="1" {% if defaults.laya %}checked{% endif %}/> Laya</label>
-      <label><input type="checkbox" name="repair" value="1" {% if defaults.repair %}checked{% endif %}/> Repair</label>
+      <label><input type="checkbox" name="repair" value="1" {% if defaults.repair %}checked{% endif %}/> Extra AI repair call</label>
       <label><input type="checkbox" name="export_docx" value="1" {% if defaults.docx %}checked{% endif %}/> DOCX</label>
       <label><input type="checkbox" name="export_pdf" value="1" {% if defaults.pdf %}checked{% endif %}/> PDF</label>
     </div>

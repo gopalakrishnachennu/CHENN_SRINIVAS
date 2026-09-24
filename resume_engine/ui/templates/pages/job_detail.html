@@ -3,40 +3,345 @@
 {% block page_title %}{{ job.title or 'Job' }}{% endblock %}
 {% block page_sub %}{{ job.company or '' }}{% if job.location %} · {{ job.location }}{% endif %}{% endblock %}
 {% block content %}
+{% macro val(obj, default='—') -%}
+  {%- if obj is mapping -%}
+    {{ obj.value if obj.value is not none and obj.value != '' else default }}
+  {%- else -%}
+    {{ obj if obj is not none and obj != '' else default }}
+  {%- endif -%}
+{%- endmacro %}
 <div class="stack">
   <div class="card">
-    <div class="meta-row">
-      <div>Target Role: <strong>{{ public.target_role or job.title }}</strong></div>
-      <div>Seniority: <strong>{{ public.seniority or job.seniority or '—' }}</strong></div>
-      <div>Primary Family: <strong>{{ public.primary_family_display or job.primary_family_display }}</strong></div>
-      <div>Secondary Family: <strong>{{ public.secondary_family_display or job.secondary_family_display }}</strong></div>
-      <div>Candidates Matched: <strong>{{ matched_count }}</strong></div>
+    <div class="section-title">
+      <div>
+        <h2>Overview</h2>
+        <div class="muted tiny">Schema {{ job.job_intelligence_schema_version or 'not analyzed' }} · {{ job.analysis_status }}</div>
+      </div>
+      <div class="actions">
+        {% if job.analysis_status == 'READY' and laya_review.ready_for_resume %}
+          <a class="btn" href="{{ url_for('create_resume.index', jd=job.id) }}">Create Resume</a>
+        {% endif %}
+        {% if job.analysis_status in ['NEEDS_ANALYSIS','FAILED'] and laya_review.readiness != 'BLOCKED' %}
+          <form method="post" action="{{ url_for('jobs.reanalyze', job_id=job.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+            <button class="btn" type="submit">{% if job.analysis_status == 'FAILED' %}Retry Analysis{% else %}Analyze Job{% endif %}</button>
+          </form>
+        {% elif laya_review.readiness != 'BLOCKED' %}
+          <form method="post" action="{{ url_for('jobs.reanalyze', job_id=job.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+            <button class="btn secondary" type="submit">Re-analyze</button>
+          </form>
+        {% endif %}
+        <a class="btn ghost" href="{{ url_for('jobs.edit', job_id=job.id) }}">Edit Job</a>
+        <a class="btn ghost" href="{{ url_for('jobs.raw_jd', job_id=job.id) }}">Raw JD</a>
+        <a class="btn ghost" href="{{ url_for('jobs.detail', job_id=job.id, advanced=1) if not show_advanced else url_for('jobs.detail', job_id=job.id) }}">
+          {% if show_advanced %}Hide Advanced{% else %}Advanced{% endif %}
+        </a>
+      </div>
     </div>
-
-    <h3>Must-Have Skills</h3>
-    <p>{% for s in public.must_have_skills or [] %}<span class="pill ok" style="margin:0.15rem;">{{ s if s is string else s }}</span> {% else %}<span class="muted">—</span>{% endfor %}</p>
-    <h3>Preferred Skills</h3>
-    <p>{% for s in public.preferred_skills or [] %}<span class="pill" style="margin:0.15rem;">{{ s if s is string else s }}</span> {% else %}<span class="muted">—</span>{% endfor %}</p>
-    <h3>Responsibilities</h3>
-    <ul>
-      {% for r in public.responsibilities or [] %}
-        <li>{{ r if r is string else r }}</li>
-      {% else %}
-        <li class="muted">—</li>
-      {% endfor %}
-    </ul>
-    <h3>Certifications</h3>
-    <p class="muted">{{ (public.certifications or [])|join(', ') or '—' }}</p>
-
-    <div class="actions" style="margin-top:1rem;">
-      <a class="btn" href="{{ url_for('create_resume.index', jd=job.id) }}">Create Resume</a>
-      <a class="btn ghost" href="{{ url_for('jobs.detail', job_id=job.id, advanced=1) if not show_advanced else url_for('jobs.detail', job_id=job.id) }}">
-        {% if show_advanced %}Hide Advanced Analysis{% else %}Advanced Analysis{% endif %}
-      </a>
+    <div class="meta-row">
+      <div>Title: <strong>{{ val(intel.target_role, job.title) }}</strong></div>
+      <div>Company: <strong>{{ job.company or '—' }}</strong></div>
+      <div>Req ID: <strong>{{ val(intel.requisition_id) }}</strong></div>
+      <div>JD URL: <strong>{% if job.job_url %}<a href="{{ job.job_url }}" target="_blank" rel="noopener">{{ job.job_url }}</a>{% else %}—{% endif %}</strong></div>
+      <div>Seniority: <strong>{{ val(intel.seniority, job.seniority) }}</strong></div>
+      <div>Primary Family: <strong>{{ public.primary_family_display or job.primary_family_display }}</strong></div>
+      <div>Secondary Family: <strong>{{ public.secondary_family_display or job.secondary_family_display or val(intel.secondary_family) }}</strong></div>
+      <div>Candidates Matched: <strong>{{ matched_count }}</strong></div>
     </div>
   </div>
 
+  {% if required_missing %}
+  <div class="card">
+    <div class="section-title">
+      <div>
+        <h2>Required Intake Missing</h2>
+        <div class="muted tiny">This job cannot be analyzed or used for resume creation until the intake contract is complete.</div>
+      </div>
+      <span class="pill warn">Blocked</span>
+    </div>
+    <div class="meta-row">
+      {% for field in required_missing %}
+        <div>{{ field }}: <strong>Required</strong></div>
+      {% endfor %}
+    </div>
+    <div class="actions" style="margin-top:1rem;">
+      <a class="btn" href="{{ url_for('jobs.edit', job_id=job.id) }}">Fix Intake</a>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <div class="section-title">
+      <div>
+        <h2>Laya Workflow Review</h2>
+        <div class="muted tiny">Typed decisions for intake, location, family, seniority, application metrics, match explanation, and resume guardrails.</div>
+      </div>
+      {% if laya_review.readiness == 'READY' %}
+        <span class="pill pass">READY</span>
+      {% elif laya_review.readiness == 'BLOCKED' %}
+        <span class="pill fail">BLOCKED</span>
+      {% elif laya_review.readiness == 'REVIEW' %}
+        <span class="pill warn">REVIEW</span>
+      {% else %}
+        <span class="pill">UNKNOWN</span>
+      {% endif %}
+    </div>
+    <div class="meta-row">
+      <div>Source: <strong>{{ laya_review.source or '—' }}</strong></div>
+      <div>Human Review: <strong>{% if laya_review.human_review_required %}Required{% else %}Not required{% endif %}</strong></div>
+      <div>Matching: <strong>{% if laya_review.ready_for_matching %}Ready{% else %}Blocked{% endif %}</strong></div>
+      <div>Resume: <strong>{% if laya_review.ready_for_resume %}Ready{% else %}Guarded{% endif %}</strong></div>
+    </div>
+    <div style="overflow:auto; margin-top:1rem;">
+      <table>
+        <thead>
+          <tr>
+            <th>Decision</th>
+            <th>Status</th>
+            <th>Confidence</th>
+            <th>Reason</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for decision in laya_review.decisions or [] %}
+            <tr>
+              <td><strong>{{ decision.label }}</strong></td>
+              <td>
+                {% if decision.status == 'PASS' %}<span class="pill pass">PASS</span>
+                {% elif decision.status == 'BLOCKED' %}<span class="pill fail">BLOCKED</span>
+                {% elif decision.status in ['WARN','NEEDS_HUMAN_REVIEW'] %}<span class="pill warn">{{ decision.status }}</span>
+                {% else %}<span class="pill">{{ decision.status }}</span>{% endif %}
+              </td>
+              <td>{{ decision.confidence }}</td>
+              <td>{{ decision.reason }}</td>
+              <td>{{ decision.action or '—' }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5" class="muted">No Laya workflow review available yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if laya_review.human_review_queue %}
+      <h3 style="margin-top:1rem;">Human Review Queue</h3>
+      <div class="meta-row">
+        {% for item in laya_review.human_review_queue %}
+          <div><strong>{{ item.label }}</strong>: {{ item.reason }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h3>Location & Work</h3>
+      <div class="meta-row">
+        <div>City: <strong>{{ val(intel.city) }}</strong></div>
+        <div>State: <strong>{{ val(intel.state) }}</strong></div>
+        <div>Country: <strong>{{ val(intel.country) }}</strong></div>
+        {% if intel.location_needs_review %}
+          <div><span class="pill warn">Location needs review</span></div>
+        {% endif %}
+        <div>Mode: <strong>{{ val(intel.work_mode, job.work_mode) }}</strong></div>
+        <div>Hybrid Days: <strong>{{ intel.hybrid_days_per_week if intel.hybrid_days_per_week is not none else '—' }}</strong></div>
+        <div>Timezone: <strong>{{ intel.timezone_requirement or '—' }}</strong></div>
+        <div>Relocation: <strong>{{ val(intel.relocation_status) }}</strong></div>
+        <div>Travel: <strong>{% if intel.travel_required is sameas true %}Yes{% elif intel.travel_required is sameas false %}No{% else %}—{% endif %}{% if intel.travel_percentage_max %}, up to {{ intel.travel_percentage_max }}%{% endif %}</strong></div>
+        <div>Shift: <strong>{{ val(intel.shift_type) }}</strong></div>
+        <div>On-call: <strong>{% if intel.on_call_required is sameas true %}Yes{% elif intel.on_call_required is sameas false %}No{% else %}—{% endif %}</strong></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Employment</h3>
+      <div class="meta-row">
+        <div>Employment Type: <strong>{{ val(intel.employment_type, job.employment_type) }}</strong></div>
+        <div>Engagement: <strong>{{ val(intel.engagement_type, job.engagement_type) }}</strong></div>
+        <div>Contract Duration: <strong>{% if intel.contract_duration_value %}{{ intel.contract_duration_value }} {{ intel.contract_duration_unit }}{% else %}—{% endif %}</strong></div>
+        <div>Start Date: <strong>{{ intel.expected_start_date or '—' }}</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h3>Compensation</h3>
+      <div class="meta-row">
+        <div>Salary: <strong>{% if job.salary_min %}{{ job.salary_currency }} {{ '{:,.0f}'.format(job.salary_min) }}{% if job.salary_max and job.salary_max != job.salary_min %}-{{ '{:,.0f}'.format(job.salary_max) }}{% endif %} {{ job.salary_period }}{% else %}{{ (intel.salary_status.value if intel.salary_status is mapping else intel.salary_status)|default('NOT_STATED', true) }}{% endif %}</strong></div>
+        <div>Bonus: <strong>{{ intel.bonus_raw_text or '—' }}</strong></div>
+        <div>Commission: <strong>{{ intel.commission_raw_text or '—' }}</strong></div>
+        <div>Equity: <strong>{{ intel.equity_type or '—' }}</strong></div>
+        <div>Sign-on: <strong>{% if intel.sign_on_bonus_available is sameas true %}Yes{% else %}—{% endif %}</strong></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Work Authorization</h3>
+      <div class="meta-row">
+        <div>Sponsorship: <strong>{{ val(intel.sponsorship_status, job.sponsorship_status) }}</strong></div>
+        <div>Requirement: <strong>{{ val(intel.authorization_requirement, job.authorization_requirement) }}</strong></div>
+        <div>H-1B: <strong>{{ val(intel.h1b_status) }}</strong></div>
+        <div>OPT/CPT: <strong>{{ val(intel.student_visa_status, job.student_visa_status) }}</strong></div>
+        <div>EAD: <strong>{{ val(intel.ead_status) }}</strong></div>
+        <div>Clearance: <strong>{{ val(intel.clearance_status, job.clearance_status) }} · {{ val(intel.clearance_level) }}</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h3>Requirements</h3>
+      <div class="meta-row">
+        <div>Experience: <strong>{{ val(intel.minimum_years_experience, job.minimum_years_experience) }}</strong></div>
+        <div>Degrees: <strong>{{ (intel.required_degree_levels or [])|join(', ') or '—' }}</strong></div>
+        <div>Majors: <strong>{{ (intel.required_majors or [])|join(', ') or '—' }}</strong></div>
+        <div>Equivalent Experience: <strong>{% if intel.equivalent_experience_accepted is sameas true %}Yes{% elif intel.equivalent_experience_accepted is sameas false %}No{% else %}—{% endif %}</strong></div>
+        <div>Mandatory Application Metrics: <strong>{{ val(intel.work_mode, job.work_mode) }} · {{ val(intel.employment_type, job.employment_type) }} · {{ val(intel.authorization_requirement, job.authorization_requirement) }}</strong></div>
+      </div>
+      <h3 style="margin-top:1rem;">Technologies</h3>
+      <p>{% for s in public.must_have_skills or [] %}<span class="pill ok" style="margin:0.15rem;">{{ s if s is string else s }}</span> {% else %}<span class="muted">—</span>{% endfor %}</p>
+      <p>{% for s in public.preferred_skills or [] %}<span class="pill" style="margin:0.15rem;">{{ s if s is string else s }}</span> {% endfor %}</p>
+      <h3>Certifications</h3>
+      <p class="muted">{{ (intel.certifications_required or public.certifications or [])|join(', ') or '—' }}</p>
+    </div>
+    <div class="card">
+      <h3>Responsibilities</h3>
+      <ul>
+        {% for r in intel.responsibilities or public.responsibilities or [] %}
+          <li>{{ r if r is string else r }}</li>
+        {% else %}
+          <li class="muted">—</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">
+      <div>
+        <h3>Job Description</h3>
+        <div class="muted tiny">Exact stored JD text used by parsers, Laya role assignment, and resume workflow checks.</div>
+      </div>
+      <a class="btn ghost" href="{{ url_for('jobs.raw_jd', job_id=job.id) }}">Open Full Raw JD</a>
+    </div>
+    <pre class="json" style="max-height:260px; overflow:auto;">{{ job.jd_text or 'No raw JD stored.' }}</pre>
+  </div>
+
   {% if show_advanced %}
+  <div class="grid two">
+    <form class="card" method="post" action="{{ url_for('jobs.override', job_id=job.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+      <div class="section-title">
+        <div>
+          <h2>Manual Override</h2>
+          <div class="muted tiny">Correct extracted JD intelligence without editing the raw job description.</div>
+        </div>
+        <span class="pill warn">Audited</span>
+      </div>
+      <div class="form-grid">
+        <div>
+          <label>Field</label>
+          <select name="field_name" required>
+            {% for field, label in override_fields %}
+              <option value="{{ field }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>New Value</label>
+          <input type="text" name="new_value" placeholder="REMOTE, 5, REQUIRED, Austin"/>
+        </div>
+        <div class="full">
+          <label>Reason</label>
+          <textarea name="reason" placeholder="Why this correction is needed"></textarea>
+        </div>
+      </div>
+      <div class="actions" style="margin-top:1rem;">
+        <button class="btn" type="submit">Save Override</button>
+      </div>
+    </form>
+
+    <div class="card">
+      <div class="section-title">
+        <div>
+          <h2>Analysis Versions</h2>
+          <div class="muted tiny">Every analysis and operator correction is preserved for review.</div>
+        </div>
+        <span class="pill">{{ analysis_versions|length }} records</span>
+      </div>
+      <div style="overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Version</th>
+              <th>Event</th>
+              <th>Schema</th>
+              <th>Flags</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in analysis_versions %}
+              <tr>
+                <td>{{ row.version }}</td>
+                <td>{{ row.note or 'analysis' }}</td>
+                <td>{{ row.schema_version or '—' }}</td>
+                <td>
+                  {% for flag in row.quality_flags %}
+                    <span class="pill warn">{{ flag }}</span>
+                  {% else %}
+                    <span class="muted">None</span>
+                  {% endfor %}
+                </td>
+                <td class="tiny">{{ row.created_at }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="5" class="muted">No analysis history yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">
+      <div>
+        <h2>Manual Override History</h2>
+        <div class="muted tiny">A visible trail of field-level corrections for downstream resume decisions.</div>
+      </div>
+      <span class="pill">{{ overrides|length }} changes</span>
+    </div>
+    <div style="overflow:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Old</th>
+            <th>New</th>
+            <th>Reason</th>
+            <th>Actor</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in overrides %}
+            <tr>
+              <td><strong>{{ row.field_name }}</strong></td>
+              <td>{{ row.old_value or '—' }}</td>
+              <td>{{ row.new_value or '—' }}</td>
+              <td>{{ row.reason or '—' }}</td>
+              <td>{{ row.actor or 'system' }}</td>
+              <td class="tiny">{{ row.created_at }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6" class="muted">No manual overrides yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <div class="card">
     <h2>Advanced Analysis</h2>
     <div class="meta-row">
@@ -46,7 +351,13 @@
       <div>P3: {{ advanced.p3 }}</div>
       <div>P4: {{ advanced.p4 }}</div>
     </div>
+    <h3>Quality Flags</h3>
+    <p>{% for flag in intel.quality_flags or [] %}<span class="pill warn" style="margin:0.15rem;">{{ flag }}</span>{% else %}<span class="muted">None</span>{% endfor %}</p>
     <details open>
+      <summary>Job intelligence JSON</summary>
+      <pre class="tiny" style="overflow:auto;max-height:320px;">{{ intel | tojson(indent=2) }}</pre>
+    </details>
+    <details>
       <summary>Raw blueprint JSON</summary>
       <pre class="tiny" style="overflow:auto;max-height:320px;">{{ advanced.raw | tojson(indent=2) }}</pre>
     </details>

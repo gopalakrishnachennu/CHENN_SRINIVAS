@@ -1,0 +1,33 @@
+Database Administrator II
+Location: Plano, TX
+
+DESCRIPTION
+The Database Administrator II is responsible for installing, maintaining, and securing database systems to ensure optimal performance, data integrity, and reliable backup and recovery. This role also supports database planning and development efforts and troubleshoots issues to meet user and business needs.
+
+REQUIREMENTS
+
+Education:
+Bachelor's degree preferred (B.S. or B.A. in Computer Science or related field) or equivalent.
+
+Experience:
+Minimum of 6 years of experience and/or training; or equivalent combination of education and experience in related field.
+
+Computer Skills:
+To perform this job successfully, an individual should have extensive knowledge and the ability to use MS-Office products (Word, Excel, Visio, PowerPoint, and Outlook), Linux based systems, SQL Server database systems, SSIS, PowerBI, Redgate, SolarWinds, MS Teams, WebEx, GoTo Meeting and other productivity tools.
+
+Other Requirements:
+- Expert knowledge of transactional databases and strong working knowledge of data warehouse environments
+- Ability to configure, maintain, and support Windows and SQL Server clusters
+- Experience implementing SQL Server Always On Availability Groups for high availability
+- Proficiency in monitoring and analyzing SQL Server databases (SQL Server 2022 and earlier), including related tools and scripts
+- Expert knowledge of SSIS packages, including deployment, upgrades, and ongoing maintenance
+- Experience with SQL Server Change Data Capture (CDC)
+- Experience supporting continuous integration and deployment for databases
+- Strong understanding of logical and physical database design principles
+- Ability to perform SQL Server and operating system-level performance tuning and monitoring
+- In-depth knowledge of SQL Server backup and recovery strategies and scenarios
+- Expert knowledge of SQL Server security management and data integrity
+- Experience working with data warehouse platforms, including extract, load, and transform (ELT/ETL) processes; SSIS experience required
+- Advanced industry knowledge of performance tuning, query optimization, and environment remediation
+- Experience with database tools such as Redgate, Spotlight, and OEM, with flexibility to learn and adopt new tools
+- Strong T-SQL and PL/SQL programming skills, including DDL and DML scripts, stored procedures, triggers, views, and related objects

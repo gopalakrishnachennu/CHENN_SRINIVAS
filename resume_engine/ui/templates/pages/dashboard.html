@@ -1,48 +1,88 @@
 {% extends "base.html" %}
 {% block title %}Dashboard · Resume Engine{% endblock %}
 {% block page_title %}Dashboard{% endblock %}
-{% block page_sub %}Add candidates, add jobs, see matches, generate resumes.{% endblock %}
+{% block page_sub %}Corporate resume operations from JD intake to governed exports.{% endblock %}
 {% block content %}
 <div class="stack">
-  <div class="hero-steps">
-    <div class="hero-step"><div class="n">1</div><strong>Add Candidates</strong><div class="muted tiny">Family + companies + timeline</div></div>
-    <div class="hero-step"><div class="n">2</div><strong>Add Jobs</strong><div class="muted tiny">Paste or upload JDs</div></div>
-    <div class="hero-step"><div class="n">3</div><strong>See Matches</strong><div class="muted tiny">Family-compatible roles</div></div>
-    <div class="hero-step"><div class="n">4</div><strong>Generate Resume</strong><div class="muted tiny">Download DOCX / PDF</div></div>
+  <div class="command-hero">
+    <div class="hero-panel">
+      <div>
+        <div class="eyebrow">Resume Intelligence Control Center</div>
+        <h2>Turn every job description into a truthful, validated, export-ready resume workflow.</h2>
+        <p>Add Candidates, analyze JDs, score strict matches, generate variants, repair failures, and export DOCX/PDF without exposing the technical engine to everyday operators.</p>
+        <div class="hero-actions">
+          <a class="btn xl" href="{{ url_for('create_resume.index') }}">Create Resume</a>
+          <a class="btn ghost" href="{{ url_for('jobs.create') }}">Analyze New JD</a>
+          <a class="btn ghost" href="{{ url_for('candidates.create') }}">Add Candidate</a>
+        </div>
+      </div>
+      <div class="hero-steps">
+        <div class="hero-step"><div class="n">01</div><strong>Add Candidates</strong><span class="tiny">Verified facts, family, companies, timeline</span></div>
+        <div class="hero-step"><div class="n">02</div><strong>Analyze Jobs</strong><span class="tiny">JD parsing, role family, priority tiers</span></div>
+        <div class="hero-step"><div class="n">03</div><strong>See Matches</strong><span class="tiny">Direct, secondary, hybrid, blocked</span></div>
+        <div class="hero-step"><div class="n">04</div><strong>Generate Resume</strong><span class="tiny">Variants, validation, repair, export</span></div>
+      </div>
+    </div>
+    <div class="control-panel">
+      <div class="lane-card">
+        <strong>Intake Desk</strong>
+        <ul>
+          <li>Candidate fact cards</li>
+          <li>JD upload and paste flow</li>
+          <li>Family registry guardrails</li>
+        </ul>
+      </div>
+      <div class="lane-card">
+        <strong>Decision Desk</strong>
+        <ul>
+          <li>Match explorer</li>
+          <li>Laya ambiguity checks</li>
+          <li>Validation gate review</li>
+        </ul>
+      </div>
+      <div class="lane-card">
+        <strong>Delivery Desk</strong>
+        <ul>
+          <li>Variant generation</li>
+          <li>Auto-repair loop</li>
+          <li>DOCX/PDF export library</li>
+        </ul>
+      </div>
+    </div>
   </div>
 
   <div class="grid cards">
-    <div class="card"><div class="metric">{{ data.candidates }}</div><div class="metric-label">Candidates</div></div>
-    <div class="card"><div class="metric">{{ data.active_jds }}</div><div class="metric-label">Active JDs</div></div>
-    <div class="card"><div class="metric">{{ data.new_matches }}</div><div class="metric-label">New Matches</div></div>
-    <div class="card"><div class="metric">{{ data.resumes_generated }}</div><div class="metric-label">Resumes Generated</div></div>
-    <div class="card"><div class="metric">{{ data.validated_resumes }}</div><div class="metric-label">Validated Resumes</div></div>
-    <div class="card"><div class="metric">{{ data.needs_attention }}</div><div class="metric-label">Needs Attention</div></div>
-  </div>
-
-  <div class="actions">
-    <a class="btn xl" href="{{ url_for('create_resume.index') }}">Create Resume</a>
-    <a class="btn secondary" href="{{ url_for('matches.index') }}">View Matches</a>
-    <a class="btn ghost" href="{{ url_for('candidates.create') }}">Add Candidate</a>
-    <a class="btn ghost" href="{{ url_for('jobs.create') }}">Add Job</a>
+    <div class="card metric-card"><div class="metric">{{ data.candidates }}</div><div class="metric-label">Candidates</div><div class="metric-note">Operator-ready profiles</div></div>
+    <div class="card metric-card"><div class="metric">{{ data.active_jds }}</div><div class="metric-label">Active JDs</div><div class="metric-note">Analyzed job library</div></div>
+    <div class="card metric-card"><div class="metric">{{ data.new_matches }}</div><div class="metric-label">New Matches</div><div class="metric-note">Fresh fit opportunities</div></div>
+    <div class="card metric-card"><div class="metric">{{ data.resumes_generated }}</div><div class="metric-label">Runs</div><div class="metric-note">Generated resume attempts</div></div>
+    <div class="card metric-card"><div class="metric">{{ data.validated_resumes }}</div><div class="metric-label">Validated</div><div class="metric-note">Passed gate output</div></div>
+    <div class="card metric-card"><div class="metric">{{ data.needs_attention }}</div><div class="metric-label">Needs Attention</div><div class="metric-note">Failures and rework</div></div>
   </div>
 
   <div class="card">
-    <h2>Recent Matches</h2>
+    <div class="section-title">
+      <div>
+        <h2>Recent Match Pipeline</h2>
+        <div class="muted tiny">Fast entry points for the next resume action.</div>
+      </div>
+      <a class="btn secondary" href="{{ url_for('matches.index') }}">View Matches</a>
+    </div>
     {% if not data.recent_matches %}
       <div class="empty">No candidates yet. Add a candidate to see matching jobs.</div>
     {% else %}
       <div class="grid product">
       {% for m in data.recent_matches %}
-        <div class="card person-card" style="padding:0.9rem;box-shadow:none;">
+        <div class="card person-card">
           <div class="name">{{ m.name }}</div>
           <div class="meta-row">
             <div><strong>{{ m.family or '—' }}</strong></div>
-            <div>{{ m.match_count }} matching jobs{% if m.new_count %} · <span class="pill ok">{{ m.new_count }} new</span>{% endif %}</div>
+            <div>{{ m.match_count }} family matches{% if m.new_count %} · <span class="pill ok">{{ m.new_count }} new</span>{% endif %}</div>
+            <div>{{ m.ready_match_count }} ready to generate</div>
           </div>
           <div class="actions">
             <a class="btn secondary" href="{{ url_for('matches.index', candidate=m.id) }}">View Matches</a>
-            <a class="btn" href="{{ url_for('create_resume.index') }}">Create Resume</a>
+            <a class="btn" href="{{ url_for('create_resume.index', candidate=m.id) }}">Create Resume</a>
           </div>
         </div>
       {% endfor %}

@@ -1,11 +1,20 @@
 {% extends "base.html" %}
 {% block title %}Candidates · Resume Engine{% endblock %}
 {% block page_title %}Candidates{% endblock %}
-{% block page_sub %}Family + companies + timeline only. The engine writes the resume content.{% endblock %}
+{% block page_sub %}Verified candidate facts only. The engine writes positioning, skills, and resume content later.{% endblock %}
 {% block content %}
 <div class="stack">
-  <div class="actions">
-    <a class="btn" href="{{ url_for('candidates.create') }}">+ Add Candidate</a>
+  <div class="card soft">
+    <div class="section-title">
+      <div>
+        <h2>Candidate Intake Desk</h2>
+        <div class="muted tiny">Keep inputs clean: identity, job family, companies, dates, education, and certifications.</div>
+      </div>
+      <div class="actions">
+        <a class="btn" href="{{ url_for('candidates.create') }}">Add Candidate</a>
+        <a class="btn ghost" href="{{ url_for('create_resume.index') }}">Create Resume</a>
+      </div>
+    </div>
   </div>
   {% if not cards %}
     <div class="empty">No candidates yet.</div>
@@ -18,13 +27,17 @@
         <div>Primary Family: <strong>{{ c.primary_family_display }}</strong></div>
         <div>Secondary Family: <strong>{{ c.secondary_family_display }}</strong></div>
         <div>Companies: <strong>{{ c.company_count }}</strong></div>
-        <div>Matching Jobs: <strong>{{ c.match_count }}</strong></div>
+        <div>Family Matches: <strong>{{ c.match_count }}</strong></div>
+        <div>Ready Matches: <strong>{{ c.ready_match_count }}</strong></div>
+        {% if c.pending_match_count or c.blocked_match_count %}
+          <div>Needs Work: <strong>{{ c.pending_match_count + c.blocked_match_count }}</strong></div>
+        {% endif %}
         <div>Resumes: <strong>{{ c.resume_count }}</strong></div>
       </div>
       <div class="actions">
         <a class="btn ghost" href="{{ url_for('candidates.view', profile_id=c.id) }}">View</a>
         <a class="btn secondary" href="{{ url_for('matches.index', candidate=c.id) }}">Matches</a>
-        <a class="btn" href="{{ url_for('create_resume.index') }}">Create Resume</a>
+        <a class="btn" href="{{ url_for('create_resume.index', candidate=c.id) }}">Create Resume</a>
       </div>
     </div>
     {% endfor %}

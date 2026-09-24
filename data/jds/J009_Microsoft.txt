@@ -1,0 +1,5 @@
+Principal Security Architect
+Microsoft · Hyderabad, Telangana
+https://careers.microsoft.com/v2/global/en/locations/noida.html
+
+Microsoft lists a Principal Security Architect role in Hyderabad focused on secure cloud architecture across Azure, sovereign and specialized environments. Responsibilities include architecture strategy, resilient cloud infrastructure, networking, identity, access management and Zero Trust. The role calls for extensive software, cloud or infrastructure engineering experience plus deep Azure and security knowledge. Preferred experience includes enterprise reference architectures, regulated environments, technical leadership and mentoring.

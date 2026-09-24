@@ -1,0 +1,5 @@
+Machine Learning Engineer, Amazon Music - Catalog Quality
+Amazon · Bengaluru, Karnataka
+https://www.amazon.jobs/en/jobs/10486421/machine-learning-engineer-amazon-music-catalog-quality
+
+Amazon is hiring an ML Engineer in Bengaluru to build scalable machine-learning pipelines and online serving systems, productionize models with applied scientists, choose ML infrastructure technologies, and support high-volume low-latency systems. The role requires professional software-development experience and programming ability in a modern language such as Python, Java, C++, C#, Go, Rust or TypeScript. Preferred qualifications include a CS degree or equivalent knowledge of algorithms, data structures, operating systems and object-oriented design.

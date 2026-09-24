@@ -1,0 +1,5 @@
+Summer 2027 Intern - Software Engineer
+Salesforce · Bengaluru / Hyderabad
+https://careers.salesforce.com/en/jobs/jr337715/summer-2027-intern-software-engineer/
+
+Salesforce is hiring a 2027 Software Engineering Intern for Bangalore or Hyderabad. The intern works with Scrum teams to design, develop, test and deploy software, contribute to distributed systems, write optimized code, improve automated tests and support cloud-service monitoring. Candidates should be pursuing an eligible engineering degree and have strong problem-solving and communication skills. Programming knowledge in Java, C++ or Python and familiarity with web technologies, SQL and core computer science are desirable.

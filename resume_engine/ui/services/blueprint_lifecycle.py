@@ -174,10 +174,14 @@ def ensure_job_blueprint(job_id: str, *, actor: str | None = None, force: bool =
         blueprint = result["blueprint"]
         path = result["path"]
         job_block = blueprint.get("job") or {}
+        is_local_fallback = blueprint.get("analysis_source") == "LOCAL_DETERMINISTIC_FALLBACK"
         primary = resolve_family(job_block.get("primary_family")) or job_block.get("primary_family")
         secondary = resolve_family(job_block.get("secondary_family"))
         if secondary in {"none", None}:
             secondary = None
+        if is_local_fallback:
+            primary = job.get("primary_family") or primary
+            secondary = job.get("secondary_family") if job.get("secondary_family") else secondary
         _set_job_analysis(
             job_id,
             analysis_status=ANALYSIS_READY,
@@ -185,19 +189,28 @@ def ensure_job_blueprint(job_id: str, *, actor: str | None = None, force: bool =
             jd_hash=blueprint.get("jd_hash"),
             bump_version=True,
             families={
-                "title": job_block.get("target_title") or job.get("title"),
-                "seniority": job_block.get("seniority") or job.get("seniority"),
+                "title": job.get("title") if is_local_fallback and job.get("title") else job_block.get("target_title") or job.get("title"),
+                "seniority": job.get("seniority") if is_local_fallback and job.get("seniority") else job_block.get("seniority") or job.get("seniority"),
                 "primary_family": primary,
                 "secondary_family": secondary,
             },
         )
+        from resume_engine.ui.services import job_service
+
+        job_service.persist_job_intelligence_for_job(job_id, blueprint=blueprint)
         match_service.invalidate_matches_for_job(job_id)
         record_audit_event(
             action="job.ensure_blueprint",
             actor=actor,
             entity_type="jd",
             entity_id=job_id,
-            metadata={"blueprint_path": str(path), "jd_hash": blueprint.get("jd_hash")},
+            metadata={
+                "blueprint_path": str(path),
+                "jd_hash": blueprint.get("jd_hash"),
+                "analysis_source": blueprint.get("analysis_source", "OPENAI_PHASE_1"),
+                "fallback": bool(result.get("fallback")),
+                "fallback_reason": result.get("fallback_reason"),
+            },
         )
         return {
             "ok": True,
@@ -205,6 +218,9 @@ def ensure_job_blueprint(job_id: str, *, actor: str | None = None, force: bool =
             "analysis_status": ANALYSIS_READY,
             "blueprint_path": str(path),
             "jd_hash": blueprint.get("jd_hash"),
+            "analysis_source": blueprint.get("analysis_source", "OPENAI_PHASE_1"),
+            "fallback": bool(result.get("fallback")),
+            "fallback_reason": result.get("fallback_reason"),
             "reused": False,
         }
     except Exception as exc:  # noqa: BLE001

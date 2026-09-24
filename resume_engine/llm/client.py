@@ -175,6 +175,12 @@ class LLMClient:
                     operation=operation,
                 )
                 self.metrics_log.append(metrics)
+                try:
+                    from resume_engine.ui.services.openai_command_service import record_metrics
+
+                    record_metrics(metrics)
+                except Exception:  # noqa: BLE001
+                    logger.debug("openai usage telemetry write skipped", exc_info=True)
                 logger.info(
                     "llm_call success model=%s latency_ms=%.1f retries=%s run_id=%s request_id=%s",
                     metrics.model,
@@ -201,6 +207,12 @@ class LLMClient:
                     operation=operation,
                 )
                 self.metrics_log.append(metrics)
+                try:
+                    from resume_engine.ui.services.openai_command_service import record_metrics
+
+                    record_metrics(metrics)
+                except Exception:  # noqa: BLE001
+                    logger.debug("openai usage telemetry write skipped", exc_info=True)
                 logger.warning(
                     "llm_call failure class=%s type=%s retries=%s run_id=%s",
                     error_class.value,

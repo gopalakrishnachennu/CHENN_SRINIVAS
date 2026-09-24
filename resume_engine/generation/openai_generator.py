@@ -12,10 +12,10 @@ from resume_engine.models.resume_schema import OpenAIResumeJSON, ResumeJSON
 from resume_engine.models.resume_strategy import ResumeStrategy, VariantStrategy
 
 
-def build_openai_client() -> LLMClient:
+def build_openai_client(**kwargs) -> LLMClient:
     """Backward-compatible factory; returns Wave 4 LLMClient wrapper."""
     load_local_environment()
-    return build_llm_client()
+    return build_llm_client(**kwargs)
 
 
 def generate_resume_with_openai(

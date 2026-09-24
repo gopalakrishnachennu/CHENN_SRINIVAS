@@ -1,0 +1,5 @@
+Systems Development Engineer II, Ads AI Core Infra
+Amazon · Bengaluru, Karnataka
+https://prod.gamma.amazon.jobs/en/jobs/10463755/systems-development-engineer-ii-ads-ai-core-infra-aci
+
+Amazon's Ads AI Core Infrastructure team is hiring a Systems Development Engineer II in Bengaluru. The role manages and automates critical infrastructure behind advertising and AI systems, with a focus on reliability and engineering productivity. Requirements include several years of system design or architecture experience, large-scale infrastructure automation, programming in a modern language and CI/CD. Preferred qualifications include distributed-systems experience and hands-on AWS DevOps knowledge.

@@ -1,0 +1,47 @@
+ASSYST, Inc.
+Senior Database Administrator
+Location: Tallahassee, FL (Onsite)
+
+Scope of Services:
+The DBA team is responsible for ensuring the application and processing architectures, data dictionaries, and database schemas meet the department standards for data requirements.
+The candidate in this position will be responsible for assisting in the design, development, amendments and optimization of the schema to meet system(s) requirements.
+The candidate must be able to understand and demonstrate the ability to develop database and warehousing design across multiple platforms and computing environments.
+The candidate must be able to work as part of a team to assist in developing an overall data architecture that supports the Department’s needs and meets Department and Agency for State Technology (AST) security standards.
+
+Primary Job Duties/ Tasks:
+This resource will primarily be tasked with performing Database (DB2, SQL Server, Oracle) planning and operational activities including, but not limited to the following: 
+
+- Daily operational and database administration activities
+- Plan, design, implement, support for database structures
+- Conduct database performance monitoring and tuning
+- Develop and maintain database administration procedures and documentation
+- Perform SQL Code reviews
+- Assist with training/mentoring other technical staff 
+This resource may also be required to perform other database or infrastructure activities as requested.
+
+The candidate must have skill and five (5) years combined experience in database administration for the following database platforms: 
+
+- Experience with IBM DB2
+- Proficient with SQL Server 2016 and above
+- Proficient with Oracle 19c and above
+- Experience with Azure SQL is a plus
+
+Job Specific Knowledge, Skills, and Abilities (KSAs):
+- Knowledge of the principles, practices and techniques of relational database management systems
+- Ability to work independently in the technical analysis, evaluation and resolution of large Enterprise database production issues or problems, with little or no assistance, and to make decisions and recommendations to remediate those issues or problems
+- Knowledge of Relational Database Management principles, design and practices
+- Ability to plan, organize, coordinate, and prioritize work assignments for him/herself or lower-level database analysts
+- Skill in accurately estimating time requirements for database analysis and administration tasks for a project
+- Skill in customer service
+- Ability to work effectively with Project Managers, Business Analysts, Data Analysts, to build efficient, long-term solutions in the development of databases utilizing all established departmental standards
+- Ability to analyze processes and workflows to design efficient database solutions
+- Ability to prepare complex database specifications
+- Ability to design relational databases
+- Skill in interpreting and communicating technical information related to computer programming and data processing, both verbally and in writing
+- Ability to develop and manage relational databases in accordance with the Department’s standards
+- Ability to receive and give constructive criticism, and maintain effective work relationships with others
+
+Education:
+Bachelor’s or Master’s Degree in Computer Science, Information Systems or other related field or equivalent work experience.
+
+ASSYST is an Equal Opportunity Employer. Qualified applicants will receive consideration for employment without regard to race, color, religion, sex, age, disability, military status, national origin or any other characteristic protected under federal, state, or applicable local law.

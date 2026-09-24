@@ -27,6 +27,11 @@ CHECKS
 [PASS] run_isolation
 [PASS] targeted_patch_repair
 [PASS] repair_scope_guard
+[PASS] online_learner_no_action_invention
+[PASS] online_shadow_does_not_alter_ranking
+[PASS] online_failed_resume_reward_zero
+[PASS] online_superseded_not_learned
+[PASS] online_policy_fallback_safe
 
 PASS CONDITIONS
 [PASS] P1 coverage
@@ -47,5 +52,6 @@ PASS CONDITIONS
 [PASS] Raw artifact preserved
 [PASS] Run isolation
 [PASS] Variant differentiation
+[PASS] ONLINE_LEARNING_SHADOW_VALIDATED
 
 RESULT: PASS

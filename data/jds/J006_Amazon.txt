@@ -1,0 +1,5 @@
+Quality Assurance Engineer 1, QRE
+Amazon · Bengaluru, Karnataka
+https://www.amazon.jobs/en/jobs/10530418/quality-assurance-engineer-1-qre
+
+Amazon is hiring a Bengaluru Quality Assurance Engineer to own software quality for large-scale grocery systems. The role defines test strategy, builds automated execution, uses AI agents in the software testing lifecycle, troubleshoots issues and works within CI/CD and agile delivery. Required experience includes manual and automated testing plus UI/API automation with tools such as Selenium or SOAPUI. Preferred experience includes API/mobile testing, scripting and test-data design.

@@ -1,28 +1,37 @@
 {% extends "base.html" %}
 {% block title %}Add Job · Resume Engine{% endblock %}
 {% block page_title %}Add Job{% endblock %}
-{% block page_sub %}Paste or upload a JD, then analyze{% endblock %}
+{% block page_sub %}Paste a JD, then create a reusable analyzed job record.{% endblock %}
 {% block content %}
+{% set form = form_values if form_values is defined and form_values else {} %}
 <div class="stack">
-<form method="post" enctype="multipart/form-data" class="card">
+<form method="post" class="card">
   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-  <input type="hidden" name="action" value="analyze"/>
-  <div class="form-grid">
-    <div><label>Company</label><input type="text" name="company"/></div>
-    <div><label>Location</label><input type="text" name="location"/></div>
-    <div><label>Job URL</label><input type="url" name="job_url"/></div>
-    <div><label>Source</label><input type="text" name="source" placeholder="LinkedIn, referral, …"/></div>
-    <div class="full">
-      <label>Upload TXT / DOCX / PDF</label>
-      <input type="file" name="jd_file" accept=".txt,.md,.docx,.pdf"/>
+  <div class="section-title">
+    <div>
+      <h2>JD Intake</h2>
+      <div class="muted tiny">Required before a job enters the workflow: Job Title, Company, Location, JD URL, and Raw JD.</div>
     </div>
+    <span class="pill warn">Required intake</span>
+  </div>
+  {% if required_missing %}
+    <div class="flash error">Complete these fields before saving: {{ required_missing|join(', ') }}</div>
+  {% endif %}
+  <div class="form-grid">
+    <div><label>Job Title <span class="muted tiny">Required</span></label><input type="text" name="title" value="{{ form.get('title', '') }}" required/></div>
+    <div><label>Company <span class="muted tiny">Required</span></label><input type="text" name="company" value="{{ form.get('company', '') }}" required/></div>
+    <div><label>Location <span class="muted tiny">Required</span></label><input type="text" name="location" value="{{ form.get('location', '') }}" placeholder="City, State or City, State, Country" required/></div>
+    <div><label>JD URL <span class="muted tiny">Required</span></label><input type="url" name="job_url" value="{{ form.get('job_url', '') }}" placeholder="https://company.com/jobs/123" required/></div>
+    <div><label>Source</label><input type="text" name="source" value="{{ form.get('source', '') }}" placeholder="LinkedIn, referral, …"/></div>
     <div class="full">
-      <label>Or paste JD</label>
-      <textarea name="jd_text" class="mono" placeholder="Paste the full job description…"></textarea>
+      <label>Raw JD <span class="muted tiny">Required</span></label>
+      <textarea name="jd_text" class="mono" placeholder="Paste the full job description…" required>{{ form.get('jd_text', '') }}</textarea>
     </div>
   </div>
   <div class="actions" style="margin-top:1rem;">
-    <button class="btn xl" type="submit">Analyze Job</button>
+    <button class="btn xl" type="submit" name="action" value="analyze">Analyze Job</button>
+    <button class="btn secondary" type="submit" name="action" value="draft">Save Draft</button>
+    <a class="btn ghost" href="{{ url_for('jobs.index') }}">Back to Jobs</a>
   </div>
 </form>
 </div>

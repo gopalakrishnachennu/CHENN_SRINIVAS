@@ -1,11 +1,17 @@
 {% extends "base.html" %}
 {% block title %}Resumes · Resume Engine{% endblock %}
 {% block page_title %}Resumes{% endblock %}
-{% block page_sub %}Generated resume library{% endblock %}
+{% block page_sub %}Generated runs, validation status, and export follow-through.{% endblock %}
 {% block content %}
 <div class="stack">
-  <div class="actions">
-    <a class="btn" href="{{ url_for('create_resume.index') }}">Create New Resume</a>
+  <div class="card soft">
+    <div class="section-title">
+      <div>
+        <h2>Delivery Desk</h2>
+        <div class="muted tiny">Track generated variants, validation outcomes, progress links, and export-ready artifacts.</div>
+      </div>
+      <a class="btn" href="{{ url_for('create_resume.index') }}">Create New Resume</a>
+    </div>
   </div>
   <form class="card filters" method="get">
     <div><label>Candidate</label><input type="text" name="candidate" value="{{ filters.get('candidate','') }}"/></div>

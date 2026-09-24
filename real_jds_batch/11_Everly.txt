@@ -1,0 +1,42 @@
+DBA/Data Engineer (AI-First)
+Austin, TXTechnology – Engineering /Full-Time /Hybrid
+Everlywell is a digital health company pioneering the next generation of biomarker intelligence—combining AI-powered technology with human insight to deliver personalized, actionable health answers. We transform complex biomarker data into life-changing insights—seamlessly integrating advanced diagnostics, virtual care, and patient engagement to reshape how and where health happens.
+
+Over the past decade, Everlywell has delivered close to 1 billion personalized health insights, transforming care for 60 million people and powering hundreds of enterprise partners. In 2024 alone, an estimated 1 in 86 U.S. households received an Everlywell test, solidifying our spot as the #1 at-home testing brand in the country. And we’re just getting started. Fueled by AI and built for scale, we’re breaking down barriers, closing care gaps, and unlocking a more connected healthcare experience that is smarter, faster, and more personalized.
+
+Everlywell is transforming the diagnostics experience, and robust, intelligent infrastructure is critical to delivering on our mission. As a DBA / Data Engineer, you will own and optimize our database platforms, while building scalable data pipelines, modeling systems, and analytical infrastructure across AWS and Azure. You’ll work at the intersection of data reliability, pipeline scalability, and AI automation—helping power a high-performing, data-driven diagnostic platform.
+
+This role requires someone who can bring deep expertise in database operations and modern data engineering practices, while embracing an AI-first mindset to automate and enhance performance, observability, and efficiency across the data stack. You will be a critical hands-on contributor who builds and maintains the foundational infrastructure that enables our product and engineering teams to move fast, securely, and intelligently.
+Database Ownership & Engineering Duties:
+Lead operational management of PostgreSQL and MySQL databases hosted in AWS (RDS, Aurora) and Azure.
+Ensure database availability, performance, backups, replication, and disaster recovery.
+Continuously optimize database queries and indexing to support product performance at scale.
+Implement AI-augmented tooling and automation for monitoring, tuning, and routine database maintenance.
+Data Engineering & Infrastructure Duties:
+Design, build, and maintain scalable data pipelines that support real-time and batch processing.
+Develop data integration workflows across internal and external data sources, including APIs and partner systems.
+Support data lake and warehouse infrastructure, optimizing for performance and cost-efficiency.
+Define and enforce best practices for data quality, lineage, and schema governance.
+Enable analytics, AI, and product teams by delivering trusted, well-structured datasets and models.
+AI-First Enablement Duties:
+Identify opportunities to incorporate AI into data workflows (e.g., anomaly detection, data validation, pipeline optimization)
+Champion adoption of AI-based tools and automation across database and data engineering operations.
+Experiment with and integrate modern AI agents, copilots, and models to accelerate data workflows.
+Who You Are:
+5+ years of experience in a combined Database Administration and/or Data Engineering role.
+Deep experience administering PostgreSQL and MySQL in production, cloud-native environments.
+Strong experience building and scaling data pipelines with tools like Airflow, DBT, or similar.
+Hands-on skills with AWS (including RDS, Aurora, S3, Glue, Lambda) and familiarity with Azure data services.
+Proficient in Terraform and modern CI/CD tools (e.g., GitLab CI/CD).
+Strong scripting ability (e.g., Python, Bash) for automation and workflow orchestration.
+Committed to working in an AI-first environment—excited by rapid learning and tool integration.
+Detail-oriented problem solver who values performance, scalability, and reliability.
+Collaborative, communicative, and comfortable in a fast-paced, high-growth environment.
+Preferred Qualifications:
+AWS or Azure certifications.
+Experience with stream processing (e.g., Kafka, Kinesis) and real-time data architecture.
+Familiarity with observability stacks like Prometheus, Grafana, or Datadog.
+Exposure to security, compliance, and auditing frameworks (HIPAA, SOC2, etc.).
+Everlywell is on a mission to transform diagnostics into a data-driven, accessible, and empowering experience for every consumer and healthcare partner. This is a rare opportunity to define and optimize the foundational systems that power intelligent diagnostics—while working in a company that values innovation, velocity, and purpose.Passion for modern AI tooling and its impact on data infrastructure and engineering workflows.
+Everlywell is on a mission to transform diagnostics into a data-driven, accessible, and empowering experience for every consumer and healthcare partner. This is a rare opportunity to define and optimize the foundational systems that power intelligent diagnostics—while working in a company that values innovation, velocity, and purpose.
+We may use artificial intelligence (AI) tools to support parts of the hiring process, such as reviewing applications, analyzing resumes, or assessing responses. These tools assist our recruitment team but do not replace human judgment. Final hiring decisions are ultimately made by humans. If you would like more information about how your data is processed, please contact us.

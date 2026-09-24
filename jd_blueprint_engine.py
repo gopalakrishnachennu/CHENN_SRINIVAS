@@ -2,6 +2,7 @@ import argparse
 import hashlib
 import json
 import os
+import time
 from datetime import UTC, datetime
 from getpass import getpass
 from pathlib import Path
@@ -255,14 +256,51 @@ STRICT RULES:
 10. Return only the requested structured information.
 """
 
-    response = client.responses.parse(
-        model=OPENAI_MODEL,
-        input=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": jd_text},
-        ],
-        text_format=JDExtraction,
-    )
+    payload = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": jd_text},
+    ]
+    started = time.perf_counter()
+    try:
+        response = client.responses.parse(
+            model=OPENAI_MODEL,
+            input=payload,
+            text_format=JDExtraction,
+        )
+        usage = getattr(response, "usage", None)
+        input_tokens = getattr(usage, "input_tokens", None) if usage else None
+        output_tokens = getattr(usage, "output_tokens", None) if usage else None
+        total_tokens = getattr(usage, "total_tokens", None) if usage else None
+        try:
+            from resume_engine.ui.services.openai_command_service import record_usage_event
+
+            record_usage_event(
+                operation="jd_analysis",
+                model=OPENAI_MODEL,
+                success=True,
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
+                total_tokens=total_tokens,
+                latency_ms=round((time.perf_counter() - started) * 1000.0, 2),
+                request_id=str(getattr(response, "id", "") or getattr(response, "_request_id", "") or ""),
+            )
+        except Exception:
+            pass
+    except Exception as exc:
+        try:
+            from resume_engine.ui.services.openai_command_service import record_usage_event
+
+            record_usage_event(
+                operation="jd_analysis",
+                model=OPENAI_MODEL,
+                success=False,
+                latency_ms=round((time.perf_counter() - started) * 1000.0, 2),
+                error_class="openai_error",
+                error_type=type(exc).__name__,
+            )
+        except Exception:
+            pass
+        raise
 
     if response.output_parsed is None:
         raise RuntimeError("JD extraction failed.")

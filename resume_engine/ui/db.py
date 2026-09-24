@@ -90,6 +90,25 @@ CREATE TABLE IF NOT EXISTS ui_jobs (
     updated_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS openai_usage_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    created_at TEXT NOT NULL,
+    operation TEXT NOT NULL,
+    model TEXT NOT NULL,
+    success INTEGER NOT NULL DEFAULT 0,
+    input_tokens INTEGER,
+    output_tokens INTEGER,
+    total_tokens INTEGER,
+    latency_ms REAL,
+    retries INTEGER DEFAULT 0,
+    request_id TEXT,
+    run_id TEXT,
+    error_class TEXT,
+    error_type TEXT,
+    estimated_cost_usd REAL,
+    metadata_json TEXT
+);
+
 CREATE TABLE IF NOT EXISTS blueprint_versions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     jd_hash TEXT NOT NULL,
@@ -129,6 +148,29 @@ CREATE TABLE IF NOT EXISTS jd_library (
     metadata_json TEXT,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS job_analysis_versions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id TEXT NOT NULL,
+    version INTEGER NOT NULL,
+    job_intelligence_json TEXT NOT NULL,
+    blueprint_json TEXT,
+    actor TEXT,
+    note TEXT,
+    created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS job_manual_overrides (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id TEXT NOT NULL,
+    field_name TEXT NOT NULL,
+    old_value TEXT,
+    new_value TEXT NOT NULL,
+    actor TEXT,
+    reason TEXT,
+    analysis_version INTEGER,
+    created_at TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS resume_runs (
@@ -172,9 +214,14 @@ CREATE TABLE IF NOT EXISTS resume_library (
 
 CREATE INDEX IF NOT EXISTS idx_audit_ts ON audit_events(timestamp);
 CREATE INDEX IF NOT EXISTS idx_ui_jobs_status ON ui_jobs(status);
+CREATE INDEX IF NOT EXISTS idx_openai_usage_created ON openai_usage_events(created_at);
+CREATE INDEX IF NOT EXISTS idx_openai_usage_model ON openai_usage_events(model);
+CREATE INDEX IF NOT EXISTS idx_openai_usage_operation ON openai_usage_events(operation);
 CREATE INDEX IF NOT EXISTS idx_blueprint_versions_hash ON blueprint_versions(jd_hash);
 CREATE INDEX IF NOT EXISTS idx_jd_library_family ON jd_library(primary_family);
 CREATE INDEX IF NOT EXISTS idx_jd_library_status ON jd_library(status);
+CREATE INDEX IF NOT EXISTS idx_job_analysis_versions_job ON job_analysis_versions(job_id, version);
+CREATE INDEX IF NOT EXISTS idx_job_manual_overrides_job ON job_manual_overrides(job_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_resume_runs_candidate ON resume_runs(candidate_id);
 CREATE INDEX IF NOT EXISTS idx_match_cache_cand ON match_cache(candidate_id);
 CREATE INDEX IF NOT EXISTS idx_match_cache_job ON match_cache(job_id);
@@ -187,6 +234,23 @@ _UI_SCHEMA_ALTERS = [
     "ALTER TABLE jd_library ADD COLUMN analysis_status TEXT DEFAULT 'NEEDS_ANALYSIS'",
     "ALTER TABLE jd_library ADD COLUMN analysis_version INTEGER DEFAULT 0",
     "ALTER TABLE jd_library ADD COLUMN jd_content_hash TEXT",
+    "ALTER TABLE jd_library ADD COLUMN job_intelligence_json TEXT",
+    "ALTER TABLE jd_library ADD COLUMN job_intelligence_schema_version TEXT",
+    "ALTER TABLE jd_library ADD COLUMN country TEXT",
+    "ALTER TABLE jd_library ADD COLUMN state TEXT",
+    "ALTER TABLE jd_library ADD COLUMN city TEXT",
+    "ALTER TABLE jd_library ADD COLUMN work_mode TEXT DEFAULT 'UNKNOWN'",
+    "ALTER TABLE jd_library ADD COLUMN employment_type TEXT DEFAULT 'UNKNOWN'",
+    "ALTER TABLE jd_library ADD COLUMN engagement_type TEXT DEFAULT 'UNKNOWN'",
+    "ALTER TABLE jd_library ADD COLUMN salary_min REAL",
+    "ALTER TABLE jd_library ADD COLUMN salary_max REAL",
+    "ALTER TABLE jd_library ADD COLUMN salary_currency TEXT",
+    "ALTER TABLE jd_library ADD COLUMN salary_period TEXT DEFAULT 'UNKNOWN'",
+    "ALTER TABLE jd_library ADD COLUMN sponsorship_status TEXT DEFAULT 'SPONSORSHIP_NOT_STATED'",
+    "ALTER TABLE jd_library ADD COLUMN authorization_requirement TEXT DEFAULT 'NONE_STATED'",
+    "ALTER TABLE jd_library ADD COLUMN student_visa_status TEXT DEFAULT 'OPT_CPT_NOT_STATED'",
+    "ALTER TABLE jd_library ADD COLUMN clearance_status TEXT DEFAULT 'NOT_STATED'",
+    "ALTER TABLE jd_library ADD COLUMN minimum_years_experience REAL",
     "ALTER TABLE candidate_profiles ADD COLUMN version INTEGER DEFAULT 1",
     "ALTER TABLE match_cache ADD COLUMN candidate_version INTEGER DEFAULT 0",
     "ALTER TABLE match_cache ADD COLUMN job_analysis_version INTEGER DEFAULT 0",
@@ -197,6 +261,10 @@ _UI_SCHEMA_INDEXES = [
     "CREATE INDEX IF NOT EXISTS idx_jd_library_content_hash ON jd_library(jd_content_hash)",
     "CREATE INDEX IF NOT EXISTS idx_jd_library_job_url ON jd_library(job_url)",
     "CREATE INDEX IF NOT EXISTS idx_jd_library_analysis ON jd_library(analysis_status)",
+    "CREATE INDEX IF NOT EXISTS idx_jd_library_location ON jd_library(country, state, city)",
+    "CREATE INDEX IF NOT EXISTS idx_jd_library_work_mode ON jd_library(work_mode)",
+    "CREATE INDEX IF NOT EXISTS idx_jd_library_employment ON jd_library(employment_type, engagement_type)",
+    "CREATE INDEX IF NOT EXISTS idx_jd_library_auth ON jd_library(sponsorship_status, authorization_requirement)",
 ]
 
 # Engine family_id → display. Matching uses family_id; UI shows display_name.

@@ -2,6 +2,15 @@
 {% block page_title %}Create Resume{% endblock %}
 {% block page_sub %}Step 1: Select candidate{% endblock %}
 {% block content %}
+<div class="card soft" style="margin-bottom:1rem;">
+  <div class="section-title">
+    <div>
+      <h2>Setup Flow</h2>
+      <div class="muted tiny">Pick a verified candidate, choose a matching JD, then let the engine generate, validate, repair, and export.</div>
+    </div>
+    <a class="btn ghost" href="{{ url_for('candidates.create') }}">New Candidate</a>
+  </div>
+</div>
 <div class="wizard-steps">
   <span class="wizard-step active">1 Candidate</span>
   <span class="wizard-arrow">→</span>
@@ -12,7 +21,10 @@
 
 {% if candidates %}
 <div class="card">
-  <h3>Select a candidate</h3>
+  <div class="section-title">
+    <h3>Select a candidate</h3>
+    <span class="pill">{{ candidates|length }} available</span>
+  </div>
   <table>
     <thead><tr><th>Name</th><th>Primary Family</th><th>Companies</th><th></th></tr></thead>
     <tbody>
@@ -21,7 +33,7 @@
         <td><strong>{{ c.name }}</strong></td>
         <td>{{ c.primary_family_display or '—' }}</td>
         <td>{{ c.company_count }}</td>
-        <td><a class="btn" href="{{ url_for('create_resume.select_job', candidate_id=c.id) }}">Select →</a></td>
+        <td><a class="btn" href="{{ url_for('create_resume.select_job', candidate_id=c.id) }}">Select</a></td>
       </tr>
     {% endfor %}
     </tbody>

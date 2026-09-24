@@ -88,7 +88,7 @@ def _run_job(job_id: str) -> None:
         if job["status"] == "CANCEL_REQUESTED":
             _update(job_id, status="FAILED", stage="cancelled", error="cancelled")
             return
-        _update(job_id, status="RUNNING", stage="phase2")
+        _update(job_id, status="RUNNING", stage="preflight", result={"progress_message": "Preparing generation job."})
         payload = job["payload"]
         import os
         os.environ["RESUME_ONLINE_LEARNING_MODE"] = "shadow"
@@ -99,6 +99,7 @@ def _run_job(job_id: str) -> None:
         if not blueprint:
             raise ValueError("blueprint_path required")
         variant_count = int(payload.get("variant_count") or get_effective_setting("default_variant_count"))
+        single_call = bool(payload.get("single_call", variant_count == 1 and not payload.get("repair")))
         formats = []
         if payload.get("export_docx", get_effective_setting("default_export_docx")):
             formats.append("docx")
@@ -111,6 +112,17 @@ def _run_job(job_id: str) -> None:
         if mode == "CANDIDATE" and not candidate:
             raise ValueError("candidate_profile_path required for CANDIDATE mode")
 
+        def progress_callback(stage: str, message: str, detail: dict[str, Any] | None = None) -> None:
+            _update(
+                job_id,
+                status="RUNNING",
+                stage=stage,
+                result={
+                    "progress_message": message,
+                    "progress_detail": detail or {},
+                },
+            )
+
         result = run_phase2_pipeline(
             blueprint_path=blueprint,
             candidate_profile_path=candidate if mode == "CANDIDATE" else None,
@@ -121,6 +133,8 @@ def _run_job(job_id: str) -> None:
             use_laya=bool(payload.get("use_laya", get_effective_setting("laya_default_enabled"))),
             run_id=payload.get("run_id"),
             export_formats=formats or None,
+            progress_callback=progress_callback,
+            single_call=single_call,
         )
         _update(job_id, status="COMPLETED", stage="done", result=result)
     except Exception as exc:  # noqa: BLE001

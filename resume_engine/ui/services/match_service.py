@@ -232,6 +232,52 @@ def _job_is_resume_ready(job: dict[str, Any]) -> bool:
     return Path(path).exists()
 
 
+def _job_readiness(job: dict[str, Any]) -> dict[str, Any]:
+    from resume_engine.ui.services import job_service
+
+    missing = job_service.validate_required_intake(job)
+    if missing:
+        return {
+            "is_resume_ready": False,
+            "readiness_status": "BLOCKED_INTAKE",
+            "readiness_label": "Fix Required Fields",
+            "readiness_reason": f"Missing required intake: {', '.join(missing)}",
+            "required_missing": missing,
+        }
+    status = (job.get("analysis_status") or "NEEDS_ANALYSIS").upper()
+    if _job_is_resume_ready(job):
+        return {
+            "is_resume_ready": True,
+            "readiness_status": "READY",
+            "readiness_label": "Ready to Generate",
+            "readiness_reason": "Job has a ready blueprint and can generate resumes.",
+            "required_missing": [],
+        }
+    if status == "FAILED":
+        label = "Rebuild Analysis"
+        reason = "Previous job analysis failed. Rebuild it; local Laya fallback is used when OpenAI is unavailable."
+    elif status == "ANALYZING":
+        label = "Analyzing"
+        reason = "Job analysis is currently running."
+    else:
+        label = "Build Job Analysis"
+        reason = "Family match exists. Build the JD blueprint before resume generation."
+    return {
+        "is_resume_ready": False,
+        "readiness_status": status,
+        "readiness_label": label,
+        "readiness_reason": reason,
+        "required_missing": [],
+    }
+
+
+def _dedupe_matches(matches: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    by_id: dict[str, dict[str, Any]] = {}
+    for match in matches:
+        by_id[match["id"]] = match
+    return list(by_id.values())
+
+
 def list_matches_for_candidate(
     candidate: dict[str, Any],
     jobs: list[dict[str, Any]] | None = None,
@@ -271,6 +317,7 @@ def list_matches_for_candidate(
         item["primary_family_display"] = reg.display(job.get("primary_family"))
         item["secondary_family_display"] = reg.display(job.get("secondary_family"))
         item["analysis_status"] = job.get("analysis_status") or "NEEDS_ANALYSIS"
+        item.update(_job_readiness(job))
         out.append(item)
     order = {MATCH_DIRECT: 0, MATCH_HYBRID: 1, MATCH_SECONDARY: 2, MATCH_COMPATIBLE: 3}
     out.sort(key=lambda x: (order.get(x["match_type"], 9), x.get("title") or ""))
@@ -290,32 +337,36 @@ def match_summary_for_candidate(
     if jobs is None:
         jobs = list_jobs_lite(status="active", limit=5000)
     active = [j for j in jobs if (j.get("status") or "active") != "archived"]
-    ready = [j for j in active if _job_is_resume_ready(j)]
+    ready = [j for j in active if _job_readiness(j)["is_resume_ready"]]
     needs = sum(
         1
         for j in active
         if (j.get("analysis_status") or "").upper() in {"NEEDS_ANALYSIS", "FAILED", "ANALYZING", ""}
     )
-    matched = list_matches_for_candidate(
-        candidate, ready, include_compatible=include_compatible, ready_only=True, registry=reg
+    matched = _dedupe_matches(
+        list_matches_for_candidate(
+            candidate, active, include_compatible=include_compatible, ready_only=False, registry=reg
+        )
     )
-    # Deduplicate by job id
-    by_id: dict[str, dict[str, Any]] = {}
-    for m in matched:
-        by_id[m["id"]] = m
-    unique = list(by_id.values())
-    direct = sum(1 for m in unique if m["match_type"] == MATCH_DIRECT)
-    secondary = sum(1 for m in unique if m["match_type"] == MATCH_SECONDARY)
-    hybrid = sum(1 for m in unique if m["match_type"] == MATCH_HYBRID)
+    ready_matches = [m for m in matched if m.get("is_resume_ready")]
+    blocked = [m for m in matched if m.get("readiness_status") == "BLOCKED_INTAKE"]
+    pending = [m for m in matched if not m.get("is_resume_ready") and m not in blocked]
+    direct = sum(1 for m in matched if m["match_type"] == MATCH_DIRECT)
+    secondary = sum(1 for m in matched if m["match_type"] == MATCH_SECONDARY)
+    hybrid = sum(1 for m in matched if m["match_type"] == MATCH_HYBRID)
     return {
         "total_jobs": len(active),
         "ready_jobs": len(ready),
         "needs_analysis_jobs": needs,
-        "matched_jobs": len(unique),
+        "matched_jobs": len(matched),
+        "resume_ready_matches": len(ready_matches),
+        "pending_matched_jobs": len(pending),
+        "blocked_matched_jobs": len(blocked),
         "direct": direct,
         "secondary": secondary,
         "hybrid": hybrid,
-        "matches": unique,
+        "matches": matched,
+        "ready_matches": ready_matches,
     }
 
 

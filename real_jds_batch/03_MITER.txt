@@ -1,0 +1,124 @@
+Job Description
+
+Location: Tacoma, WA
+
+Pay Range: $103,000/Yr. - $129,500/Yr., depending on experience and qualifications.
+
+Join MITER Brands™ Where Innovation Meets Craftsmanship  MITER Brands™ is more than a window and door manufacturer... we’re shaping the future of residential living. As the powerhouse behind trusted names like Milgard, MI Windows & Doors, and PGT, we’re one of the nation’s largest suppliers of vinyl windows and patio doors, with state-of-the-art facilities across the country.  
+
+Why work at MITER Brands?
+
+ We are looking for a Database Administrator in the Tacoma, Washington area.  In this role you will ensure the stability, integrity, and efficient operation of the MSSQL, mysql, or any related database as required that support core organizational functions. This includes designing, installing, configuring, administering, and fine-tuning database components across the organization in a timely and efficient manner. There is a considerable focus and emphasis for this role in the support of Microsoft Azure with a focus on Azure Synapse and data analytics. The Database Administrator will apply proven communication, analytical, and problem-solving skills to help identify, communicate, and resolve issues in order to maximize the benefit of IT systems investments.  
+
+Responsibilities
+
+Azure Analytics and Infrastructure Engineering
+
+Promote changes in Azure DevOps to production Synapse environment
+
+Manage Synapse pipelines and coordinate with other infrastructure team members to deliver data
+
+Manage, build and design Azure infrastructure to support business demand
+
+Troubleshoot data issues related to Enterprise BI platform in Azure Synapse and Power BI
+
+Ensure all database servers are backed up in a way that meets the business’s Recovery Point Objectives (RPO)
+
+Test backups to ensure we can meet the business’ Recovery Time Objectives (RTO)
+
+Troubleshoot SQL Server service outages as they occur, including after-hours and weekends
+
+Configure SQL Server monitoring utilities to minimize false alarms
+
+Install and configure new SQL Servers
+
+Deploy database change scripts provided by third party vendors or internal Development and Business Analysts post approvals
+
+When performance issues arise, determine the most effective way to increase performance including server configuration changes, or index/query changes
+
+Document the company’s database environment
+
+Manage/plan database capacity and storage, disk space and monitor database growth
+
+Monitor and pro-actively identify locks/blocking and resolve concurrent issues
+
+Monitor database server health and create alerts to capture poor server performance issues
+
+Manage database security as defined and dictated by the company
+
+Qualifications
+
+On-call troubleshooting experience with at least one production SQL Server for a year. You don’t have to be the only DBA or have DBA in your job description, but you should have been the one person that the company would call if the SQL Server service stopped working.
+
+Finding DMV queries to answer questions about server-level performance
+
+Using tools like (Extended Events, DTA) and (SQL Profiler, DMV, Data Collection) to diagnose server reliability and performance issues
+
+Tuning T-SQL queries to improve performance
+
+3-7 years of experience 
+
+Expertise in designing database schemas, normalization, and indexing strategies.
+
+Experience with data modeling tools and technique
+
+Knowledge of backup strategies and tools.
+
+Proficiency in disaster recovery planning and implementation.
+
+Understanding of data warehousing concepts and design.
+
+Experience with ETL (Extract, Transform, Load) processes and tools. Certifications (Optional but Beneficial)
+
+Microsoft Certified: Azure Database Administrator Associate
+
+Certified MySQL Database Administrator
+
+MongoDB Certified DBA
+
+#MITERopswest
+
+What We Offer
+
+Our benefits package includes coverage of your health, wealth, and wellness for you and your eligible spouse/dependents. We offer a competitive salary and benefits package, including a 401k with company match and generous paid time off to help you balance your life. Below is a list of benefits you will enjoy while working with our company.
+
+- Three comprehensive Medical plan options
+
+Prescription
+
+Dental
+
+Vision
+
+- Company Paid Life Insurance
+
+- Voluntary Life Insurance
+
+- Supplemental Hospital Indemnity, Critical Illness, and Accident Insurance
+
+- Company-paid Short-Term Disability
+
+- Company-paid Long-Term Disability
+
+- Paid time off (PTO) and paid Holidays
+
+- 401k retirement plan with company match
+
+- Employee Assistance Program
+
+- Teladoc
+
+- Legal Insurance
+
+- Identity Theft Protection
+
+- Pet Insurance
+
+- Team Member Discount Program
+
+- Tuition Reimbursement
+
+- Yearly Wellness Clinic
+
+MITER Brands, also known as MI Windows and Doors, Milgard and PGT Industries are an equal-opportunity employer. The company does not discriminate based on religion, race, creed, color, national origin, sex, age, disability, handicap, veteran status, sexual orientation, genetic information, or any other applicable legally protected category.
+

@@ -1,0 +1,100 @@
+Senior Endpoint Security Engineer
+Apply
+locations
+100 East Main Street - OKLAHOMA CITY, OK
+time type
+Full time
+posted on
+Posted 30+ Days Ago
+job requisition id
+JR110309
+Department: Information Security
+Reports to: Senior Director, Information Security
+Role Summary
+You will be a hands-on engineer responsible for securing and managing endpoints across a modern, hybrid enterprise. You’ll design and enforce endpoint security baselines, automate compliance, and leverage Microsoft Intune to maintain strong, measurable protection.
+Success in this role means maintaining a resilient endpoint ecosystem—devices that are secure by default, compliant by design, and enable users to work anywhere without compromise.
+What You’ll Do (Core Responsibilities)
+Architect and Manage Endpoint Security at Scale
+Lead the design, implementation, and tuning of Microsoft Intune (Endpoint Manager) for Windows, macOS, iOS, and Android endpoints.
+Create paved road device baselines with pre-configured encryption, firewall, endpoint detection, patching, and configuration standards.
+Administer and integrate Microsoft Defender for Endpoint (MDE) for advanced threat protection, behavioral detection, and automated remediation.
+Ensure policy consistency across cloud-managed and hybrid-joined devices (Intune, Group Policy, Azure AD).
+Security Hardening, Compliance, and Monitoring
+Define and enforce endpoint security configurations in line with enterprise standards/policies.
+Implement Conditional Access policies and device compliance posture checks in Microsoft Entra (Azure AD).
+Collaborate with Cloud, IAM, and GRC teams to align device security controls to frameworks such as CIS Benchmarks, NIST CSF, and Zero Trust.
+Integrate endpoint telemetry into SIEM/SOAR systems for threat correlation and automated response.
+Automation and Tool Integration
+Develop automation workflows using PowerShell, Graph API, or Azure Automation to streamline policy deployment, patching, and reporting.
+Integrate Intune and MDE with broader security orchestration and compliance tools (e.g., Wiz, ServiceNow, Sentinel).
+Implement policy-as-code concepts for device configurations and compliance validation.
+Work with IT Operations to continuously improve speed, reliability, and security of patch management cycles.
+Collaboration and Enablement
+Partner with Desktop Engineering, IT, and Cloud Security teams to ensure cohesive endpoint and identity integration.
+Provide guidance and documentation for secure endpoint configuration and troubleshooting.
+Develop and deliver training or quick-start guides for IT support staff on endpoint compliance and security posture management.
+Minimum Qualifications
+5+ years of experience in Endpoint Security Engineering, IT Security, or related infrastructure roles.
+Hands-on expertise with Microsoft Intune / Endpoint Manager, Defender for Endpoint (MDE), and Azure AD Conditional Access.
+Strong knowledge of Windows 10/11 and macOS management and hardening best practices.
+Experience with PowerShell scripting, Microsoft Graph API, or similar automation frameworks.
+Familiarity with MDM and MAM policies, compliance baselines, and zero-touch deployment processes.
+Understanding of Zero Trust, least privilege, and device compliance principles.
+Strong troubleshooting and analytical skills across OS, network, and endpoint layers.
+Preferred Qualifications
+Experience integrating endpoint telemetry with SIEM/SOAR systems (e.g., Sentinel, Splunk).
+Familiarity with Defender for Identity, Defender for Cloud Apps, or other Microsoft 365 Defender suite components.
+Exposure to vulnerability management and patch automation tools (e.g., TVM, Tanium, or Qualys).
+Relevant certifications such as Microsoft Certified: Endpoint Administrator Associate, MD-102, SC-200, or CompTIA Security+.
+Behavioral Competencies
+Enablement mindset: You design controls that protect users without impeding productivity.
+Automation first: You codify baselines and compliance checks to scale effortlessly.
+Curious and analytical: You dig into telemetry and data to reveal root causes and systemic fixes.
+Collaborative: You partner across Security, IT, and Operations to drive unified endpoint resilience.
+Communicative: You translate device risk into actionable, business-relevant outcomes.
+#Auris
+
+Candidates should be comfortable with an on-site presence to support collaboration, team leadership, and cross-functional partnership.
+
+ 
+
+Why Join Us:
+
+At Acrisure, we’re building more than a business, we’re building a community where people can grow, thrive, and make an impact. Our benefits are designed to support every dimension of your life, from your health and finances to your family and future.
+
+Making a lasting impact on the communities it serves, Acrisure has pledged more than $22 million through its partnerships with Corewell Health Helen DeVos Children's Hospital in Grand Rapids, Michigan, UPMC Children's Hospital in Pittsburgh, Pennsylvania and Blythedale Children's Hospital in Valhalla, New York.
+
+ 
+
+Employee Benefits
+
+We also offer our employees a comprehensive suite of benefits and perks, including:
+
+Physical Wellness: Comprehensive medical insurance, dental insurance, and vision insurance; life and disability insurance; fertility benefits; wellness resources; and paid sick time.
+
+Mental Wellness: Generous paid time off and holidays; Employee Assistance Program (EAP); and a complimentary Calm app subscription.
+
+Financial Wellness: Immediate vesting in a 401(k) plan; Health Savings Account (HSA) and Flexible Spending Account (FSA) options; commuter benefits; and employee discount programs.
+
+Family Care: Paid maternity leave and paid paternity leave (including for adoptive parents); legal plan options; and pet insurance coverage.
+
+… and so much more!
+
+This list is not exhaustive of all available benefits. Eligibility and waiting periods may apply to certain offerings. Benefits may vary based on subsidiary entity and geographic location.
+
+ 
+
+Acrisure is an Equal Opportunity Employer. We consider qualified applicants without regard to race, color, religion, sex, national origin, disability, or protected veteran status. Applicants may request reasonable accommodation by contacting leaves@acrisure.com.
+
+ 
+
+California Residents: Learn more about our privacy practices for applicants by visiting the Acrisure California Applicant Privacy Policy.
+
+ 
+
+Recruitment Fraud: Please visit here to learn more about our Recruitment Fraud Notice.
+
+ 
+
+Welcome, your new opportunity awaits you.
+

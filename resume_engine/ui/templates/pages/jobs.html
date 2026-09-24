@@ -1,15 +1,61 @@
 {% extends "base.html" %}
 {% block title %}Jobs · Resume Engine{% endblock %}
 {% block page_title %}Jobs{% endblock %}
-{% block page_sub %}Job description library{% endblock %}
+{% block page_sub %}JD intake, intelligence review, operator overrides, and match readiness.{% endblock %}
 {% block content %}
 <div class="stack">
-  <div class="actions">
-    <a class="btn" href="{{ url_for('jobs.create') }}">+ Add Job</a>
+  <div class="card soft">
+    <div class="section-title">
+      <div>
+        <h2>Job Intake Desk</h2>
+        <div class="muted tiny">Paste JDs, review extracted intelligence, correct fields, and keep resume-ready roles in the match lane.</div>
+      </div>
+      <div class="actions">
+        <a class="btn" href="{{ url_for('jobs.create') }}">Add Job</a>
+        <a class="btn ghost" href="{{ url_for('matches.index') }}">Explore Matches</a>
+      </div>
+    </div>
     <form method="post" action="{{ url_for('jobs.analyze_pending') }}" style="display:inline;">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
       <button class="btn secondary" type="submit">Analyze Pending Jobs</button>
     </form>
+  </div>
+  <div class="grid cards">
+    <div class="card metric-card">
+      <div class="metric">{{ stats.total }}</div>
+      <div class="metric-label">Visible Jobs</div>
+      <div class="metric-note">After current filters</div>
+    </div>
+    <div class="card metric-card">
+      <div class="metric">{{ stats.ready }}</div>
+      <div class="metric-label">Resume Ready</div>
+      <div class="metric-note">Blueprint and intelligence ready</div>
+    </div>
+    <div class="card metric-card">
+      <div class="metric">{{ stats.needs_review }}</div>
+      <div class="metric-label">Needs Review</div>
+      <div class="metric-note">Drafts, failures, stale analysis</div>
+    </div>
+    <div class="card metric-card">
+      <div class="metric">{{ stats.remote_hybrid }}</div>
+      <div class="metric-label">Remote / Hybrid</div>
+      <div class="metric-note">Location-flexible roles</div>
+    </div>
+    <div class="card metric-card">
+      <div class="metric">{{ stats.visa_sensitive }}</div>
+      <div class="metric-label">Visa Sensitive</div>
+      <div class="metric-note">Authorization constraints detected</div>
+    </div>
+    <div class="card metric-card">
+      <div class="metric">{{ stats.manual_overrides }}</div>
+      <div class="metric-label">Manual Fixes</div>
+      <div class="metric-note">Audited JD intelligence corrections</div>
+    </div>
+    <div class="card metric-card">
+      <div class="metric">{{ stats.laya_review }}</div>
+      <div class="metric-label">Laya Review</div>
+      <div class="metric-note">Jobs needing operator judgment</div>
+    </div>
   </div>
   <form class="card filters" method="get">
     <div><label>Search</label><input type="text" name="q" value="{{ filters.get('q','') }}"/></div>
@@ -24,6 +70,91 @@
     </div>
     <div><label>Company</label><input type="text" name="company" value="{{ filters.get('company','') }}"/></div>
     <div><label>Location</label><input type="text" name="location" value="{{ filters.get('location','') }}"/></div>
+    <div><label>City</label><input type="text" name="city" value="{{ filters.get('city','') }}"/></div>
+    <div><label>State</label><input type="text" name="state" value="{{ filters.get('state','') }}"/></div>
+    <div><label>Country</label><input type="text" name="country" value="{{ filters.get('country','') }}"/></div>
+    <div>
+      <label>Work Mode</label>
+      <select name="work_mode">
+        <option value="">All</option>
+        {% for v in ['REMOTE','HYBRID','ONSITE','FLEXIBLE','UNKNOWN'] %}
+          <option value="{{ v }}" {% if filters.get('work_mode')==v %}selected{% endif %}>{{ v }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Employment</label>
+      <select name="employment_type">
+        <option value="">All</option>
+        {% for v in ['FULL_TIME','PART_TIME','CONTRACT','TEMPORARY','INTERNSHIP','SEASONAL','UNKNOWN'] %}
+          <option value="{{ v }}" {% if filters.get('employment_type')==v %}selected{% endif %}>{{ v }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Engagement</label>
+      <select name="engagement_type">
+        <option value="">All</option>
+        {% for v in ['W2','C2C','C2H','1099','DIRECT_HIRE','UNKNOWN'] %}
+          <option value="{{ v }}" {% if filters.get('engagement_type')==v %}selected{% endif %}>{{ v }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Salary</label>
+      <select name="salary_status">
+        <option value="">All</option>
+        <option value="STATED" {% if filters.get('salary_status')=='STATED' %}selected{% endif %}>Stated</option>
+        <option value="NOT_STATED" {% if filters.get('salary_status')=='NOT_STATED' %}selected{% endif %}>Not Stated</option>
+      </select>
+    </div>
+    <div>
+      <label>Sponsorship</label>
+      <select name="sponsorship_status">
+        <option value="">All</option>
+        {% for v in ['SPONSORSHIP_AVAILABLE','NO_SPONSORSHIP','CASE_BY_CASE','SPONSORSHIP_NOT_STATED','AMBIGUOUS'] %}
+          <option value="{{ v }}" {% if filters.get('sponsorship_status')==v %}selected{% endif %}>{{ v }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Work Auth</label>
+      <select name="authorization_requirement">
+        <option value="">All</option>
+        {% for v in ['AUTHORIZED_TO_WORK_US','US_CITIZEN_OR_GREEN_CARD','ANY_VALID_EAD','NO_RESTRICTION','NONE_STATED','AMBIGUOUS'] %}
+          <option value="{{ v }}" {% if filters.get('authorization_requirement')==v %}selected{% endif %}>{{ v }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>OPT/CPT</label>
+      <select name="student_visa_status">
+        <option value="">All</option>
+        {% for v in ['OPT_ACCEPTED','CPT_ACCEPTED','OPT_CPT_ACCEPTED','OPT_CPT_NOT_ACCEPTED','OPT_CPT_NOT_STATED','AMBIGUOUS'] %}
+          <option value="{{ v }}" {% if filters.get('student_visa_status')==v %}selected{% endif %}>{{ v }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Clearance</label>
+      <select name="clearance_status">
+        <option value="">All</option>
+        {% for v in ['REQUIRED','PREFERRED','NOT_REQUIRED','NOT_STATED','AMBIGUOUS'] %}
+          <option value="{{ v }}" {% if filters.get('clearance_status')==v %}selected{% endif %}>{{ v }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div><label>Min Years</label><input type="number" min="0" step="0.5" name="min_experience" value="{{ filters.get('min_experience','') }}"/></div>
+    <div><label>Max Years</label><input type="number" min="0" step="0.5" name="max_experience" value="{{ filters.get('max_experience','') }}"/></div>
+    <div>
+      <label>Status</label>
+      <select name="status">
+        <option value="">All</option>
+        {% for v in ['READY','NEEDS_ANALYSIS','ANALYZING','FAILED','ARCHIVED'] %}
+          <option value="{{ v }}" {% if filters.get('status')==v %}selected{% endif %}>{{ v }}</option>
+        {% endfor %}
+      </select>
+    </div>
     <div><button class="btn secondary" type="submit">Filter</button></div>
   </form>
 
@@ -37,8 +168,25 @@
       <div class="muted" style="margin-bottom:0.75rem;">{{ j.company or 'Company not set' }}</div>
       <div class="meta-row">
         <div><strong>{{ j.primary_family_display }}</strong>{% if j.secondary_family %} · Secondary: {{ j.secondary_family_display }}{% endif %}</div>
-        <div>{{ j.seniority or '—' }}{% if j.location %} · {{ j.location }}{% endif %}</div>
+        <div>{{ j.seniority or '—' }}{% if j.city or j.state %} · {{ j.city or '' }}{% if j.city and j.state %}, {% endif %}{{ j.state or '' }}{% elif j.location %} · {{ j.location }}{% endif %}</div>
+        <div>Work Mode: <strong>{{ j.work_mode or 'UNKNOWN' }}</strong></div>
+        <div>Employment: <strong>{{ j.employment_type or 'UNKNOWN' }}</strong>{% if j.engagement_type and j.engagement_type != 'UNKNOWN' %} · {{ j.engagement_type }}{% endif %}</div>
+        <div>Salary:
+          <strong>{% if j.salary_min %}{{ j.salary_currency or '' }} {{ '{:,.0f}'.format(j.salary_min) }}{% if j.salary_max and j.salary_max != j.salary_min %}-{{ '{:,.0f}'.format(j.salary_max) }}{% endif %} {{ j.salary_period or '' }}{% else %}NOT STATED{% endif %}</strong>
+        </div>
+        <div>Sponsorship: <strong>{{ j.sponsorship_status or 'SPONSORSHIP_NOT_STATED' }}</strong></div>
+        <div>Work Auth: <strong>{{ j.authorization_requirement or 'NONE_STATED' }}</strong></div>
+        <div>OPT/CPT: <strong>{{ j.student_visa_status or 'OPT_CPT_NOT_STATED' }}</strong></div>
+        <div>Clearance: <strong>{{ j.clearance_status or 'NOT_STATED' }}</strong></div>
+        <div>Experience: <strong>{{ j.minimum_years_experience if j.minimum_years_experience is not none else '—' }}</strong></div>
         <div>Candidates Matched: <strong>{{ j.candidates_matched }}</strong></div>
+        <div>Laya Readiness:
+          {% if j.workflow_readiness == 'READY' %}<span class="pill pass">READY</span>
+          {% elif j.workflow_readiness == 'BLOCKED' %}<span class="pill fail">BLOCKED</span>
+          {% elif j.workflow_readiness == 'REVIEW' %}<span class="pill warn">REVIEW</span>
+          {% else %}<span class="pill">UNKNOWN</span>{% endif %}
+          {% if j.human_review_count %}<span class="muted tiny">{{ j.human_review_count }} checks</span>{% endif %}
+        </div>
         <div>
           {% set st = (j.analysis_status or 'NEEDS_ANALYSIS')|upper %}
           {% if st == 'READY' %}<span class="pill pass">READY</span>
@@ -49,6 +197,11 @@
       </div>
       <div class="actions">
         <a class="btn secondary" href="{{ url_for('jobs.detail', job_id=j.id) }}">View</a>
+        {% if j.workflow_readiness != 'BLOCKED' %}
+          <a class="btn ghost" href="{{ url_for('create_resume.index', jd=j.id) }}">Use JD</a>
+        {% else %}
+          <a class="btn ghost" href="{{ url_for('jobs.edit', job_id=j.id) }}">Fix Intake</a>
+        {% endif %}
       </div>
     </div>
     {% endfor %}

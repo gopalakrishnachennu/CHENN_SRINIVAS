@@ -497,7 +497,32 @@ def apply_resume_operations(
     before_snapshot = snapshot_non_target_fields(resume, set())
     patched = resume.model_copy(deep=True)
 
-    for operation in operations:
+    def _text_op_matches_plan(operation: RepairOperation, planned: RepairOperation) -> bool:
+        if operation.operation != planned.operation:
+            return False
+        if operation.operation == "REPLACE_TEXT":
+            return (planned.location or "") == (operation.location or "")
+        if operation.operation == "REPLACE_EXPERIENCE_BULLET":
+            return (
+                planned.experience_index == operation.experience_index
+                and planned.bullet_index == operation.bullet_index
+            )
+        if operation.operation == "APPEND_EXPERIENCE_BULLET":
+            return planned.experience_index == operation.experience_index
+        if operation.operation == "REPLACE_PROJECT_BULLET":
+            return (
+                planned.project_index == operation.project_index
+                and planned.bullet_index == operation.bullet_index
+            )
+        return False
+
+    def _operation_in_plan(operation: RepairOperation) -> bool:
+        """True if operation targets a planned slot.
+
+        Planned text ops often ship with empty ``value``; the LLM fills
+        replacement text. Match those by operation + target indices/location,
+        not by value equality. Skill ops still require exact value match.
+        """
         key = (
             operation.operation,
             operation.group,
@@ -507,21 +532,46 @@ def apply_resume_operations(
             operation.bullet_index,
             operation.project_index,
         )
-        if repair_plan is not None and key not in plan_op_keys:
-            if operation.operation == "REPLACE_TEXT" and operation.location in legacy_allowed:
-                pass
-            elif (plan_ops or legacy_allowed) and not any(
-                op.operation == operation.operation
-                and (op.value or "") == (operation.value or "")
-                and (op.group or None) == (operation.group or None)
-                for op in plan_ops
+        if key in plan_op_keys:
+            return True
+        if operation.operation == "REPLACE_TEXT" and operation.location in legacy_allowed:
+            return True
+        text_ops = {
+            "REPLACE_TEXT",
+            "REPLACE_EXPERIENCE_BULLET",
+            "REPLACE_PROJECT_BULLET",
+            "APPEND_EXPERIENCE_BULLET",
+        }
+        for planned in plan_ops:
+            if operation.operation in text_ops:
+                if _text_op_matches_plan(operation, planned):
+                    return True
+                continue
+            if (
+                planned.operation == operation.operation
+                and (planned.value or "") == (operation.value or "")
+                and (planned.group or None) == (operation.group or None)
             ):
-                # Allow exact planned skill ops already converted.
-                raise PatchApplicationError(
-                    "FAIL_OUT_OF_SCOPE_PATCH",
-                    f"Repair operation not present in repair plan: {operation.operation}",
-                    operation.location,
-                )
+                return True
+        return False
+
+    for operation in operations:
+        if repair_plan is not None and (plan_ops or legacy_allowed) and not _operation_in_plan(
+            operation
+        ):
+            # LLM sometimes invents extra experience/project bullet replacements.
+            # Skip those rather than aborting repair. REPLACE_TEXT/skill ops stay hard-fail.
+            if operation.operation in {
+                "REPLACE_EXPERIENCE_BULLET",
+                "REPLACE_PROJECT_BULLET",
+                "APPEND_EXPERIENCE_BULLET",
+            }:
+                continue
+            raise PatchApplicationError(
+                "FAIL_OUT_OF_SCOPE_PATCH",
+                f"Repair operation not present in repair plan: {operation.operation}",
+                operation.location,
+            )
         apply_repair_operation(
             patched,
             operation,

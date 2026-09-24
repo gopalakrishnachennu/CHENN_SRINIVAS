@@ -1,0 +1,62 @@
+Database Engineer
+110 S. REGENT STREET SUITE 500 - SALT LAKE CITY, UT 84111
+Description
+The Database Engineer designs, builds, and operates scalable, reliable, and secure database platforms that support Priority Dispatch’s mission-critical public safety products. This role focuses on database platform engineering, automation, reliability, and performance rather than day-to-day reactive administration.
+
+The Database Engineer partners closely with software engineers, platform teams, security, and product stakeholders to design resilient data architectures, implement infrastructure-as-code, enable high availability and disaster recovery, and embed security and compliance controls into database systems by design. This role establishes standards, builds automation, mentors other engineers, and ensures database platforms meet reliability, performance, and security expectations for 24x7 emergency services.
+
+This position reports to the Executive Director of Infrastructure and works collaborative across Cybersecurity, and Software Development to align database strategy with organizational technology and compliance objectives. This is a hybrid role based in Salt Lake City, UT. 
+ 
+
+Major Responsibilities
+
+Design, build, and evolve database platforms supporting mission-critical public safety applications.
+Architect and implement high availability, replication, and disaster recovery strategies for business-critical data systems.
+Develop and maintain infrastructure-as-code and automation for database provisioning, configuration, scaling, patching, and lifecycle management.
+Optimize database performance, storage, indexing, and partitioning for large-scale, high-throughput workloads.
+Engineer secure database architectures including encryption, role-based access, auditing, monitoring, and vulnerability remediation.
+Build and operate reliable data pipelines and integrations using SQL, SSIS, Azure Data Factory, and related tooling.
+Partner with application and platform engineers to support secure, efficient, and scalable data access patterns.
+Define and enforce database engineering standards, best practices, and operational runbooks.
+Design and test backup, recovery, and disaster recovery processes to meet availability and resiliency objectives.
+Implement monitoring, alerting, and observability for database health, performance, and capacity.
+Support data reporting and analytics platforms including Power BI and downstream data consumers.
+Participate in architectural reviews, design discussions, and technical decision making.
+Mentor and guide junior engineers and DBAs.
+Support incident response, root cause analysis, and continuous improvement of database reliability and performance.
+Support audit, security, and compliance activities by providing evidence of database controls and operational practices.
+Qualifications
+Education and/or Experience
+
+Bachelor’s degree in Computer Science, Engineering, or related field, or equivalent experience.
+5+ years of experience in database engineering, data architect, or data platform engineering roles.
+Expert knowledge of SQL Server and strong experience with PostgreSQL, MySQL, or cloud-native database services (Azure SQL, AWS RDS, etc.).
+Strong experience designing highly available, scalable, and secure data platforms.
+Strong experience with automation and infrastructure-as-code (Terraform, ARM/Bicep, Ansible, or similar).
+Strong experience with SQL, Python, C#, and JavaScript.
+Experience integrating data platforms with SaaS systems such as Salesforce and FinancialForce.
+Strong understanding of security, access control, encryption, and compliance requirements for data systems.
+Strong analytical and problem-solving skills.
+Strong communication and collaboration skills.
+Proficiency with version control and CI/CD tooling (GitHub, Azure DevOps).
+ 
+
+Essential Job Functions/Physical Requirements
+ 
+
+Design and build scalable databases to meet current and future needs
+Effectively partner with Developers to ensure secure and efficient database practices and standards are met
+Lead data recovery, reporting, and security while promoting best practices to all teams
+Ability to multi-task technical problems efficiently
+Ability to communicate technical concepts to both users and programmers effectively
+Problem-solving
+Frequent computer and telephone use
+Sitting for long periods of time
+Concentrating for long periods of time.
+Occasional travel of less than 5% may be required.
+ 
+
+ 
+
+Our Company: Priority Dispatch Corp. is an Equal Opportunity Employer. We are a small, fast-growing provider of consulting, training, and software products for the public safety market. Priority Dispatch is based in the U.S. in downtown Salt Lake City, Utah. We offer a comprehensive benefits package including medical, dental, and matching 401(k) programs, etc. Priority Dispatch Corp. (PDC) provides comprehensive, integrated solutions for Police, Fire, and Medical emergency dispatching. We incorporate the Priority Dispatch System® approved by the International Academies of Emergency Dispatch in all our products. PDC offers multi-agency emergency dispatching ProQA® software, as well as a card-set version, AQUA® quality improvement software, training, consulting, and Academy accreditation support. www.prioritydispatch.net
+

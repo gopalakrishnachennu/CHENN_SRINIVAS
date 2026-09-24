@@ -36,7 +36,11 @@ def _now() -> str:
 def preflight_create_resume(candidate_id: str, job_id: str) -> dict[str, Any]:
     """Structured preflight — never starts Phase 2 on failure."""
     from resume_engine.ui.services.candidate_service import get_profile
-    from resume_engine.ui.services.job_service import get_job
+    from resume_engine.ui.services.job_service import (
+        get_job,
+        validate_required_intake,
+        workflow_review,
+    )
 
     try:
         candidate = get_profile(candidate_id)
@@ -62,6 +66,19 @@ def preflight_create_resume(candidate_id: str, job_id: str) -> dict[str, Any]:
         raise PreflightError("JOB_NOT_FOUND", "Job does not exist") from exc
     if (job.get("status") or "").lower() == "archived":
         raise PreflightError("JOB_ARCHIVED", "Job is archived")
+    required_missing = validate_required_intake(job)
+    if required_missing:
+        raise PreflightError(
+            "JOB_REQUIRED_INTAKE_MISSING",
+            f"Required job intake missing: {', '.join(required_missing)}",
+        )
+    review = workflow_review(job)
+    if review.get("readiness") == "BLOCKED":
+        blocked = ", ".join(item["label"] for item in review.get("human_review_queue") or [])
+        raise PreflightError(
+            "LAYA_WORKFLOW_BLOCKED",
+            f"Laya workflow guard blocked resume creation: {blocked or 'review required'}",
+        )
 
     analysis = get_analysis_status(job)
     if analysis != ANALYSIS_READY:
@@ -88,14 +105,36 @@ def start_create_resume(
     *,
     candidate_id: str,
     jd_id: str,
-    variants: int = 3,
-    repair: bool = True,
+    variants: int = 1,
+    repair: bool = False,
     laya: bool = True,
     export_docx: bool = True,
     export_pdf: bool = True,
+    model: str | None = None,
     actor: str | None = None,
 ) -> dict[str, Any]:
     """Prepare blueprint if needed, preflight, then queue generation."""
+    from resume_engine.ui.services.job_service import (
+        get_job,
+        validate_required_intake,
+        workflow_review,
+    )
+
+    job = get_job(jd_id)
+    required_missing = validate_required_intake(job)
+    if required_missing:
+        raise PreflightError(
+            "JOB_REQUIRED_INTAKE_MISSING",
+            f"Required job intake missing: {', '.join(required_missing)}",
+        )
+    review = workflow_review(job)
+    if review.get("readiness") == "BLOCKED":
+        blocked = ", ".join(item["label"] for item in review.get("human_review_queue") or [])
+        raise PreflightError(
+            "LAYA_WORKFLOW_BLOCKED",
+            f"Laya workflow guard blocked resume creation: {blocked or 'review required'}",
+        )
+
     # Ensure blueprint without exposing raw path errors
     ensured = ensure_job_blueprint(jd_id, actor=actor)
     if not ensured.get("ok"):
@@ -115,6 +154,7 @@ def start_create_resume(
         repair=repair,
         export_docx=export_docx,
         export_pdf=export_pdf,
+        model=model,
         actor=actor,
     )
 
@@ -129,6 +169,7 @@ def start_resume_creation(
     repair: bool | None = None,
     export_docx: bool | None = None,
     export_pdf: bool | None = None,
+    model: str | None = None,
     actor: str | None = None,
 ) -> dict[str, Any]:
     from resume_engine.ui.services.candidate_service import to_engine_candidate_profile
@@ -159,7 +200,8 @@ def start_resume_creation(
         "generation_mode": "CANDIDATE",
         "candidate_profile_path": str(profile_path),
         "variant_count": vc,
-        "model": get_effective_setting("default_openai_model"),
+        "single_call": vc == 1 and not bool(rep),
+        "model": model or get_effective_setting("openai_resume_generation_model") or get_effective_setting("default_openai_model"),
         "use_laya": bool(laya),
         "repair": bool(rep),
         "export_docx": bool(docx),
@@ -236,54 +278,178 @@ def start_resume_creation(
 
 
 def friendly_progress(job: dict[str, Any]) -> dict[str, Any]:
+    from resume_engine.ui.services import openai_command_service
+
     status = job.get("status") or "QUEUED"
     stage = (job.get("stage") or "").lower()
+    payload = job.get("payload") or {}
+    result = job.get("result") or {}
+    progress_message = result.get("progress_message") if isinstance(result, dict) else None
+    progress_detail = result.get("progress_detail") if isinstance(result, dict) else {}
+    created_at = job.get("created_at")
+    updated_at = job.get("updated_at")
+
+    def _age_seconds(raw: str | None) -> int | None:
+        if not raw:
+            return None
+        try:
+            return max(0, int((datetime.now(UTC) - datetime.fromisoformat(raw)).total_seconds()))
+        except ValueError:
+            return None
+
+    reached = "candidate"
+    if status == "RUNNING":
+        if stage in {"queued", "preflight", "load_blueprint"}:
+            reached = "jd"
+        elif stage in {"strategy", "strategy_ready"}:
+            reached = "strategy"
+        elif stage == "openai_setup" or stage.startswith("generate_variant") or stage == "regenerate_variant":
+            reached = "generate"
+        elif stage.startswith("variant_") or stage in {"learning", "diversity"}:
+            reached = "validate"
+        elif stage == "export":
+            reached = "export"
+        elif stage == "finalize":
+            reached = "export"
+        else:
+            # Keep older jobs readable when they were created before the
+            # pipeline started emitting named progress milestones.
+            for legacy_stage, step_key in (
+                ("phase2", "jd"),
+                ("strateg", "strategy"),
+                ("generat", "generate"),
+                ("validat", "validate"),
+                ("repair", "repair"),
+                ("export", "export"),
+            ):
+                if legacy_stage in stage:
+                    reached = step_key
+                    break
+    exports = result.get("exports") if isinstance(result, dict) else None
+    exports = exports if isinstance(exports, list) else []
+    variant_results = result.get("variant_results") if isinstance(result, dict) else None
+    variant_results = variant_results if isinstance(variant_results, list) else []
+    failed_variants = sum(1 for item in variant_results if not item.get("passed"))
+    usage = openai_command_service.usage_for_run(job.get("run_id"))
+    artifacts_ready = status == "COMPLETED" and bool(exports)
+    provider_blocked = any(
+        str(row.get("error_class") or "").lower() in {
+            "ratelimiterror", "rate_limit", "authenticationerror", "api_connection_error"
+        }
+        or str(row.get("error_type") or "").lower() in {"insufficient_quota", "invalid_api_key"}
+        for row in usage.get("recent", [])
+    )
+    single_call = bool(payload.get("single_call"))
+    repair_skipped = not bool(payload.get("repair")) or single_call
+    repair_label = (
+        "Repair skipped (single-call mode)"
+        if single_call
+        else "Repair skipped (disabled)"
+        if not payload.get("repair")
+        else "Repair completed"
+    )
     steps_def = [
         ("candidate", "Candidate loaded"),
         ("match", "Family match confirmed"),
         ("jd", "JD analyzed"),
         ("strategy", "Strategy created"),
-        ("generate", "Resume generated"),
+        ("generate", "OpenAI resume generation"),
         ("validate", "Validation completed"),
-        ("repair", "Repair completed"),
-        ("export", "Documents created"),
+        ("repair", repair_label),
+        ("export", "Documents created" if artifacts_ready else "No artifacts created"),
     ]
-    reached = "candidate"
-    if status == "RUNNING":
-        for needle, key in [
-            ("phase2", "jd"),
-            ("strateg", "strategy"),
-            ("generat", "generate"),
-            ("validat", "validate"),
-            ("repair", "repair"),
-            ("export", "export"),
-        ]:
-            if needle in stage:
-                reached = key
+
     if status == "COMPLETED":
         reached = "export"
     order = [k for k, _ in steps_def]
     idx = order.index(reached) if reached in order else 0
     steps = []
     for i, (key, label) in enumerate(steps_def):
-        done = status == "COMPLETED" or i < idx
+        skipped = key == "repair" and repair_skipped
+        done = (
+            (status == "COMPLETED" and (key != "export" or artifacts_ready))
+            or (i < idx and not skipped)
+        )
         current = status == "RUNNING" and key == reached
-        steps.append({"key": key, "label": label, "done": done or (status == "COMPLETED"), "current": current})
+        steps.append({"key": key, "label": label, "done": done, "skipped": skipped, "current": current})
     headline = "Creating resume..."
-    if status == "COMPLETED":
+    if status == "COMPLETED" and artifacts_ready:
         headline = "RESUME READY"
+    elif status == "COMPLETED":
+        headline = "RUN COMPLETED WITHOUT ARTIFACTS"
     elif status == "FAILED":
         headline = "Something went wrong"
     elif status == "RUNNING":
         headline = next((lab for k, lab in steps_def if k == reached), headline)
+    formats = []
+    if payload.get("export_docx"):
+        formats.append("DOCX")
+    if payload.get("export_pdf"):
+        formats.append("PDF")
+    if not formats:
+        formats = ["JSON"]
+    elapsed = _age_seconds(created_at)
+    updated_age = _age_seconds(updated_at)
+    percent = 100 if status == "COMPLETED" else 0 if status == "FAILED" else int(((idx + 1) / len(steps_def)) * 100)
+    if status == "QUEUED":
+        percent = 5
+    current_message = progress_message or {
+        "QUEUED": "Queued. Waiting for a generation worker.",
+        "RUNNING": "Working through generation pipeline.",
+        "COMPLETED": "All requested artifacts are ready.",
+        "FAILED": "The run stopped before completion.",
+    }.get(status, "Waiting for progress update.")
+    if status == "COMPLETED" and not artifacts_ready:
+        current_message = (
+            "The pipeline finished, but no resume artifact was created. "
+            "Review OpenAI Activity and retry after resolving the provider error."
+        )
+        if provider_blocked:
+            current_message = (
+                "OpenAI did not return a usable response, so no resume artifact was created. "
+                "Check quota, API key, or rate limits, then retry."
+            )
+    if status == "RUNNING" and reached == "generate" and not usage["totals"].get("requests"):
+        current_message = current_message + " Waiting for the first OpenAI response."
     return {
         "status": status,
         "headline": headline,
         "steps": steps,
-        "ready": status == "COMPLETED",
+        "ready": artifacts_ready,
+        "artifacts_ready": artifacts_ready,
+        "warning": status == "COMPLETED" and not artifacts_ready,
+        "provider_blocked": provider_blocked,
+        "failed_variants": failed_variants,
         "error": job.get("error"),
         "run_id": job.get("run_id"),
         "job_id": job.get("job_id"),
+        "stage": job.get("stage"),
+        "percent": percent,
+        "current_message": current_message,
+        "progress_detail": progress_detail or {},
+        "elapsed_seconds": elapsed,
+        "updated_seconds_ago": updated_age,
+        "model": payload.get("model"),
+        "variant_count": payload.get("variant_count"),
+        "formats": formats,
+        "artifact_label": ", ".join(formats) if artifacts_ready else "None",
+        "repair": bool(payload.get("repair")),
+        "laya": bool(payload.get("use_laya")),
+        "openai_key": openai_command_service.openai_key_status(),
+        "openai_usage": usage,
+        "payload_summary": {
+            "candidate_id": payload.get("candidate_id"),
+            "job_id": payload.get("job_id"),
+            "match_type": payload.get("match_type"),
+            "online_mode": payload.get("online_mode"),
+            "single_call": bool(payload.get("single_call")),
+        },
+        "call_policy": "1 OpenAI call" if payload.get("single_call") else "Multi-step generation",
+        "result": {
+            "exports": exports,
+            "summary_path": result.get("summary_path") if isinstance(result, dict) else None,
+            "variants_processed": result.get("variants_processed") if isinstance(result, dict) else None,
+        },
     }
 
 

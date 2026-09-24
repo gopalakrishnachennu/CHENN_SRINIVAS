@@ -1,6 +1,7 @@
 import contextlib
 import json
 from pathlib import Path
+from typing import Any, Callable
 
 from resume_engine.config import thresholds
 from resume_engine.config.settings import (
@@ -488,13 +489,23 @@ def run_phase2_pipeline(
     use_laya: bool = True,
     run_id: str | None = None,
     export_formats: list[str] | None = None,
+    progress_callback: Callable[[str, str, dict[str, Any] | None], None] | None = None,
+    single_call: bool = False,
 ) -> dict:
+    def progress(stage: str, message: str, detail: dict[str, Any] | None = None) -> None:
+        if progress_callback is None:
+            return
+        with contextlib.suppress(Exception):
+            progress_callback(stage, message, detail or {})
+
     ensure_storage_dirs()
+    progress("load_blueprint", "Loading JD blueprint and candidate evidence.", None)
     blueprint = JDBlueprint.from_json_file(str(blueprint_path))
     generation_context = build_generation_context(resume_seed_path, candidate_profile_path)
 
     run_paths = create_run_paths(blueprint.jd_hash, run_id=run_id)
 
+    progress("strategy", "Creating resume strategy and variant plan.", {"jd_hash": blueprint.jd_hash})
     strategy = build_strategy(blueprint)
     # Keep legacy flat strategy write for backward compatibility, plus run-scoped copy.
     legacy_strategy_path = save_strategy(strategy)
@@ -505,6 +516,17 @@ def run_phase2_pipeline(
         strategy,
         learning_insights=learning_insights,
     )[:variant_limit]
+    if single_call:
+        variants = variants[:1]
+    progress(
+        "strategy_ready",
+        (
+            "Single-resume plan ready: one OpenAI generation call."
+            if single_call
+            else f"Strategy ready with {len(variants)} variant(s)."
+        ),
+        {"variant_count": len(variants), "single_call": single_call},
+    )
 
     # Phase 2.8: shadow ranking only — production order unchanged.
     online_shadow_decisions = 0
@@ -529,6 +551,7 @@ def run_phase2_pipeline(
         {
             "generation_mode": generation_context["generation_mode"],
             "variant_count": len(variants),
+            "single_call": single_call,
             "model": resolved_model,
             "blueprint_version": blueprint.blueprint_version,
             "prompt_version": PROMPT_VERSION,
@@ -543,13 +566,23 @@ def run_phase2_pipeline(
         },
     )
 
-    client = build_openai_client()
+    progress(
+        "openai_setup",
+        f"Preparing OpenAI client for model {resolved_model}.",
+        {"model": resolved_model, "variant_count": len(variants)},
+    )
+    client = build_openai_client(max_retries=0) if single_call else build_openai_client()
     laya_agent = load_laya_agent() if use_laya else None
 
     variant_by_id = {variant.variant_id: variant for variant in variants}
     attempt_nos: dict[str, int] = {variant.variant_id: 1 for variant in variants}
     variant_results = []
-    for variant in variants:
+    for index, variant in enumerate(variants, start=1):
+        progress(
+            f"generate_variant_{index}",
+            f"Calling OpenAI and validating variant {index} of {len(variants)}.",
+            {"variant_id": variant.variant_id, "index": index, "total": len(variants), "model": resolved_model},
+        )
         variant_results.append(
             process_variant(
                 client=client,
@@ -560,16 +593,21 @@ def run_phase2_pipeline(
                 laya_agent=laya_agent,
                 run_paths=run_paths,
                 model=model,
-                repair=repair,
+                repair=repair and not single_call,
                 attempt_no=1,
                 persist_learning=False,
             )
+        )
+        progress(
+            f"variant_{index}_complete",
+            f"Variant {index} completed.",
+            {"variant_id": variant.variant_id, "index": index, "total": len(variants)},
         )
 
     # Cross-variant auto regeneration: regenerate only weaker duplicates.
     regen_events = []
     regen_counts: dict[str, int] = {variant.variant_id: 0 for variant in variants}
-    for _ in range(thresholds.VARIANT_REGEN_MAX):
+    for _ in range(0 if single_call else thresholds.VARIANT_REGEN_MAX):
         passed_items = [item for item in variant_results if item.get("passed") and item.get("_resume_object")]
         if len(passed_items) < 2:
             break
@@ -590,6 +628,11 @@ def run_phase2_pipeline(
         if not weaker_ids:
             break
         for weaker_id in weaker_ids:
+            progress(
+                "regenerate_variant",
+                f"Regenerating duplicate-heavy variant {weaker_id}.",
+                {"variant_id": weaker_id},
+            )
             # Mark prior attempt as superseded (diagnostic only; not eligible).
             for item in variant_results:
                 if item["variant_id"] == weaker_id:
@@ -636,6 +679,7 @@ def run_phase2_pipeline(
                 for item in variant_results
             ]
 
+    progress("learning", "Recording final validation and shadow-learning observations.", None)
     # After regeneration settles: persist exactly one final learning outcome per variant.
     from resume_engine.learning.eligibility import is_record_eligible_for_learning
 
@@ -691,6 +735,7 @@ def run_phase2_pipeline(
             continue
         with open(resume_file, "r", encoding="utf-8") as f:
             final_resumes.append(ResumeJSON.model_validate(json.load(f)))
+    progress("diversity", "Checking cross-variant similarity.", {"variant_count": len(final_resumes)})
     variant_similarity_result = (
         validate_variant_similarity(
             final_resumes,
@@ -704,6 +749,7 @@ def run_phase2_pipeline(
 
     exports: list[dict] = []
     if export_formats:
+        progress("export", f"Exporting final resumes to {', '.join(export_formats).upper()}.", None)
         from resume_engine.export.service import export_resume
 
         contact = None
@@ -731,6 +777,7 @@ def run_phase2_pipeline(
                     "artifacts": export_result.get("artifacts"),
                 }
             )
+    progress("finalize", "Saving run summary and final artifacts.", {"exports": len(exports)})
 
     result = {
         "phase": "Phase 2",

@@ -10,14 +10,23 @@
   <span class="wizard-step">3 Generate</span>
 </div>
 
-<div class="card" style="margin-bottom:1rem;">
-  <p><strong>Candidate:</strong> {{ candidate.name }} · {{ candidate.primary_family_display }}</p>
+<div class="card soft" style="margin-bottom:1rem;">
+  <div class="meta-row">
+    <div>Candidate: <strong>{{ candidate.name }}</strong></div>
+    <div>Primary family: <strong>{{ candidate.primary_family_display }}</strong></div>
+    <div>Only resume-ready family matches are shown</div>
+  </div>
 </div>
 
 {% if matches %}
 <div class="card">
-  <h3>Matched Jobs ({{ matches|length }})</h3>
-  <p class="muted tiny">Only jobs with a family match are shown. Add more jobs in the Jobs library.</p>
+  <div class="section-title">
+    <div>
+      <h3>Matched Jobs ({{ matches|length }})</h3>
+      <div class="muted tiny">Direct, secondary, and hybrid matches are prioritized for safe resume generation.</div>
+    </div>
+    <a class="btn ghost" href="{{ url_for('jobs.create') }}">Add JD</a>
+  </div>
   <table>
     <thead><tr><th>Job</th><th>Company</th><th>Match</th><th>Score</th><th></th></tr></thead>
     <tbody>
@@ -27,7 +36,7 @@
         <td>{{ m.get('job_company','—') }}</td>
         <td><span class="pill {{ m.match_type }}">{{ m.match_type }}</span></td>
         <td>{{ '%.0f'|format((m.score or 0)*100) }}%</td>
-        <td><a class="btn" href="{{ url_for('create_resume.options', candidate_id=candidate.id, job_id=m.job_id) }}">Select →</a></td>
+        <td><a class="btn" href="{{ url_for('create_resume.options', candidate_id=candidate.id, job_id=m.job_id) }}">Select</a></td>
       </tr>
     {% endfor %}
     </tbody>
@@ -42,6 +51,6 @@
 {% endif %}
 
 <div class="actions" style="margin-top:1rem;">
-  <a class="btn secondary" href="{{ url_for('create_resume.index') }}">← Back</a>
+  <a class="btn secondary" href="{{ url_for('create_resume.index') }}">Back</a>
 </div>
 {% endblock %}

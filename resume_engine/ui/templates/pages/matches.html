@@ -1,9 +1,18 @@
 {% extends "base.html" %}
 {% block title %}Matches · Resume Engine{% endblock %}
 {% block page_title %}Matches{% endblock %}
-{% block page_sub %}Strict family matches for resume-ready jobs{% endblock %}
+{% block page_sub %}Strict family matching with safe adjacent-role controls.{% endblock %}
 {% block content %}
 <div class="stack">
+  <div class="card soft">
+    <div class="section-title">
+      <div>
+        <h2>Decision Desk</h2>
+        <div class="muted tiny">Choose a candidate, inspect compatible JDs, and move directly into generation when the match is safe.</div>
+      </div>
+      <a class="btn ghost" href="{{ url_for('jobs.create') }}">Analyze JD</a>
+    </div>
+  </div>
   <form class="card filters" method="get">
     <div>
       <label>Candidate</label>
@@ -49,17 +58,17 @@
       {{ selected.primary_family_display }}{% if selected.payload.secondary_family %} + {{ selected.secondary_family_display }}{% endif %}
     </p>
     <p style="margin:0.55rem 0 0;">
-      <strong>{{ summary.matched_jobs }}</strong> resume-ready matches
+      <strong>{{ summary.matched_jobs }}</strong> strict family matches
       from <strong>{{ summary.total_jobs }}</strong> active jobs
-      ({{ summary.ready_jobs }} READY{% if summary.needs_analysis_jobs %}, {{ summary.needs_analysis_jobs }} need analysis{% endif %})
+      ({{ summary.resume_ready_matches }} ready to generate{% if summary.pending_matched_jobs %}, {{ summary.pending_matched_jobs }} need job analysis{% endif %}{% if summary.blocked_matched_jobs %}, {{ summary.blocked_matched_jobs }} need required fields{% endif %})
     </p>
     <p class="muted tiny" style="margin:0.25rem 0 0;">
-      Direct {{ summary.direct }} · Secondary {{ summary.secondary }} · Hybrid {{ summary.hybrid }}
+      Primary matches {{ summary.direct }} · Secondary matches {{ summary.secondary }} · Overlap matches {{ summary.hybrid }}
     </p>
   </div>
 
   {% if not matched %}
-    <div class="empty">No resume-ready family matches.</div>
+    <div class="empty">No strict family matches for this candidate.</div>
   {% else %}
   <div class="match-list">
     {% for m in matched %}
@@ -71,12 +80,40 @@
         </div>
         <div class="match-row-badges">
           <span class="muted tiny">{{ m.primary_family_display }}{% if m.secondary_family %} + {{ m.secondary_family_display }}{% endif %}</span>
-          <span class="match-badge {{ m.match_type|lower|replace('_','') }}">{{ m.match_type|replace('_',' ') }}</span>
-          <span class="pill pass">READY</span>
+          <span class="match-badge {{ m.match_type|lower|replace('_','') }}">
+            {% if m.match_type == 'DIRECT' %}Primary match{% elif m.match_type == 'SECONDARY' %}Secondary match{% elif m.match_type == 'HYBRID' %}Overlap match{% else %}{{ m.match_type|replace('_',' ')|title }}{% endif %}
+          </span>
+          {% if m.is_resume_ready %}
+            <span class="pill pass">Ready to Generate</span>
+          {% elif m.readiness_status == 'BLOCKED_INTAKE' %}
+            <span class="pill fail">Fix Intake: Required Fields</span>
+          {% elif (m.analysis_status or '')|upper == 'FAILED' %}
+            <span class="pill fail">Analysis Failed</span>
+          {% elif (m.analysis_status or '')|upper == 'ANALYZING' %}
+            <span class="pill warn">Analyzing</span>
+          {% else %}
+            <span class="pill warn">Needs Job Analysis</span>
+          {% endif %}
         </div>
+        {% if m.readiness_reason %}
+          <div class="muted tiny">{{ m.readiness_reason }}</div>
+        {% endif %}
       </div>
       <div class="actions">
-        <a class="btn" href="{{ url_for('create_resume.index', candidate=selected.id, jd=m.id) }}">Create Resume</a>
+        {% if m.is_resume_ready %}
+          <a class="btn" href="{{ url_for('create_resume.index', candidate=selected.id, jd=m.id) }}">Create Resume</a>
+        {% elif m.readiness_status == 'BLOCKED_INTAKE' %}
+          <a class="btn secondary" href="{{ url_for('jobs.edit', job_id=m.id) }}">Fix Intake</a>
+        {% else %}
+          <form method="post" action="{{ url_for('create_resume.prepare') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+            <input type="hidden" name="candidate_id" value="{{ selected.id }}"/>
+            <input type="hidden" name="jd_id_prepare" value="{{ m.id }}"/>
+            <button class="btn secondary" type="submit">
+              {% if (m.analysis_status or '')|upper == 'FAILED' %}Rebuild Analysis{% else %}Build Job Analysis{% endif %}
+            </button>
+          </form>
+        {% endif %}
         <a class="btn ghost" href="{{ url_for('jobs.detail', job_id=m.id) }}">View</a>
       </div>
     </div>

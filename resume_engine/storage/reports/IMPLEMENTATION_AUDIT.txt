@@ -41,10 +41,19 @@ Note: imports_successfully != tested.
 [EXISTS] pdf_exporter | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
 [EXISTS] export_service | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
 [EXISTS] phase3_ui | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] ui_auth | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] phase1_live_harness | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] online_feature_builder | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] online_reward_engine | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] online_river_policy | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] online_policy_store | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] online_shadow_runner | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] online_replay | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
+[EXISTS] online_evaluator | imports=True | unit_test_exists=True | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
 [EXISTS] resume_validation_report | imports=True | unit_test_exists=False | integration_test_exists=False | live=LIVE_TEST_NOT_RUN
 [EXISTS] behavioral_audit | imports=True | unit_test_exists=True | integration_test_exists=True | live=LIVE_TEST_NOT_RUN
 [EXISTS] phase2_pipeline | imports=True | unit_test_exists=True | integration_test_exists=True | live=LIVE_TEST_NOT_RUN
 
 Overall:
-42/42 importable modules
+51/51 importable modules
 100.0%

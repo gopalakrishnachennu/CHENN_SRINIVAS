@@ -1,0 +1,49 @@
+Job Description 
+Company Summary 
+DISH, an EchoStar Company, has been reimagining the future of connectivity for more than 40 
+years. Our business reach spans satellite television service, live-streaming and on-demand 
+programming, smart home installation services, mobile plans and products, and now we are 
+building America’s First Smart Network™️. 
+Today, our brands include EchoStar, Hughes, DISH TV, Sling TV, Boost Infinite, Boost Mobile, DISH 
+Wireless, OnTech and GenMobile. 
+Department Summary 
+Our Technology teams challenge the status quo and reimagine capabilities across industries. 
+Whether through research and development, technology innovation or solution engineering, 
+our team members play a vital role in connecting consumers with the products and platforms of 
+tomorrow. 
+Job Duties and Responsibilities 
+Senior Engineer-Cloud/AWS sought by DISH Network, L.L.C. in Plano, TX. 
+Help building a high functioning cloud engineering and services (security, automation) 
+organization that delivers high quality secure services. Perform solution design, architectural 
+review, implement proof-of-concepts, standardize solutions, and develop operational handoff of 
+solutions. Maturing the automation for building and deploying cloud infrastructure using 
+Infrastructure-As-Code solutions and integrating infrastructure builds with security controls for 
+proactively detecting and handling non-compliance. Design solutions for improving Cloud 
+Security posture and for increased and automated enforcement of cloud security guardrails. 
+Enable broader adoption of High Availability (HA) and Disaster Recovery (DR) solutions for 
+improving the resiliency of all Dish Cloud solutions. Work collaboratively with application 
+architects, application & analytics teams, and vendor partners for broader adoption of Cloud 
+Infrastructure and cloud engineering. Collaborate with teams and leadership within IT and with 
+business partners to advance our technical capabilities and provide data solutions that drive 
+business results. Learn and keep pace with the latest advances in the field and rapidly grasp 
+new technologies to lead and support the environment and project deliverables. 
+Skills, Experience and Requirements 
+Requires Bachelor’s degree (or foreign equivalent) in Information Technology and Computing, 
+Computer Science, or a closely related field plus 4 years of experience in the job offered or 
+related role. Also requires experience with/using the following (which may have been gained 
+concurrently): 
+● Ansible - 3 years 
+● Puppet; AWS; Infrastructure As Code: Terraform; Containers (Docker, Kubernetes); 
+and Linux - 2 years 
+● EC2, EKS, CI/CD, Jenkins, and Gitlab – 1 year 
+Salary Ranges 
+Compensation: $141,336.00/Year 
+Benefits 
+Employment is contingent on successful completion of a pre-employment criminal background 
+check, which may include a drug test. 
+Rate of Pay: $141,336.00 
+Benefits information available at careers.dish.com. 
+Apply at careers.dish.com. Ref:2025-95812 if applying externally through careers.dish.com; 
+Ref:2025-95811 if applying internally. May also apply by emailing resume with (Ref:2025-95812) 
+to tasharedservices@dish.com. The posting will be active for a minimum of 3 days. The active 
+posting will continue to extend by 3 days until the position is filled.

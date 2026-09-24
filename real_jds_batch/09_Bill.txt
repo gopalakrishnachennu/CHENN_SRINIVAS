@@ -1,0 +1,60 @@
+**Job Title**: Senior Database Reliability Engineer
+**Location**: Draper, Utah, United States; San Jose, California, United States
+
+---
+
+**About BILL**
+At BILL, we empower businesses by replacing outdated financial processes with innovative tools, helping businesses—from startups to established brands—make smarter decisions and gain control of their operations. Our vision is to create the future of financial automation, enabling businesses to focus on what truly matters.
+
+We value purpose, drive, and curiosity, and thrive in a fast-paced, ever-changing environment. Join a team that delivers impactful solutions for businesses.
+
+---
+
+**Role Overview**
+We are seeking a Senior Database Reliability Engineer to join our Core Infrastructure Team. This team is responsible for managing all of BILL's infrastructure and databases. You will play a key role in architecting, building, and supporting high-throughput data platforms and ensuring exceptional data consistency and performance across databases, streaming, and distributed systems.
+
+---
+
+**Key Responsibilities**
+
+* Design, build, scale, and support mission-critical data platforms.
+* Ensure data consistency and performance at the database level, primarily using Kafka and Flink.
+* Architect and build resilient, fault-tolerant real-time data pipelines.
+* Collaborate with engineering, product, and infrastructure teams to create scalable and high-performing solutions.
+* Manage enterprise RDBMS (PostgreSQL, Aurora, MySQL, Oracle) databases, focusing on optimization, security, and access control.
+* Implement high availability, replication, CDC, disaster recovery, and multi-region database deployments.
+* Work with tools like GoldenGate, Debezium for replication, and use IaC with Terraform for managing infrastructure.
+* Troubleshoot complex platform issues across the database, streaming, and infrastructure layers.
+* Monitor and alert using DataDog, Splunk, and CloudWatch to resolve performance issues.
+
+---
+
+**Required Qualifications**
+
+* 5+ years of experience with enterprise RDBMS (PostgreSQL, Aurora, MySQL, Oracle).
+* 3+ years managing databases & CDC Streaming services on AWS.
+* Experience with Apache/Confluent Kafka (running clusters at scale with exactly-once or at-least-once delivery).
+* Familiarity with Flink pipelines (stateful streaming, checkpointing, windows).
+* Experience in database replication tools (GoldenGate / Debezium).
+* Proficient in Python and other programming languages.
+* Strong experience with query optimization and performance tuning.
+* Knowledge of monitoring tools like DataDog, Splunk, and CloudWatch.
+* Expertise in containers and cloud platforms (Kubernetes/ECS/AWS).
+* Bachelor’s degree in Computer Science or related field, or equivalent experience.
+
+---
+
+**Compensation & Benefits**
+
+* San Jose: $148,800 - $178,500 USD
+* Draper, UT: $126,500 - $151,700 USD
+* Eligible for bonus and equity plan.
+* 100% paid health, dental, and vision plans.
+* Life insurance, long & short-term disability coverage.
+* 401(k) retirement plan, paid holidays, wellness days, flexible time off.
+* Employee Stock Purchase Program, fitness initiatives, and much more.
+
+---
+
+**Equal Opportunity Employer**
+At BILL, we believe our best ideas come from a diverse team. We welcome people of all backgrounds, abilities, and identities. We foster an inclusive hiring process and value the contributions of every individual.

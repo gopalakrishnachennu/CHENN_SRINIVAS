@@ -298,7 +298,12 @@
     "raw_artifact_preserved": true,
     "run_isolation": true,
     "targeted_patch_repair": true,
-    "repair_scope_guard": true
+    "repair_scope_guard": true,
+    "online_learner_no_action_invention": true,
+    "online_shadow_does_not_alter_ranking": true,
+    "online_failed_resume_reward_zero": true,
+    "online_superseded_not_learned": true,
+    "online_policy_fallback_safe": true
   },
   "pass_conditions": {
     "P1 coverage": true,
@@ -318,7 +323,14 @@
     "Failed-final gate": true,
     "Raw artifact preserved": true,
     "Run isolation": true,
-    "Variant differentiation": true
+    "Variant differentiation": true,
+    "ONLINE_LEARNING_SHADOW_VALIDATED": true
+  },
+  "online_learning": {
+    "mode_label": "ONLINE_LEARNING_SHADOW_VALIDATED",
+    "self_learning_production_active": false,
+    "eligible_action_count": 20,
+    "ranked_action_count": 20
   },
   "result": "PASS"
 }

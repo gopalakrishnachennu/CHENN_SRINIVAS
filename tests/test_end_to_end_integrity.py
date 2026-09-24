@@ -86,7 +86,7 @@ def _insert_imported_job(
             ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             """,
             (
-                jid, None, title, "Co", "Remote", None, "import",
+                jid, None, title, "Co", "Remote, United States", "https://example.test/imported", "import",
                 "mid", primary, None, "active",
                 blueprint_path, jd_text, "{}", now, now,
                 analysis_status, 0, None,
@@ -94,6 +94,15 @@ def _insert_imported_job(
         )
         conn.commit()
     return jid
+
+
+def _analyzed_job(text: str):
+    return job_service.analyze_and_store(
+        text,
+        company="Acme",
+        location="Austin, TX",
+        job_url=f"https://example.test/jobs/{uuid.uuid4()}",
+    )
 
 
 @pytest.fixture
@@ -122,8 +131,8 @@ def test_end_to_end_happy_path_then_secondary_removal(mock_analyze):
     })
     assert cand["payload"]["secondary_family"] == "data_engineering"
 
-    ai_job = job_service.analyze_and_store("Senior ML Engineer Python PyTorch")
-    de_job = job_service.analyze_and_store("Data Engineer Spark Airflow pipelines")
+    ai_job = _analyzed_job("Senior ML Engineer Python PyTorch")
+    de_job = _analyzed_job("Data Engineer Spark Airflow pipelines")
     assert get_analysis_status(ai_job) == ANALYSIS_READY
     assert ai_job["blueprint_path"] and Path(ai_job["blueprint_path"]).exists()
 
@@ -153,7 +162,7 @@ def test_end_to_end_happy_path_then_secondary_removal(mock_analyze):
 
 
 def test_ensure_job_blueprint_regenerates_missing_file(mock_analyze, tmp_path):
-    job = job_service.analyze_and_store("AI engineer LLM RAG")
+    job = _analyzed_job("AI engineer LLM RAG")
     path = Path(job["blueprint_path"])
     assert path.exists()
     path.unlink()
@@ -165,7 +174,7 @@ def test_ensure_job_blueprint_regenerates_missing_file(mock_analyze, tmp_path):
 
 
 def test_jd_text_edit_invalidates_blueprint(mock_analyze):
-    job = job_service.analyze_and_store("ML engineer tensorflow keras")
+    job = _analyzed_job("ML engineer tensorflow keras")
     old_path = job["blueprint_path"]
     old_hash = job["jd_content_hash"]
     updated = job_service.update_job(job["id"], {"jd_text": "Completely new Salesforce Admin Apex LWC JD text here"})
@@ -186,14 +195,14 @@ def test_no_match_cannot_generate(mock_analyze):
         "primary_family": "salesforce",
         "companies": [{"company": "Org", "start_date": "2019-01", "end_date": "Present"}],
     })
-    ai_job = job_service.analyze_and_store("Machine learning engineer deep learning")
+    ai_job = _analyzed_job("Machine learning engineer deep learning")
     with pytest.raises(PreflightError) as exc:
         preflight_create_resume(cand["id"], ai_job["id"])
     assert exc.value.code == "FAMILY_NO_LONGER_MATCHES"
 
 
 def test_ready_cannot_exist_with_missing_blueprint(mock_analyze):
-    job = job_service.analyze_and_store("AI research engineer")
+    job = _analyzed_job("AI research engineer")
     Path(job["blueprint_path"]).unlink()
     with connect_ui_db() as conn:
         conn.execute(
@@ -254,7 +263,7 @@ def test_archived_job_cannot_generate(mock_analyze):
         "primary_family": "ai_ml",
         "companies": [{"company": "Y", "start_date": "2020-01", "end_date": "2021-01"}],
     })
-    job = job_service.analyze_and_store("AI engineer")
+    job = _analyzed_job("AI engineer")
     job_service.archive_job(job["id"])
     with pytest.raises(PreflightError) as exc:
         preflight_create_resume(cand["id"], job["id"])
@@ -267,7 +276,7 @@ def test_candidate_zero_companies_preflight_fails(mock_analyze):
         "primary_family": "ai_ml",
         "companies": [],
     })
-    job = job_service.analyze_and_store("AI engineer")
+    job = _analyzed_job("AI engineer")
     with pytest.raises(PreflightError) as exc:
         preflight_create_resume(cand["id"], job["id"])
     assert exc.value.code == "CANDIDATE_COMPANY_HISTORY_MISSING"

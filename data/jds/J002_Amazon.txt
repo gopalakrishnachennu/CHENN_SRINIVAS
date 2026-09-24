@@ -1,0 +1,5 @@
+Data Engineer, IN Data Engineering & Analytics
+Amazon · Bengaluru, Karnataka
+https://www.amazon.jobs/en/jobs/10474887/data-engineer-in-data-engineering-analytics
+
+This Bengaluru Data Engineer role supports Amazon India's marketplace data platform. Responsibilities include building ingestion, storage, processing and query systems, producing reusable datasets, enabling self-service analytics, and developing AI-enabled data products. Required experience includes SQL, data modeling, data warehousing, ETL pipelines and a modern programming language such as Python, Java or Scala. Preferred experience includes AWS data services, Hadoop, Hive, Spark and non-relational data stores.

@@ -12,11 +12,13 @@
       <div>Phone: {{ profile.payload.phone or '—' }}</div>
       <div>Location: {{ profile.payload.location or '—' }}</div>
       <div>Jobs in library: <strong>{{ match_summary.total_jobs if match_summary else '—' }}</strong></div>
-      <div>Analyzed/Ready: <strong>{{ match_summary.ready_jobs if match_summary else '—' }}</strong></div>
-      <div>Strict family matches: <strong>{{ match_count }}</strong></div>
+      <div>Ready Jobs: <strong>{{ match_summary.ready_jobs if match_summary else '—' }}</strong></div>
+      <div>Strict Family Matches: <strong>{{ match_count }}</strong></div>
+      <div>Ready Matches: <strong>{{ match_summary.resume_ready_matches if match_summary else '—' }}</strong></div>
+      <div>Pending Matches: <strong>{{ match_summary.pending_matched_jobs if match_summary else '—' }}</strong></div>
     </div>
     {% if match_summary %}
-    <p class="muted tiny">Direct {{ match_summary.direct }} · Secondary {{ match_summary.secondary }} · Hybrid {{ match_summary.hybrid }}</p>
+    <p class="muted tiny">Direct {{ match_summary.direct }} · Secondary {{ match_summary.secondary }} · Hybrid {{ match_summary.hybrid }}{% if match_summary.blocked_matched_jobs %} · Blocked {{ match_summary.blocked_matched_jobs }}{% endif %}</p>
     {% endif %}
     <h3>Companies</h3>
     {% for c in profile.payload.companies %}

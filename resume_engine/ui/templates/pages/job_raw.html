@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Raw JD · {{ job.title or 'Job' }}{% endblock %}
+{% block page_title %}Raw JD{% endblock %}
+{% block page_sub %}{{ job.title or 'Untitled' }}{% if job.company %} · {{ job.company }}{% endif %}{% endblock %}
+{% block content %}
+<div class="stack">
+  <div class="card">
+    <div class="section-title">
+      <div>
+        <h2>Manual JD Text</h2>
+        <div class="muted tiny">This is the exact pasted JD used for deterministic parsers and model analysis.</div>
+      </div>
+      <div class="actions">
+        <a class="btn ghost" href="{{ url_for('jobs.edit', job_id=job.id) }}">Edit</a>
+        <a class="btn secondary" href="{{ url_for('jobs.detail', job_id=job.id) }}">Back</a>
+      </div>
+    </div>
+    <pre class="json">{{ job.jd_text or 'No raw JD stored.' }}</pre>
+  </div>
+</div>
+{% endblock %}

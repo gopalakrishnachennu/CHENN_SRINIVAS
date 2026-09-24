@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}OpenAI Command · Resume Engine{% endblock %}
+{% block page_title %}OpenAI Command{% endblock %}
+{% block page_sub %}Model routing, request telemetry, token usage, and estimated cost controls.{% endblock %}
+{% block content %}
+<div class="stack">
+  <div class="card soft">
+    <div class="section-title">
+      <div>
+        <h2>Routing Desk</h2>
+        <div class="muted tiny">Separate model choices for JD analysis and final resume generation.</div>
+      </div>
+      <span class="pill {% if key_status.configured %}pass{% else %}fail{% endif %}">OpenAI {{ key_status.label }}</span>
+    </div>
+    <form method="post" class="form-grid">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+      <div>
+        <label>JD Analysis Model</label>
+        <select name="openai_jd_analysis_model">
+          {% for model in model_options %}
+            <option value="{{ model.id }}" {% if model.id == jd_model %}selected{% endif %}>{{ model.label }} - {{ model.tier }}</option>
+          {% endfor %}
+        </select>
+        <div class="muted tiny">Used when building a JD blueprint from pasted job text.</div>
+      </div>
+      <div>
+        <label>Resume Generation Model</label>
+        <select name="openai_resume_generation_model">
+          {% for model in model_options %}
+            <option value="{{ model.id }}" {% if model.id == resume_model %}selected{% endif %}>{{ model.label }} - {{ model.tier }}</option>
+          {% endfor %}
+        </select>
+        <div class="muted tiny">Default for final resume variants; Create Resume can override per run.</div>
+      </div>
+      <div class="full actions">
+        <button class="btn" type="submit">Save Routing</button>
+        <span class="muted tiny">Key: {{ key_status.masked or 'not available in this process' }}</span>
+      </div>
+    </form>
+  </div>
+
+  <div class="grid cards">
+    <div class="card metric-card">
+      <span class="muted tiny">Requests</span>
+      <strong>{{ summary.totals.requests or 0 }}</strong>
+      <span class="muted tiny">{{ summary.totals.successes or 0 }} success / {{ summary.totals.failures or 0 }} failed</span>
+    </div>
+    <div class="card metric-card">
+      <span class="muted tiny">Input Tokens</span>
+      <strong>{{ "{:,}".format(summary.totals.input_tokens or 0) }}</strong>
+      <span class="muted tiny">Last {{ summary.days }} days</span>
+    </div>
+    <div class="card metric-card">
+      <span class="muted tiny">Output Tokens</span>
+      <strong>{{ "{:,}".format(summary.totals.output_tokens or 0) }}</strong>
+      <span class="muted tiny">Structured generation and extraction</span>
+    </div>
+    <div class="card metric-card">
+      <span class="muted tiny">Estimated Cost</span>
+      <strong>${{ "%.4f"|format(summary.totals.estimated_cost_usd or 0) }}</strong>
+      <span class="muted tiny">Estimate from configured model prices</span>
+    </div>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <div class="section-title">
+        <div>
+          <h3>Usage by Model</h3>
+          <div class="muted tiny">Requests, tokens, failures, and estimated cost by selected model.</div>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Model</th><th>Req</th><th>Tokens</th><th>Failures</th><th>Est. Cost</th></tr></thead>
+        <tbody>
+        {% for row in summary.by_model %}
+          <tr>
+            <td class="mono">{{ row.model }}</td>
+            <td>{{ row.requests }}</td>
+            <td>{{ "{:,}".format(row.total_tokens or 0) }}</td>
+            <td>{{ row.failures or 0 }}</td>
+            <td>${{ "%.4f"|format(row.estimated_cost_usd or 0) }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="5" class="muted">No OpenAI calls recorded yet.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="section-title">
+        <div>
+          <h3>Usage by Workflow</h3>
+          <div class="muted tiny">JD analysis, resume generation, repair, and any future OpenAI calls.</div>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Workflow</th><th>Req</th><th>Tokens</th><th>Failures</th><th>Est. Cost</th></tr></thead>
+        <tbody>
+        {% for row in summary.by_operation %}
+          <tr>
+            <td>{{ row.operation|replace('_',' ')|title }}</td>
+            <td>{{ row.requests }}</td>
+            <td>{{ "{:,}".format(row.total_tokens or 0) }}</td>
+            <td>{{ row.failures or 0 }}</td>
+            <td>${{ "%.4f"|format(row.estimated_cost_usd or 0) }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="5" class="muted">No workflow usage recorded yet.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">
+      <div>
+        <h3>Model Catalog</h3>
+        <div class="muted tiny">Dropdown options used by this project. Price estimates are used only when known.</div>
+      </div>
+      <span class="pill">Configurable routing</span>
+    </div>
+    <div class="grid product">
+      {% for model in model_options %}
+      <div class="card compact-model {% if model.id == jd_model or model.id == resume_model %}selected-model{% endif %}">
+        <strong>{{ model.label }}</strong>
+        <span class="mono tiny">{{ model.id }}</span>
+        <span class="pill">{{ model.tier }}</span>
+        <p class="muted tiny">{{ model.use }}</p>
+        {% if model.input_per_mtok is not none and model.output_per_mtok is not none %}
+          <div class="muted tiny">${{ model.input_per_mtok }}/MTok input · ${{ model.output_per_mtok }}/MTok output</div>
+        {% else %}
+          <div class="muted tiny">Price not set locally; requests still count, cost estimate remains $0 until configured.</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">
+      <div>
+        <h3>Recent Requests</h3>
+        <div class="muted tiny">Newest OpenAI calls recorded locally. Failed calls are kept so quota/key issues are visible.</div>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>When</th><th>Workflow</th><th>Model</th><th>Status</th><th>Tokens</th><th>Latency</th><th>Run</th></tr></thead>
+      <tbody>
+      {% for row in summary.recent %}
+        <tr>
+          <td class="tiny">{{ row.created_at }}</td>
+          <td>{{ row.operation|replace('_',' ')|title }}</td>
+          <td class="mono">{{ row.model }}</td>
+          <td><span class="pill {% if row.success %}pass{% else %}fail{% endif %}">{% if row.success %}OK{% else %}FAILED{% endif %}</span></td>
+          <td>{{ "{:,}".format(row.total_tokens or 0) }}</td>
+          <td>{{ "%.0f"|format(row.latency_ms or 0) }} ms</td>
+          <td class="mono tiny">{{ row.run_id or row.request_id or '-' }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7" class="muted">No requests recorded yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

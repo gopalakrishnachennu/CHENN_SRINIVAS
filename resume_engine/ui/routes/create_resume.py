@@ -8,10 +8,12 @@ from resume_engine.ui.auth import require_auth
 from resume_engine.ui.csrf import csrf_protect
 from resume_engine.ui.services import (
     candidate_service,
+    config_service,
     create_resume_service,
     job_service,
     match_service,
 )
+from resume_engine.ui.services import openai_command_service
 from resume_engine.ui.services.blueprint_lifecycle import ensure_job_blueprint
 from resume_engine.ui.services.create_resume_service import PreflightError
 
@@ -30,7 +32,7 @@ def _matched_for(candidate_id: str | None):
             jobs = job_service.list_jobs_lite(limit=2000)
             summary = match_service.match_summary_for_candidate(selected, jobs)
             matched = summary["matches"]
-            ready_count = summary["matched_jobs"]
+            ready_count = summary["resume_ready_matches"]
         except KeyError:
             selected = None
     return candidates, selected, matched, ready_count, summary
@@ -50,11 +52,12 @@ def index():
             job = create_resume_service.start_create_resume(
                 candidate_id=request.form.get("candidate_id") or "",
                 jd_id=request.form.get("jd_id") or "",
-                variants=int(request.form.get("variants") or 3),
+                variants=int(request.form.get("variants") or 1),
                 repair=request.form.get("repair") == "on",
                 laya=request.form.get("laya") == "on",
                 export_docx=request.form.get("docx") == "on",
                 export_pdf=request.form.get("pdf") == "on",
+                model=request.form.get("model") or None,
                 actor=session.get("username"),
             )
             return redirect(url_for("create_resume.progress", job_id=job["job_id"]))
@@ -67,13 +70,13 @@ def index():
         except Exception as exc:  # noqa: BLE001
             text = str(exc)
             if "blueprint_path" in text.lower():
-                flash("Preparing job analysis failed. Use Analyze Now / Retry Analysis.", "error")
+                flash("Preparing job analysis failed. Use Build Job Analysis / Rebuild Analysis.", "error")
             else:
                 flash(text, "error")
 
     candidates, selected, matched, ready_count, summary = _matched_for(candidate_id)
     preselect_jd = request.args.get("jd") or request.form.get("jd_id")
-    first_ready_id = next((m["id"] for m in matched), None)
+    first_ready_id = next((m["id"] for m in matched if m.get("is_resume_ready")), None)
     return render_template(
         "pages/create.html",
         candidates=candidates,
@@ -83,6 +86,8 @@ def index():
         summary=summary,
         preselect_jd=preselect_jd,
         first_ready_id=first_ready_id,
+        model_options=openai_command_service.model_options(),
+        selected_resume_model=config_service.get_effective_setting("openai_resume_generation_model"),
     )
 
 
@@ -96,10 +101,25 @@ def prepare():
     if not job_id:
         flash("Select a job to analyze", "error")
         return redirect(url_for("create_resume.index", candidate=candidate_id))
+    try:
+        job = job_service.get_job(job_id)
+        missing = job_service.validate_required_intake(job)
+        if missing:
+            flash(f"Preparing job analysis blocked. Required job intake missing: {', '.join(missing)}", "error")
+            return redirect(url_for("create_resume.index", candidate=candidate_id, jd=job_id))
+    except KeyError:
+        flash("Job does not exist", "error")
+        return redirect(url_for("create_resume.index", candidate=candidate_id))
     flash("Preparing job analysis...", "info")
     result = ensure_job_blueprint(job_id, actor=session.get("username"))
     if result.get("ok"):
-        flash("✓ Job ready", "success")
+        if result.get("fallback"):
+            flash(
+                "Job ready using local Laya fallback. OpenAI was unavailable for JD analysis; final resume generation may still need OpenAI credits/key.",
+                "success",
+            )
+        else:
+            flash("Job ready to generate.", "success")
     else:
         flash(
             f"Job analysis failed: {result.get('error') or result.get('reason') or 'unknown'}",

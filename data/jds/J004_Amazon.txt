@@ -1,0 +1,5 @@
+Systems Development Engineer I
+Amazon · Bengaluru, Karnataka
+https://www.amazon.jobs/en/jobs/10477442/systems-development-engineer-i
+
+This Bengaluru Systems Development Engineer role focuses on infrastructure automation and operational engineering. The engineer designs and operates workflow orchestration, CDK-based multi-region infrastructure, AWS-native automation pipelines and proactive monitoring. Required qualifications include DevOps or SysOps experience, Linux/Unix and programming in a modern language. Preferred qualifications include CI/CD pipeline experience, system architecture for reliability and scaling, and automation of development, testing and operations.

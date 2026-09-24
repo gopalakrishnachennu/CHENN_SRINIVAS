@@ -26,6 +26,16 @@ SETTING_SPECS: dict[str, dict[str, Any]] = {
         "type": "str",
         "default": os.getenv("OPENAI_MODEL", "gpt-5.6"),
     },
+    "openai_jd_analysis_model": {
+        "classification": "SAFE",
+        "type": "str",
+        "default": os.getenv("OPENAI_JD_ANALYSIS_MODEL", os.getenv("OPENAI_MODEL", "gpt-5.6-terra")),
+    },
+    "openai_resume_generation_model": {
+        "classification": "SAFE",
+        "type": "str",
+        "default": os.getenv("OPENAI_RESUME_GENERATION_MODEL", os.getenv("OPENAI_MODEL", "gpt-5.6")),
+    },
     "laya_default_enabled": {
         "classification": "SAFE",
         "type": "bool",

@@ -1,98 +1,195 @@
 {% extends "base.html" %}
 {% block title %}Create Resume · Resume Engine{% endblock %}
 {% block page_title %}Create Resume{% endblock %}
-{% block page_sub %}1. Candidate → 2. Matching Jobs → 3. Generate{% endblock %}
+{% block page_sub %}Candidate, matched JD, governed generation, validation, repair, and export.{% endblock %}
 {% block content %}
 <div class="stack">
-<form method="post" class="card" id="create-form">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-  <input type="hidden" name="action" value="generate"/>
+  <div class="card soft">
+    <div class="section-title">
+      <div>
+        <h2>Operator Setup</h2>
+        <div class="muted tiny">One page, three decisions: who, which job, and what delivery package.</div>
+      </div>
+      <div class="actions">
+        <a class="btn ghost" href="{{ url_for('candidates.create') }}">Add Candidate</a>
+        <a class="btn ghost" href="{{ url_for('jobs.create') }}">Analyze JD</a>
+      </div>
+    </div>
+  </div>
 
-  <h3>1. Candidate</h3>
-  <select name="candidate_id" onchange="location.href='{{ url_for('create_resume.index') }}?candidate='+this.value{% if preselect_jd %}+'&jd={{ preselect_jd }}'{% endif %}">
-    <option value="">Select…</option>
-    {% for c in candidates %}
-      <option value="{{ c.id }}" {% if selected and selected.id == c.id %}selected{% endif %}>{{ c.name }} — {{ c.primary_family_display }}</option>
-    {% endfor %}
-  </select>
+  <div class="card">
+    <div class="section-title">
+      <div>
+        <h3>Generation Rules</h3>
+        <div class="muted tiny">The button opens only when the selected job is safe for resume generation.</div>
+      </div>
+      <span class="pill warn">What blocks generation</span>
+    </div>
+    <div class="meta-row">
+      <div><strong>Required fields:</strong> Job Title, Company, Location, JD URL, and Raw JD must be filled.</div>
+      <div><strong>Family match:</strong> Primary match, Secondary match, or Overlap match is required.</div>
+      <div><strong>Job analysis:</strong> Build the JD blueprint first. Local Laya fallback runs when OpenAI is unavailable.</div>
+      <div><strong>Final resume:</strong> OpenAI credits/key are needed only when generating resume variants.</div>
+    </div>
+  </div>
 
-  <h3 style="margin-top:1.25rem;">2. Matching Jobs</h3>
-  {% if not selected %}
-    <div class="empty">Choose a candidate first.</div>
-  {% elif not matched %}
-    <div class="empty">No family matches for this candidate yet.</div>
-  {% else %}
-    <div class="grid product">
-      {% for m in matched %}
-      {% set status = (m.analysis_status or 'NEEDS_ANALYSIS')|upper %}
-      {% set ready = status == 'READY' %}
-      <label class="card {% if not ready %}dimmed{% endif %}" style="cursor:{% if ready %}pointer{% else %}default{% endif %};">
-        {% if ready %}
-        <input type="radio" name="jd_id" value="{{ m.id }}"
-          {% if preselect_jd == m.id %}checked{% elif ready and not preselect_jd and m.id == first_ready_id %}checked{% endif %}
-          class="job-radio" data-ready="1"
-          style="margin-bottom:0.5rem;"/>
-        {% endif %}
-        <div><strong>{{ m.title }}</strong></div>
-        <div class="muted tiny">{{ m.company or '—' }}</div>
-        <div style="margin-top:0.45rem;">
-          <span class="match-badge {{ m.match_type|lower|replace('_','') }}">{{ m.match_type|replace('_',' ') }}</span>
-          {% if status == 'READY' %}
-            <span class="pill pass">READY</span>
-          {% elif status == 'ANALYZING' %}
-            <span class="pill warn">ANALYZING</span>
-          {% elif status == 'FAILED' or status == 'FAILED ANALYSIS' %}
-            <span class="pill fail">FAILED ANALYSIS</span>
-          {% elif status == 'ARCHIVED' %}
-            <span class="pill">ARCHIVED</span>
-          {% else %}
-            <span class="pill warn">NEEDS ANALYSIS</span>
-          {% endif %}
-        </div>
-        {% if not ready and status != 'ARCHIVED' %}
-          <div class="actions" style="margin-top:0.6rem;">
-            <button class="btn secondary" type="submit" name="action" value="prepare"
-              formaction="{{ url_for('create_resume.prepare') }}"
-              formmethod="post" formnovalidate
-              onclick="this.form.jd_id_prepare.value='{{ m.id }}'">
-              {% if status == 'FAILED' %}Retry Analysis{% else %}Analyze Now{% endif %}
-            </button>
+  <form method="post" class="stack" id="create-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+    <input type="hidden" name="action" value="generate"/>
+
+    <div class="grid two">
+      <div class="card">
+        <div class="section-title">
+          <div>
+            <h3>Candidate</h3>
+            <div class="muted tiny">Choose the verified fact card used for truth-safe generation.</div>
           </div>
+          <span class="pill">{{ candidates|length }} profiles</span>
+        </div>
+        <select name="candidate_id" onchange="location.href='{{ url_for('create_resume.index') }}?candidate='+this.value{% if preselect_jd %}+'&jd={{ preselect_jd }}'{% endif %}">
+          <option value="">Select...</option>
+          {% for c in candidates %}
+            <option value="{{ c.id }}" {% if selected and selected.id == c.id %}selected{% endif %}>{{ c.name }} - {{ c.primary_family_display }}</option>
+          {% endfor %}
+        </select>
+        {% if selected and summary %}
+        <div class="meta-row" style="margin-top:0.75rem;">
+          <div>Family matches: <strong>{{ summary.matched_jobs }}</strong></div>
+          <div>Ready matches: <strong>{{ summary.resume_ready_matches }}</strong></div>
+          <div>Pending: <strong>{{ summary.pending_matched_jobs }}</strong></div>
+          <div>Direct: <strong>{{ summary.direct }}</strong></div>
+          <div>Secondary: <strong>{{ summary.secondary }}</strong></div>
+          <div>Hybrid: <strong>{{ summary.hybrid }}</strong></div>
+        </div>
         {% endif %}
-      </label>
-      {% endfor %}
-    </div>
-    <input type="hidden" name="jd_id_prepare" value=""/>
-  {% endif %}
+      </div>
 
-  <h3 style="margin-top:1.25rem;">3. Generate</h3>
-  <div class="form-grid">
-    <div>
-      <label>Variants</label>
-      <select name="variants">
-        <option value="1">1</option>
-        <option value="3" selected>3</option>
-        <option value="5">5</option>
-      </select>
+      <div class="card delivery-card">
+        <div class="section-title">
+          <div>
+            <h3>Delivery Package</h3>
+            <div class="muted tiny">Single-resume mode uses one OpenAI generation attempt. Extra AI repair is opt-in.</div>
+          </div>
+          <span class="pill warn">Governed</span>
+        </div>
+        <div class="form-grid">
+          <div>
+            <label>Variants</label>
+            <select name="variants">
+              <option value="1" selected>1 (recommended)</option>
+              <option value="3">3</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+          <div>
+            <label>Resume Model</label>
+            <select name="model">
+              {% for model in model_options %}
+                <option value="{{ model.id }}" {% if model.id == selected_resume_model %}selected{% endif %}>{{ model.label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="full actions">
+            <label><input type="checkbox" name="repair"/> Extra AI repair call</label>
+            <label><input type="checkbox" name="laya" checked/> Laya Validation</label>
+            <label><input type="checkbox" name="docx" checked/> DOCX</label>
+            <label><input type="checkbox" name="pdf" checked/> PDF</label>
+          </div>
+        </div>
+        <div class="launch-panel">
+          <div>
+            <strong>Ready to Generate</strong>
+            <div class="muted tiny" id="launch-status">
+              {% if selected and ready_count %}
+                Select a ready matched job below, then launch.
+              {% elif selected %}
+                Build analysis for one matched job before launching.
+              {% else %}
+                Choose a candidate to begin.
+              {% endif %}
+            </div>
+          </div>
+          <button class="btn xl" type="submit" id="generate-btn"
+            {% if not selected or not ready_count %}disabled{% endif %}>
+            Generate Resume
+          </button>
+        </div>
+      </div>
     </div>
-    <div class="full actions" style="padding-top:1.4rem;">
-      <label><input type="checkbox" name="repair" checked/> Auto Repair</label>
-      <label><input type="checkbox" name="laya" checked/> Laya Validation</label>
-      <label><input type="checkbox" name="docx" checked/> DOCX</label>
-      <label><input type="checkbox" name="pdf" checked/> PDF</label>
-    </div>
-  </div>
 
-  <div style="margin-top:1.5rem;">
-    <button class="btn xl" type="submit" id="generate-btn"
-      {% if not selected or not ready_count %}disabled{% endif %}>
-      Generate Resume
-    </button>
+    <div class="card">
+      <div class="section-title">
+        <div>
+          <h3>Matching Jobs</h3>
+          <div class="muted tiny">Family matches appear immediately. A job must say Ready to Generate before resume creation starts.</div>
+        </div>
+        {% if selected %}<span class="pill">{{ matched|length }} family matches</span>{% endif %}
+      </div>
+      {% if not selected %}
+        <div class="empty">Choose a candidate first.</div>
+      {% elif not matched %}
+        <div class="empty">No family matches for this candidate yet. Add another JD or adjust candidate family.</div>
+      {% else %}
+        <div class="grid product">
+          {% for m in matched %}
+          {% set status = (m.analysis_status or 'NEEDS_ANALYSIS')|upper %}
+          {% set ready = m.is_resume_ready %}
+          <label class="job-option card {% if not ready %}dimmed{% endif %}">
+            {% if ready %}
+            <input type="radio" name="jd_id" value="{{ m.id }}"
+              {% if preselect_jd == m.id %}checked{% elif ready and not preselect_jd and m.id == first_ready_id %}checked{% endif %}
+              class="job-radio" data-ready="1"/>
+            {% endif %}
+            <span class="job-option-body">
+              <strong>{{ m.title }}</strong>
+              <span class="muted tiny">{{ m.company or 'Company not set' }}</span>
+              <span class="actions" style="margin-top:0.45rem;">
+                <span class="match-badge {{ m.match_type|lower|replace('_','') }}">
+                  {% if m.match_type == 'DIRECT' %}Primary match{% elif m.match_type == 'SECONDARY' %}Secondary match{% elif m.match_type == 'HYBRID' %}Overlap match{% else %}{{ m.match_type|replace('_',' ')|title }}{% endif %}
+                </span>
+                {% if status == 'READY' %}
+                  <span class="pill pass">Ready to Generate</span>
+                {% elif status == 'ANALYZING' %}
+                  <span class="pill warn">Analyzing</span>
+                {% elif status == 'FAILED' or status == 'FAILED ANALYSIS' %}
+                  <span class="pill fail">Analysis Failed</span>
+                {% elif status == 'ARCHIVED' %}
+                  <span class="pill">Archived</span>
+                {% elif m.readiness_status == 'BLOCKED_INTAKE' %}
+                  <span class="pill fail">Fix Intake: Required Fields</span>
+                {% else %}
+                  <span class="pill warn">Needs Job Analysis</span>
+                {% endif %}
+              </span>
+              {% if m.readiness_reason %}
+                <span class="muted tiny" style="margin-top:0.35rem;">{{ m.readiness_reason }}</span>
+              {% endif %}
+              {% if not ready and status != 'ARCHIVED' %}
+                <span class="actions" style="margin-top:0.65rem;">
+                  {% if m.readiness_status == 'BLOCKED_INTAKE' %}
+                    <a class="btn ghost" href="{{ url_for('jobs.edit', job_id=m.id) }}">Fix Intake</a>
+                  {% else %}
+                    <button class="btn secondary" type="submit" name="action" value="prepare"
+                      formaction="{{ url_for('create_resume.prepare') }}"
+                      formmethod="post" formnovalidate
+                      onclick="this.form.jd_id_prepare.value='{{ m.id }}'">
+                      {% if status == 'FAILED' %}Rebuild Analysis{% else %}Build Job Analysis{% endif %}
+                    </button>
+                  {% endif %}
+                </span>
+              {% endif %}
+            </span>
+          </label>
+          {% endfor %}
+        </div>
+        <input type="hidden" name="jd_id_prepare" value=""/>
+      {% endif %}
+    </div>
+
     {% if selected and matched and not ready_count %}
-      <p class="muted tiny" style="margin-top:0.5rem;">Generate stays disabled until a matched job is READY.</p>
+      <div class="banner">Choose a job marked Ready to Generate. Needs Job Analysis means build the JD blueprint first; Fix Intake means mandatory required fields are missing.</div>
     {% endif %}
-  </div>
-</form>
+  </form>
 </div>
 {% endblock %}
 {% block scripts %}
@@ -100,10 +197,16 @@
 (function () {
   var btn = document.getElementById('generate-btn');
   var form = document.getElementById('create-form');
+  var launchStatus = document.getElementById('launch-status');
   if (!btn || !form) return;
   function sync() {
     var ready = form.querySelector('input.job-radio[data-ready="1"]:checked');
     btn.disabled = !ready;
+    if (launchStatus) {
+      launchStatus.textContent = ready
+        ? 'Ready: this run will generate, validate, repair, and export.'
+        : 'Select one ready matched job below to launch.';
+    }
   }
   form.addEventListener('change', sync);
   sync();

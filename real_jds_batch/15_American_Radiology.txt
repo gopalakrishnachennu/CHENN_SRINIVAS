@@ -1,0 +1,46 @@
+Database Administrator - MS SQL Server, AWS RDS, Redshift, MySQL (Primarily Remote)
+Job Category: Database Administration
+Requisition Number: DATAB003037
+ 
+
+Posting Details
+Posted: March 25, 2026
+Full-Time
+Hybrid
+LocationsShowing 1 location
+Philadelphia, PA 19102, USA
+Job Details
+Description
+The American College of Radiology (ACR) is a progressive membership organization representing nearly 40,000 medical specialists in radiological care.  As a member of our team, you will join a radiological world leader in patient-centered care, advocacy, policy, clinical research, and quality and safety.
+
+If you share our core values of:
+*Integrity *Visionary *Excellence *Leadership *Transparency *Member-Driven
+We want you on our team!
+
+Principal duties include:
+
+Architect and Optimize: Design, maintain, and fine-tune AWS RDS (MySQL/PostgreSQL) and Amazon Redshift environments to ensure peak performance.
+Manage Hybrid Infrastructure: Support MS SQL Server environments, including T-SQL scripting and SQL Agent jobs, across both on-prem and EC2-hosted instances.
+Streamline Data Pipelines: Execute seamless data migrations and complex transformations between MS SQL Server, RDS, and Redshift.
+Proactive Monitoring: Utilize Datadog and native AWS tools to monitor system health, preemptively identifying and resolving performance bottlenecks.
+Champion Data Integrity: Partner with cross-functional teams to uphold rigorous standards for data security, availability, and compliance.
+Standardize & Innovate: Maintain comprehensive technical documentation and drive continuous improvement through strategic database recommendations.
+Qualified candidates will possess the following:
+
+The ideal candidate will be located in the US mid-Atlantic region.
+3+ years of related experience preferred. 2+ years of hands-on experience with AWS RDS MySQL, and Amazon Redshift (development, tuning, monitoring, maintenance) required.  2+ years of experience with MS SQL Server technologies, including T-SQL, SQL Agent jobs, and EC2 required.
+Proven experience in database/data migration between MS SQL Server and AWS RDS/Redshift.
+Familiarity with Datadog for monitoring and alerting.
+Strong initiative and ability to work independently with minimal supervision.
+AWS Certified Database – Specialty, etc.
+Experience with scripting languages for automation (Python and Powershell).
+Knowledge of data warehousing concepts and ETL pipelines.
+If you would like to put your experience to great use in a professional team-oriented environment, please apply online. To learn more about ACR’s rewarding employee experience, culture, and benefits, visit: https://www.acr.org/jobs
+
+ACR is committed to a total rewards compensation philosophy that includes base salary in addition to our full suite of comprehensive benefits.  ACR’s goal is to pay competitively and equitably.  It is typical for individuals to be hired in the entry to the middle of the range for their role, and compensation decisions depend on each case’s circumstances.  A reasonable estimate of the annual compensation range for this position is 92-123k.
+
+ACR offers a rewarding employee experience: innovative culture, professional growth potential, competitive compensation, and an exceptional benefits package, including a defined contribution pension plan, 403(b); generous paid time off package; insurance plans with the leading providers; flexible spending; tuition reimbursement; training opportunities; and wellness reimbursement.
+
+
+Equal Opportunity Employer/Protected Veterans/Individuals with Disabilities
+This employer is required to notify all applicants of their rights pursuant to federal employment laws. For further information, please review the Know Your Rights notice from the Department of Labor.

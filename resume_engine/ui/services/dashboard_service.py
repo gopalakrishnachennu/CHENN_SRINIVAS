@@ -35,6 +35,7 @@ def dashboard_payload() -> dict[str, Any]:
             "family": cand.get("primary_family_display"),
             "secondary": cand.get("secondary_family_display"),
             "match_count": summary["matched_jobs"],
+            "ready_match_count": summary["resume_ready_matches"],
             "new_count": new_count,
         })
 

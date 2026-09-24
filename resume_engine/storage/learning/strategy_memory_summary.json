@@ -1,22 +1,192 @@
 {
-  "devops_cloud|data_engineering|cloud_platform_heavy": {
-    "average_score": 91.33,
-    "count": 2
+  "eligible": {
+    "data_engineering|ai_ml|ai_platform": {
+      "average_score": 94.47,
+      "count": 1,
+      "eligible_only": true
+    }
   },
-  "devops_cloud|data_engineering|databricks_platform_heavy": {
-    "average_score": 96.16,
-    "count": 1
+  "all_records": {
+    "unknown|none|pipeline_engineering": {
+      "average_score": 0.0,
+      "count": 2,
+      "eligible_only": false
+    },
+    "unknown|none|sql_analytics": {
+      "average_score": 0.0,
+      "count": 3,
+      "eligible_only": false
+    },
+    "unknown|none|business_insights": {
+      "average_score": 0.0,
+      "count": 3,
+      "eligible_only": false
+    },
+    "unknown|none|analytics_automation": {
+      "average_score": 0.0,
+      "count": 3,
+      "eligible_only": false
+    },
+    "unknown|none|cloud_data_engineering": {
+      "average_score": 0.0,
+      "count": 1,
+      "eligible_only": false
+    },
+    "unknown|none|cloud_support": {
+      "average_score": 0.0,
+      "count": 3,
+      "eligible_only": false
+    },
+    "unknown|none|application_reliability": {
+      "average_score": 0.0,
+      "count": 4,
+      "eligible_only": false
+    },
+    "devops_cloud|data_engineering|cloud_infrastructure": {
+      "average_score": 76.19,
+      "count": 1,
+      "eligible_only": false
+    },
+    "devops_cloud|data_engineering|automation_iac": {
+      "average_score": 77.15,
+      "count": 1,
+      "eligible_only": false
+    },
+    "data_engineering|devops_cloud|pipeline_engineering": {
+      "average_score": 74.11,
+      "count": 1,
+      "eligible_only": false
+    },
+    "data_engineering|devops_cloud|cloud_support": {
+      "average_score": 71.33,
+      "count": 1,
+      "eligible_only": false
+    },
+    "data_engineering|devops_cloud|cloud_data_engineering": {
+      "average_score": 68.96,
+      "count": 1,
+      "eligible_only": false
+    },
+    "data_engineering|devops_cloud|application_reliability": {
+      "average_score": 73.4,
+      "count": 1,
+      "eligible_only": false
+    },
+    "data_engineering|devops_cloud|ai_platform": {
+      "average_score": 68.85,
+      "count": 1,
+      "eligible_only": false
+    },
+    "data_engineering|none|data_quality_analytics": {
+      "average_score": 76.58,
+      "count": 1,
+      "eligible_only": false
+    },
+    "data_engineering|none|analytics_automation": {
+      "average_score": 73.78,
+      "count": 1,
+      "eligible_only": false
+    },
+    "data_engineering|none|ai_platform": {
+      "average_score": 73.85,
+      "count": 1,
+      "eligible_only": false
+    },
+    "data_engineering|none|ai_automation": {
+      "average_score": 74.08,
+      "count": 1,
+      "eligible_only": false
+    },
+    "data_engineering|none|pipeline_engineering": {
+      "average_score": 79.68,
+      "count": 1,
+      "eligible_only": false
+    },
+    "devops_cloud|infrastructure_support|cloud_infrastructure": {
+      "average_score": 93.06,
+      "count": 1,
+      "eligible_only": false
+    },
+    "devops_cloud|infrastructure_support|application_reliability": {
+      "average_score": 91.09,
+      "count": 1,
+      "eligible_only": false
+    },
+    "devops_cloud|infrastructure_support|support_automation": {
+      "average_score": 88.66,
+      "count": 1,
+      "eligible_only": false
+    },
+    "devops_cloud|infrastructure_support|cloud_support": {
+      "average_score": 89.95,
+      "count": 1,
+      "eligible_only": false
+    },
+    "devops_cloud|infrastructure_support|reliability_support": {
+      "average_score": 93.21,
+      "count": 1,
+      "eligible_only": false
+    },
+    "unknown|none|cloud_infrastructure": {
+      "average_score": 0.0,
+      "count": 2,
+      "eligible_only": false
+    },
+    "unknown|none|support_automation": {
+      "average_score": 0.0,
+      "count": 1,
+      "eligible_only": false
+    },
+    "unknown|none|reliability_support": {
+      "average_score": 0.0,
+      "count": 2,
+      "eligible_only": false
+    },
+    "unknown|none|platform_reliability": {
+      "average_score": 0.0,
+      "count": 1,
+      "eligible_only": false
+    },
+    "unknown|none|ai_automation": {
+      "average_score": 0.0,
+      "count": 1,
+      "eligible_only": false
+    },
+    "unknown|none|spark_databricks_platform": {
+      "average_score": 0.0,
+      "count": 1,
+      "eligible_only": false
+    },
+    "unknown|none|ai_enabled_operations": {
+      "average_score": 0.0,
+      "count": 1,
+      "eligible_only": false
+    },
+    "data_engineering|ai_ml|ai_platform": {
+      "average_score": 94.47,
+      "count": 1,
+      "eligible_only": false
+    },
+    "devops_cloud|none|platform_reliability": {
+      "average_score": 46.85,
+      "count": 1,
+      "eligible_only": false
+    },
+    "devops_cloud|none|cloud_infrastructure": {
+      "average_score": 48.05,
+      "count": 1,
+      "eligible_only": false
+    },
+    "devops_cloud|none|cloud_support": {
+      "average_score": 47.87,
+      "count": 1,
+      "eligible_only": false
+    },
+    "devops_cloud|none|reliability_support": {
+      "average_score": 48.89,
+      "count": 1,
+      "eligible_only": false
+    }
   },
-  "devops_cloud|data_engineering|devops_automation_heavy": {
-    "average_score": 95.9,
-    "count": 1
-  },
-  "devops_cloud|data_engineering|cloud_data_engineering_heavy": {
-    "average_score": 96.13,
-    "count": 1
-  },
-  "devops_cloud|data_engineering|ai_enabled_data_platform_heavy": {
-    "average_score": 96.03,
-    "count": 1
-  }
+  "learning_min_sample_count": 5
 }

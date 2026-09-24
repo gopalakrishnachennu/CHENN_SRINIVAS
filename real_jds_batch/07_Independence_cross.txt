@@ -1,0 +1,51 @@
+Sr Database Administrator - Hybrid (PA/NJ/DE)
+🔍Philadelphia, Pennsylvania
+New
+📁Information Technology📅Feb 26, 2026260264
+Bring your drive for excellence, teamwork, and customer commitment to Independence. Join us as we renew and reimagine the future of health care. Together we will achieve our mission to enhance the health and well-being of the people and communities we serve.
+
+The position will work directly with various IT associates including Application Development, Server Admin, Networking, Database Administration, and others.
+
+Specific Duties:
+
+1.       Provide Mid-level Microsoft SQL Server Database Administration support. (e.g., Installing / Upgrading / Backup and Recovery / Configuring / SSMS / SSIS / SSRS / Always on Failover Clustering / Performance Tuning / Troubleshooting).
+
+2.       Monitor, evaluate and resolve database system health issues.  Provide guidance on query redesign, index modifications, database configuration changes, and database related application process improvements.
+
+3.       Provide performance monitoring and measuring of all database components and provide input on capacity and performance planning.
+
+4.       Escalate issues for technical assistance as required.
+
+5.       Participate in basic to moderately complex projects as assigned as a team member.
+
+6.       Produce and maintain documentation of various database related processes and procedures.
+
+7.       Apply administration security, design and performance best practices in daily operations.
+
+8.       Participation in a 24/7 Production support call rotation.
+
+Qualifications:
+
+1.       BA/BS in Computer Science, Information Systems, or related field, or equivalent knowledge acquired by work experience and training.
+
+2.       Industry-recognized technical certifications are a plus (e.g. SQL, MCDBA)
+
+3.       Working Knowledge of database file structure, retrieval and access methods, and performance analysis. Demonstrated analytical skills, excellent written and verbal communication skills, judgment, and the ability to work effectively with clients and IT associates in a collaborative and cooperative manner.  Basic Understanding of the development process and business process.
+
+4.       Five (5) or more years’ related IT experience working as a SQL Server database administrator and familiarization with related technologies and tools.
+
+5.       The position is primarily for MS SQL Server support, but additional experience with Cloud Database technologies such as Cloud SQL (MySQL and PostgreSQL), Firestore or BigQuery would be a plus.
+
+Hybrid
+
+Independence has implemented a “Hybrid” model which consists of Associates working in the office 3 days a week (Tuesday, Wednesday & Thursday) and remotely 2 days a week (Monday & Friday). This role is designated as a role that fits into the “Hybrid” model. While associates may work remotely on our designated remote days, the work must be performed in the Tri-State Area of Delaware, New Jersey or Pennsylvania.
+
+ 
+
+ 
+
+IBX is an Equal Opportunity Employer. All qualified applicants will receive consideration for employment without regard to their age, race, color, religion, sex, national origin, sexual orientation, protected veteran status, or disability.
+
+ 
+
+Must have an Android or iOS device which is compatible with the free Microsoft Authenticator app.

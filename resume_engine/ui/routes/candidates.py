@@ -65,6 +65,9 @@ def index():
         cards.append({
             **p,
             "match_count": summary["matched_jobs"],
+            "ready_match_count": summary["resume_ready_matches"],
+            "pending_match_count": summary["pending_matched_jobs"],
+            "blocked_match_count": summary["blocked_matched_jobs"],
             "match_summary": summary,
             "resume_count": len(resumes),
         })

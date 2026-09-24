@@ -1,0 +1,5 @@
+BIE I, AOP - RoW Central Data Engineer Team
+Amazon · Bengaluru, Karnataka
+https://www.amazon.jobs/en/jobs/10507861/bie-i-aop-row-central-data-engineer-team
+
+This Bengaluru Business Intelligence Engineer role combines analytics, visualization and data engineering. The role analyzes large datasets, develops BI outputs in tools such as Tableau, QuickSight or Power BI, uses statistical methods, and scripts in Python, Java or R. Preferred qualifications include advanced education, data modeling, pipeline design and statistical analysis experience.

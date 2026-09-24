@@ -1,0 +1,5 @@
+Principal Software Engineer - FullStack
+Microsoft · Noida, Uttar Pradesh
+https://careers.microsoft.com/v2/global/en/locations/noida.html
+
+Microsoft lists a Principal Software Engineer - FullStack role in Noida for high-scale Office web platforms. Responsibilities include architecture and design, performance benchmarking, reliable and maintainable code, feature development, tests, modernization proofs of concept and identifying AI opportunities that improve engineering productivity. Minimum qualifications include significant technical engineering experience with common programming languages. Preferred experience includes large-scale cloud/web engineering, performance and scalability, modern software practices and interest in AI or machine learning.
