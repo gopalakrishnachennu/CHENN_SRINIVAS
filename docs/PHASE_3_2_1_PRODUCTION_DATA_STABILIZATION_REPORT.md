@@ -14,7 +14,7 @@ Root cause: the Phase 3.2 test suite wrote candidates/jobs into the **production
 | | SHA |
 |---|---|
 | Starting commit | `3a965b9b16ae99e7d79b8257c5f48627a228a852` |
-| Ending commit | `PENDING_FINALIZE` |
+| Ending commit | `905b6b016100cbdcf8b9307f50bc9b77b155b6e4` |
 
 ## Fixes delivered
 
@@ -78,7 +78,8 @@ Cleanup removed **77** test candidates and **77** test jobs (including `Pending 
 | Ruff | PASS |
 | Production SQLite SHA256 unchanged across full suite | PASS |
 | `data_audit --check` contamination | **0** |
-| CI Python 3.11 / 3.12 | PENDING push |
+| CI Python 3.11 | PASS (run `35962211811`) |
+| CI Python 3.12 | PASS (run `35962211811`) |
 
 ## Proof table
 
@@ -101,10 +102,8 @@ Cleanup removed **77** test candidates and **77** test jobs (including `Pending 
 | Known test strings absent from production | PASS |
 | Full tests | PASS |
 | Ruff | PASS |
-| CI 3.11 / 3.12 | PENDING |
+| CI 3.11 / 3.12 | PASS |
 
 ---
 
-**PHASE 3.2.1 PRODUCTION DATA STABILIZATION STATUS: INCOMPLETE**
-
-Blocker: GitHub CI pending after push.
+**PHASE 3.2.1 PRODUCTION DATA STABILIZATION STATUS: PASS**
