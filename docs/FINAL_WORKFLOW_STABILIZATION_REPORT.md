@@ -7,7 +7,7 @@ Phase 3.2 — End-to-End Data & Workflow Stabilization
 | | SHA |
 |---|---|
 | Starting commit | `ce808c0d31d51f2451accea7514e92ced3364101` |
-| Ending commit | `16f51866a5f971c3668eac004bcb858f03c71109` |
+| Ending commit | `PENDING_FINALIZE` |
 
 ## Root causes found
 
@@ -102,8 +102,8 @@ Detects READY-without-blueprint, stale hashes, orphan paths, unknown families, s
 
 | Matrix | Status |
 |---|---|
-| Python 3.11 | PENDING |
-| Python 3.12 | PENDING |
+| Python 3.11 | PASS (run `35959685610`) |
+| Python 3.12 | PASS (run `35959685610`) |
 
 ## Proof table
 
@@ -122,8 +122,8 @@ Detects READY-without-blueprint, stale hashes, orphan paths, unknown families, s
 | Stale cache impossible/detected | PASS |
 | Full tests | PASS |
 | Ruff | PASS |
-| CI Python 3.11 | PENDING |
-| CI Python 3.12 | PENDING |
+| CI Python 3.11 | PASS |
+| CI Python 3.12 | PASS |
 
 ## Manual flows (engine-level)
 
@@ -136,6 +136,4 @@ Detects READY-without-blueprint, stale hashes, orphan paths, unknown families, s
 
 ---
 
-**FINAL WORKFLOW STABILIZATION STATUS: INCOMPLETE**
-
-Blockers: GitHub CI Python 3.11 / 3.12 not yet green on this commit; ending SHA pending finalize.
+**FINAL WORKFLOW STABILIZATION STATUS: PASS**
