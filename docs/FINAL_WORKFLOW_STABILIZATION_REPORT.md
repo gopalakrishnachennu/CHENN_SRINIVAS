@@ -7,7 +7,7 @@ Phase 3.2 — End-to-End Data & Workflow Stabilization
 | | SHA |
 |---|---|
 | Starting commit | `ce808c0d31d51f2451accea7514e92ced3364101` |
-| Ending commit | _(filled after finalize commit)_ |
+| Ending commit |  |
 
 ## Root causes found
 
@@ -102,8 +102,8 @@ Detects READY-without-blueprint, stale hashes, orphan paths, unknown families, s
 
 | Matrix | Status |
 |---|---|
-| Python 3.11 | _(pending push)_ |
-| Python 3.12 | _(pending push)_ |
+| Python 3.11 | PENDING |
+| Python 3.12 | PENDING |
 
 ## Proof table
 
