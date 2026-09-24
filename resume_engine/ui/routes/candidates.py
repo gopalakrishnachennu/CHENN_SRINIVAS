@@ -1,45 +1,70 @@
 from __future__ import annotations
 
-import json
-
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 
 from resume_engine.ui.auth import require_auth
 from resume_engine.ui.csrf import csrf_protect
 from resume_engine.ui.services import candidate_service
+from resume_engine.ui.services.family_registry_service import family_options
 
 bp = Blueprint("candidates", __name__, url_prefix="/candidates")
+
 
 def _actor():
     return session.get("username")
 
+
+def _parse_companies():
+    companies = []
+    names = request.form.getlist("company_name")
+    starts = request.form.getlist("company_start")
+    ends = request.form.getlist("company_end")
+    for i, name in enumerate(names):
+        name = (name or "").strip()
+        if not name:
+            continue
+        companies.append({
+            "company": name,
+            "start_date": (starts[i] if i < len(starts) else "") or "",
+            "end_date": (ends[i] if i < len(ends) else "") or "",
+        })
+    return companies
+
+
 def _parse_payload():
-    def split(v):
-        return [p.strip() for p in (v or "").split(",") if p.strip()]
-    def jload(v, default):
-        try:
-            return json.loads(v) if v and v.strip() else default
-        except json.JSONDecodeError as exc:
-            raise ValueError(str(exc)) from exc
+    certs = request.form.get("certifications") or ""
+    education_raw = (request.form.get("education") or "").strip()
+    education = []
+    if education_raw:
+        education = [{"description": line.strip()} for line in education_raw.splitlines() if line.strip()]
     return {
         "candidate_name": request.form.get("candidate_name") or "",
         "email": request.form.get("email") or "",
         "phone": request.form.get("phone") or "",
         "location": request.form.get("location") or "",
         "linkedin": request.form.get("linkedin") or "",
-        "website": request.form.get("website") or "",
-        "target_background_summary": request.form.get("target_background_summary") or "",
-        "technical_skills": split(request.form.get("technical_skills")),
-        "experience": jload(request.form.get("experience_json"), []),
-        "projects": jload(request.form.get("projects_json"), []),
-        "education": jload(request.form.get("education_json"), []),
-        "certifications": split(request.form.get("certifications")),
+        "primary_family": request.form.get("primary_family") or "",
+        "secondary_family": request.form.get("secondary_family") or "",
+        "companies": _parse_companies(),
+        "education": education,
+        "certifications": [c.strip() for c in certs.split(",") if c.strip()],
     }
+
 
 @bp.get("/")
 @require_auth
 def index():
-    return render_template("pages/candidates.html", profiles=candidate_service.list_profiles())
+    from resume_engine.ui.services import create_resume_service, job_service, match_service
+
+    profiles = candidate_service.list_profiles()
+    jobs = job_service.list_jobs(limit=2000)
+    cards = []
+    for p in profiles:
+        matched = match_service.matches_for_candidate(p, jobs)
+        resumes = [r for r in create_resume_service.list_resume_library(200) if r.get("candidate_id") == p["id"]]
+        cards.append({**p, "match_count": len(matched), "resume_count": len(resumes)})
+    return render_template("pages/candidates.html", cards=cards)
+
 
 @bp.route("/new", methods=["GET", "POST"])
 @require_auth
@@ -49,18 +74,23 @@ def create():
         try:
             profile = candidate_service.create_profile(_parse_payload(), actor=_actor())
             flash("Candidate created", "success")
-            return redirect(url_for("candidates.edit", profile_id=profile["id"]))
+            return redirect(url_for("candidates.view", profile_id=profile["id"]))
         except Exception as exc:  # noqa: BLE001
             flash(str(exc), "error")
-    return render_template(
-        "pages/candidate_edit.html",
-        profile=None,
-        experience_json="[]",
-        projects_json="[]",
-        education_json="[]",
-    )
+    return render_template("pages/candidate_edit.html", profile=None, family_options=family_options())
 
-@bp.route("/<profile_id>", methods=["GET", "POST"])
+
+@bp.get("/<profile_id>")
+@require_auth
+def view(profile_id: str):
+    profile = candidate_service.get_profile(profile_id)
+    from resume_engine.ui.services import job_service, match_service
+
+    matched = match_service.matches_for_candidate(profile, job_service.list_jobs(limit=2000))
+    return render_template("pages/candidate_view.html", profile=profile, match_count=len(matched))
+
+
+@bp.route("/<profile_id>/edit", methods=["GET", "POST"])
 @require_auth
 @csrf_protect
 def edit(profile_id: str):
@@ -68,17 +98,12 @@ def edit(profile_id: str):
     if request.method == "POST":
         try:
             profile = candidate_service.update_profile(profile_id, _parse_payload(), actor=_actor())
-            flash("Candidate updated (new version)", "success")
+            flash("Candidate updated", "success")
+            return redirect(url_for("candidates.view", profile_id=profile_id))
         except Exception as exc:  # noqa: BLE001
             flash(str(exc), "error")
-    p = profile["payload"]
-    return render_template(
-        "pages/candidate_edit.html",
-        profile=profile,
-        experience_json=json.dumps(p.get("experience") or [], indent=2),
-        projects_json=json.dumps(p.get("projects") or [], indent=2),
-        education_json=json.dumps(p.get("education") or [], indent=2),
-    )
+    return render_template("pages/candidate_edit.html", profile=profile, family_options=family_options())
+
 
 @bp.post("/<profile_id>/duplicate")
 @require_auth
@@ -86,7 +111,8 @@ def edit(profile_id: str):
 def duplicate(profile_id: str):
     profile = candidate_service.duplicate_profile(profile_id, actor=_actor())
     flash("Duplicated", "success")
-    return redirect(url_for("candidates.edit", profile_id=profile["id"]))
+    return redirect(url_for("candidates.view", profile_id=profile["id"]))
+
 
 @bp.post("/<profile_id>/archive")
 @require_auth

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Create Resume · Resume Engine{% endblock %}
+{% block page_title %}Create Resume{% endblock %}
+{% block page_sub %}Select a candidate and a matched job — the engine handles the rest.{% endblock %}
+{% block content %}
+<div class="stack">
+<form method="post" class="card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+  <input type="hidden" name="action" value="generate"/>
+
+  <h3>1. Select Candidate</h3>
+  <select name="candidate_id" onchange="location.href='{{ url_for('create_resume.index') }}?candidate='+this.value{% if preselect_jd %}+'&jd={{ preselect_jd }}'{% endif %}">
+    <option value="">Select…</option>
+    {% for c in candidates %}
+      <option value="{{ c.id }}" {% if selected and selected.id == c.id %}selected{% endif %}>{{ c.name }} — {{ c.primary_family_display }}</option>
+    {% endfor %}
+  </select>
+
+  <h3 style="margin-top:1.25rem;">2. Matched Jobs Only</h3>
+  {% if not selected %}
+    <div class="empty">Choose a candidate first.</div>
+  {% elif not matched %}
+    <div class="empty">No family matches for this candidate yet.</div>
+  {% else %}
+    <div class="grid product">
+      {% for m in matched %}
+      <label class="card" style="cursor:pointer;">
+        <input type="radio" name="jd_id" value="{{ m.id }}"
+          {% if preselect_jd == m.id %}checked{% elif loop.first and not preselect_jd %}checked{% endif %}
+          required style="margin-bottom:0.5rem;"/>
+        <div><strong>{{ m.title }}</strong></div>
+        <div class="muted tiny">{{ m.company or '—' }}</div>
+        <div style="margin-top:0.45rem;"><span class="match-badge {{ m.match_type|lower|replace('_','') }}">{{ m.match_type|replace('_',' ') }}</span></div>
+      </label>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <h3 style="margin-top:1.25rem;">3. Options</h3>
+  <div class="form-grid">
+    <div>
+      <label>Variants</label>
+      <select name="variants">
+        <option value="1">1</option>
+        <option value="3" selected>3</option>
+        <option value="5">5</option>
+      </select>
+    </div>
+    <div class="full actions" style="padding-top:1.4rem;">
+      <label><input type="checkbox" name="repair" checked/> Auto Repair</label>
+      <label><input type="checkbox" name="laya" checked/> Laya Validation</label>
+      <label><input type="checkbox" name="docx" checked/> DOCX</label>
+      <label><input type="checkbox" name="pdf" checked/> PDF</label>
+    </div>
+  </div>
+
+  <div style="margin-top:1.5rem;">
+    <button class="btn xl" type="submit" {% if not selected or not matched %}disabled{% endif %}>Generate Resume</button>
+  </div>
+</form>
+</div>
+{% endblock %}

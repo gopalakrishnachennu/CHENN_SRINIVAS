@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block page_title %}Create Resume{% endblock %}
+{% block page_sub %}Step 3: Options & Generate{% endblock %}
+{% block content %}
+<div class="wizard-steps">
+  <span class="wizard-step done">1 Candidate ✓</span>
+  <span class="wizard-arrow">→</span>
+  <span class="wizard-step done">2 Job ✓</span>
+  <span class="wizard-arrow">→</span>
+  <span class="wizard-step active">3 Generate</span>
+</div>
+
+<div class="grid two" style="margin-bottom:1rem;">
+  <div class="card">
+    <h3>Candidate</h3>
+    <p><strong>{{ candidate.name }}</strong></p>
+    <p class="muted tiny">{{ candidate.primary_family_display }}</p>
+  </div>
+  <div class="card">
+    <h3>Job</h3>
+    <p><strong>{{ job.title or '—' }}</strong></p>
+    <p class="muted tiny">{{ job.company or '' }} · {{ job.primary_family or '' }}</p>
+    <p>Match: <span class="pill {{ match.match_type }}">{{ match.match_type }}</span></p>
+  </div>
+</div>
+
+<div class="card card-lg">
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+    <h3>Generation Options</h3>
+    <div class="banner">Online learning forced to <strong>shadow</strong>. River active ranking is locked.</div>
+    <div class="form-grid">
+      <div><label>Variant count</label><input type="number" min="1" max="10" name="variant_count" value="{{ defaults.variant_count }}"/></div>
+      <div></div>
+    </div>
+    <div class="actions" style="margin-top:0.8rem; gap:1rem;">
+      <label><input type="checkbox" name="use_laya" value="1" {% if defaults.laya %}checked{% endif %}/> Laya validation</label>
+      <label><input type="checkbox" name="repair" value="1" {% if defaults.repair %}checked{% endif %}/> Auto-repair</label>
+      <label><input type="checkbox" name="export_docx" value="1" {% if defaults.docx %}checked{% endif %}/> DOCX</label>
+      <label><input type="checkbox" name="export_pdf" value="1" {% if defaults.pdf %}checked{% endif %}/> PDF</label>
+    </div>
+    <div class="actions" style="margin-top:1.5rem;">
+      <button class="btn lg" type="submit">GENERATE</button>
+      <a class="btn secondary" href="{{ url_for('create_resume.select_job', candidate_id=candidate.id) }}">← Back</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

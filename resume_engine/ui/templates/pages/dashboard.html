@@ -1,50 +1,53 @@
 {% extends "base.html" %}
+{% block title %}Dashboard · Resume Engine{% endblock %}
 {% block page_title %}Dashboard{% endblock %}
-{% block page_sub %}Resume Intelligence & Optimization Control Center{% endblock %}
+{% block page_sub %}Add candidates, add jobs, see matches, generate resumes.{% endblock %}
 {% block content %}
-<div class="grid cards">
-  {% for key, label in [
-    ('total_jds','Total JDs'),('total_runs','Total runs'),('generated_resumes','Generated'),
-    ('validated_resumes','Validated'),('rejected_resumes','Rejected'),
-  ] %}
-  <div class="card"><div class="muted tiny">{{ label }}</div><div class="metric">{{ metrics[key] if metrics[key] is not none else '—' }}</div></div>
-  {% endfor %}
-  <div class="card"><div class="muted tiny">Validation rate</div><div class="metric">{% if metrics.validation_rate is not none %}{{ '%.0f'|format(metrics.validation_rate*100) }}%{% else %}—{% endif %}</div></div>
-  <div class="card"><div class="muted tiny">Avg score</div><div class="metric">{% if metrics.average_optimization_score is not none %}{{ '%.1f'|format(metrics.average_optimization_score) }}{% else %}—{% endif %}</div></div>
-  <div class="card"><div class="muted tiny">River eligible</div><div class="metric">{{ metrics.river.observations if metrics.river.observations is defined else 0 }}</div></div>
-  <div class="card"><div class="muted tiny">Shadow agreement</div><div class="metric">{% if metrics.river.agreement_rate is not none %}{{ '%.0f'|format(metrics.river.agreement_rate*100) }}%{% else %}—{% endif %}</div></div>
-</div>
-
-<div class="grid two" style="margin-top:1rem;">
-  <div class="card">
-    <h2>Recent runs</h2>
-    <table>
-      <thead><tr><th>Role</th><th>JD</th><th>Run</th><th>Variants</th><th>Validated</th><th>Avg</th><th></th></tr></thead>
-      <tbody>
-      {% for run in metrics.recent_runs %}
-        <tr>
-          <td>{{ run.target_title or '—' }}</td>
-          <td class="mono">{{ run.jd_hash }}</td>
-          <td class="mono">{{ run.run_id[:8] }}…</td>
-          <td>{{ run.variants }}</td>
-          <td>{{ run.validated }}</td>
-          <td>{% if run.average_score is not none %}{{ '%.1f'|format(run.average_score) }}{% else %}—{% endif %}</td>
-          <td><a href="{{ url_for('runs.detail', jd_hash=run.jd_hash, run_id=run.run_id) }}">Open</a></td>
-        </tr>
-      {% else %}
-        <tr><td colspan="7" class="muted">No runs yet.</td></tr>
-      {% endfor %}
-      </tbody>
-    </table>
+<div class="stack">
+  <div class="hero-steps">
+    <div class="hero-step"><div class="n">1</div><strong>Add Candidates</strong><div class="muted tiny">Family + companies + timeline</div></div>
+    <div class="hero-step"><div class="n">2</div><strong>Add Jobs</strong><div class="muted tiny">Paste or upload JDs</div></div>
+    <div class="hero-step"><div class="n">3</div><strong>See Matches</strong><div class="muted tiny">Family-compatible roles</div></div>
+    <div class="hero-step"><div class="n">4</div><strong>Generate Resume</strong><div class="muted tiny">Download DOCX / PDF</div></div>
   </div>
+
+  <div class="grid cards">
+    <div class="card"><div class="metric">{{ data.candidates }}</div><div class="metric-label">Candidates</div></div>
+    <div class="card"><div class="metric">{{ data.active_jds }}</div><div class="metric-label">Active JDs</div></div>
+    <div class="card"><div class="metric">{{ data.new_matches }}</div><div class="metric-label">New Matches</div></div>
+    <div class="card"><div class="metric">{{ data.resumes_generated }}</div><div class="metric-label">Resumes Generated</div></div>
+    <div class="card"><div class="metric">{{ data.validated_resumes }}</div><div class="metric-label">Validated Resumes</div></div>
+    <div class="card"><div class="metric">{{ data.needs_attention }}</div><div class="metric-label">Needs Attention</div></div>
+  </div>
+
+  <div class="actions">
+    <a class="btn xl" href="{{ url_for('create_resume.index') }}">Create Resume</a>
+    <a class="btn secondary" href="{{ url_for('matches.index') }}">View Matches</a>
+    <a class="btn ghost" href="{{ url_for('candidates.create') }}">Add Candidate</a>
+    <a class="btn ghost" href="{{ url_for('jobs.create') }}">Add Job</a>
+  </div>
+
   <div class="card">
-    <h2>System status</h2>
-    <table>
-      {% for k,v in metrics.system.items() %}
-      <tr><th>{{ k }}</th><td>{{ v }}</td></tr>
+    <h2>Recent Matches</h2>
+    {% if not data.recent_matches %}
+      <div class="empty">No candidates yet. Add a candidate to see matching jobs.</div>
+    {% else %}
+      <div class="grid product">
+      {% for m in data.recent_matches %}
+        <div class="card person-card" style="padding:0.9rem;box-shadow:none;">
+          <div class="name">{{ m.name }}</div>
+          <div class="meta-row">
+            <div><strong>{{ m.family or '—' }}</strong></div>
+            <div>{{ m.match_count }} matching jobs{% if m.new_count %} · <span class="pill ok">{{ m.new_count }} new</span>{% endif %}</div>
+          </div>
+          <div class="actions">
+            <a class="btn secondary" href="{{ url_for('matches.index', candidate=m.id) }}">View Matches</a>
+            <a class="btn" href="{{ url_for('create_resume.index') }}">Create Resume</a>
+          </div>
+        </div>
       {% endfor %}
-    </table>
-    <p class="muted tiny" style="margin-top:0.8rem;">Dashboard never performs paid OpenAI calls.</p>
+      </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

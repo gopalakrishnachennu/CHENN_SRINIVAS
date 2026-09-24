@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Laya · Advanced{% endblock %}
+{% block page_title %}Laya Diagnostics{% endblock %}
+{% block page_sub %}Semantic classification &amp; validation only{% endblock %}
+{% block content %}
+<div class="stack">
+  <div class="card">
+    <div class="meta-row">
+      <div>Status: <strong>{{ data.status }}</strong>{% if data.version %} ({{ data.version }}){% endif %}</div>
+      <div>Semantic validation: <strong>{% if data.enabled %}ON{% else %}OFF{% endif %}</strong></div>
+    </div>
+    <h3>Used For</h3>
+    <ul>{% for u in data.used_for %}<li>{{ u }}</li>{% endfor %}</ul>
+    <h3>Not Used For</h3>
+    <ul>{% for u in data.not_used_for %}<li>{{ u }}</li>{% endfor %}</ul>
+    <p class="muted">{{ data.fallback }}</p>
+    <form method="post" action="{{ url_for('laya.toggle') }}" class="actions">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+      <label><input type="checkbox" name="enabled" {% if data.enabled %}checked{% endif %}/> Laya ON</label>
+      <button class="btn secondary" type="submit">Save</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

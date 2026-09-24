@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Matches · Resume Engine{% endblock %}
+{% block page_title %}Matches{% endblock %}
+{% block page_sub %}Family-compatible jobs for the selected candidate{% endblock %}
+{% block content %}
+<div class="stack">
+  <form class="card" method="get">
+    <label>Candidate</label>
+    <select name="candidate" onchange="this.form.submit()">
+      <option value="">Select…</option>
+      {% for c in candidates %}
+        <option value="{{ c.id }}" {% if selected and selected.id == c.id %}selected{% endif %}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+  </form>
+
+  {% if selected %}
+  <div class="card soft">
+    <h2 style="margin:0;">{{ selected.name }}</h2>
+    <p class="muted" style="margin:0.35rem 0 0;">
+      {{ selected.primary_family_display }}{% if selected.payload.secondary_family %} + {{ selected.secondary_family_display }}{% endif %}
+      · <strong>{{ matched|length }} matching jobs</strong>
+    </p>
+  </div>
+
+  {% if not matched %}
+    <div class="empty">No matching jobs yet. Add more JDs in the Jobs library.</div>
+  {% else %}
+  <div class="grid product">
+    {% for m in matched %}
+    <div class="card">
+      <h3 style="margin-bottom:0.25rem;">{{ m.title }}</h3>
+      <div class="muted" style="margin-bottom:0.65rem;">{{ m.company or '—' }}{% if m.location %} · {{ m.location }}{% endif %}</div>
+      <div style="margin-bottom:0.75rem;">
+        <span class="match-badge {{ m.match_type|lower|replace('_','') }}">{{ m.match_type|replace('_',' ') }} MATCH</span>
+      </div>
+      <div class="meta-row">
+        <div><strong>{{ m.primary_family_display }}</strong>{% if m.secondary_family %} + {{ m.secondary_family_display }}{% endif %}</div>
+      </div>
+      <div class="actions">
+        <a class="btn" href="{{ url_for('create_resume.index', candidate=selected.id, jd=m.id) }}">Create Resume</a>
+        <a class="btn ghost" href="{{ url_for('jobs.detail', job_id=m.id) }}">View Job</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% else %}
+    <div class="empty">Select a candidate to see matches.</div>
+  {% endif %}
+</div>
+{% endblock %}

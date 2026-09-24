@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ profile.name }} · Resume Engine{% endblock %}
+{% block page_title %}{{ profile.name }}{% endblock %}
+{% block page_sub %}Verified candidate facts only{% endblock %}
+{% block content %}
+<div class="stack">
+  <div class="card person-card">
+    <div class="meta-row">
+      <div>Primary Family: <strong>{{ profile.primary_family_display }}</strong></div>
+      <div>Secondary Family: <strong>{{ profile.secondary_family_display }}</strong></div>
+      <div>Email: {{ profile.payload.email or '—' }}</div>
+      <div>Phone: {{ profile.payload.phone or '—' }}</div>
+      <div>Location: {{ profile.payload.location or '—' }}</div>
+      <div>Matching Jobs: <strong>{{ match_count }}</strong></div>
+    </div>
+    <h3>Companies</h3>
+    {% for c in profile.payload.companies %}
+      <div class="muted" style="margin-bottom:0.35rem;">
+        <strong style="color:var(--ink)">{{ c.company }}</strong>
+        · {{ c.start_date or '?' }} – {{ c.end_date or '?' }}
+      </div>
+    {% else %}
+      <div class="muted">No companies listed.</div>
+    {% endfor %}
+    <div class="actions" style="margin-top:1rem;">
+      <a class="btn" href="{{ url_for('create_resume.index') }}">Create Resume</a>
+      <a class="btn secondary" href="{{ url_for('matches.index', candidate=profile.id) }}">Matches</a>
+      <a class="btn ghost" href="{{ url_for('candidates.edit', profile_id=profile.id) }}">Edit</a>
+    </div>
+    <details class="details-block">
+      <summary>Advanced provenance</summary>
+      <p class="tiny muted">Company and dates = VERIFIED_CANDIDATE_INPUT. Role titles are NOT provided by the candidate; generated resumes mark them as GENERATED_ROLE_POSITIONING.</p>
+    </details>
+  </div>
+</div>
+{% endblock %}

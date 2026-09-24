@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block page_title %}Create Resume{% endblock %}
+{% block page_sub %}Step 2: Select job for {{ candidate.name }}{% endblock %}
+{% block content %}
+<div class="wizard-steps">
+  <span class="wizard-step done">1 Candidate ✓</span>
+  <span class="wizard-arrow">→</span>
+  <span class="wizard-step active">2 Job</span>
+  <span class="wizard-arrow">→</span>
+  <span class="wizard-step">3 Generate</span>
+</div>
+
+<div class="card" style="margin-bottom:1rem;">
+  <p><strong>Candidate:</strong> {{ candidate.name }} · {{ candidate.primary_family_display }}</p>
+</div>
+
+{% if matches %}
+<div class="card">
+  <h3>Matched Jobs ({{ matches|length }})</h3>
+  <p class="muted tiny">Only jobs with a family match are shown. Add more jobs in the Jobs library.</p>
+  <table>
+    <thead><tr><th>Job</th><th>Company</th><th>Match</th><th>Score</th><th></th></tr></thead>
+    <tbody>
+    {% for m in matches %}
+      <tr>
+        <td><strong>{{ m.get('job_title','—') }}</strong></td>
+        <td>{{ m.get('job_company','—') }}</td>
+        <td><span class="pill {{ m.match_type }}">{{ m.match_type }}</span></td>
+        <td>{{ '%.0f'|format((m.score or 0)*100) }}%</td>
+        <td><a class="btn" href="{{ url_for('create_resume.options', candidate_id=candidate.id, job_id=m.job_id) }}">Select →</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card empty-state">
+  <h3>No matching jobs</h3>
+  <p>Add jobs to the library that match this candidate's family ({{ candidate.primary_family_display }}).</p>
+  <a class="btn" href="{{ url_for('jobs.analyze') }}">Analyze New JD</a>
+</div>
+{% endif %}
+
+<div class="actions" style="margin-top:1rem;">
+  <a class="btn secondary" href="{{ url_for('create_resume.index') }}">← Back</a>
+</div>
+{% endblock %}

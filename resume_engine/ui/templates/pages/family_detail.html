@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block page_title %}Family: {{ family.display_name }}{% endblock %}
+{% block page_sub %}{{ family.family_id }}{% endblock %}
+{% block content %}
+<div class="card card-lg">
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+    <div class="form-grid">
+      <div><label>Display Name</label><input name="display_name" value="{{ family.display_name }}"/></div>
+      <div><label>Family ID</label><input value="{{ family.family_id }}" disabled/></div>
+    </div>
+    <label>Aliases (comma-separated)</label>
+    <input name="aliases" value="{{ family.aliases|join(', ') }}"/>
+    <label>Compatible families (comma-separated family IDs)</label>
+    <input name="compatible" value="{{ family.compatible|join(', ') }}"/>
+    <label>Hybrid families (comma-separated family IDs)</label>
+    <input name="hybrid" value="{{ family.hybrid|join(', ') }}"/>
+    <label>Blocked families (comma-separated family IDs)</label>
+    <input name="blocked" value="{{ family.blocked|join(', ') }}"/>
+    <div class="actions" style="margin-top:1rem;">
+      <button class="btn" type="submit">Save</button>
+      <a class="btn secondary" href="{{ url_for('families.index') }}">Back</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

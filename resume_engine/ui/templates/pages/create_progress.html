@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Creating Resume · Resume Engine{% endblock %}
+{% block page_title %}Creating resume…{% endblock %}
+{% block page_sub %}{{ progress.headline }}{% endblock %}
+{% block content %}
+<div class="stack">
+  <div class="card">
+    <h2 id="headline">{{ progress.headline }}</h2>
+    <ul class="progress-list" id="steps">
+      {% for s in progress.steps %}
+      <li class="{% if s.done %}done{% endif %} {% if s.current %}current{% endif %}" data-key="{{ s.key }}">
+        <span class="check">{% if s.done %}✓{% endif %}</span>
+        <span>{{ s.label }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% if progress.ready %}
+      <div class="actions" style="margin-top:1.25rem;">
+        <a class="btn" href="{{ url_for('resumes.detail', run_id=progress.run_id) }}">Open Resume</a>
+        <a class="btn secondary" href="{{ url_for('resumes.index') }}">Resume Library</a>
+      </div>
+    {% endif %}
+    {% if progress.error %}
+      <div class="banner danger" style="margin-top:1rem;">{{ progress.error }}</div>
+    {% endif %}
+    <details class="details-block">
+      <summary>View Details</summary>
+      <pre class="tiny">status={{ job.status }} stage={{ job.stage }} run_id={{ job.run_id }}</pre>
+    </details>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const jobId = {{ job.job_id|tojson }};
+async function poll() {
+  const r = await fetch(`/create/api/progress/${jobId}`);
+  if (!r.ok) return;
+  const data = await r.json();
+  document.getElementById('headline').textContent = data.headline;
+  if (data.ready) location.href = `/resumes/${data.run_id}`;
+  if (data.status === 'FAILED') return;
+  setTimeout(poll, 1500);
+}
+setTimeout(poll, 1200);
+</script>
+{% endblock %}

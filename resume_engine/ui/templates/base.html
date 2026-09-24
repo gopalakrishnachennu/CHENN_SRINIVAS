@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>{% block title %}Resume Intelligence Control Center{% endblock %}</title>
+  <title>{% block title %}Resume Engine{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}"/>
   {% block head %}{% endblock %}
 </head>
@@ -11,36 +11,51 @@
   <div class="shell">
     <aside class="sidebar">
       <div class="brand">
-        <div class="brand-mark">RI</div>
+        <div class="brand-mark">RE</div>
         <div>
-          <div class="brand-title">Resume Intelligence</div>
-          <div class="brand-sub">Control Center</div>
+          <div class="brand-title">Resume Engine</div>
+          <div class="brand-sub">Candidates → Jobs → Resumes</div>
         </div>
       </div>
       <nav class="nav">
-        {% set items = [
-          ('dashboard.index', 'Dashboard'),
-          ('jd_workspace.index', 'JD Workspace'),
-          ('blueprints.index', 'Blueprints'),
-          ('candidates.index', 'Candidates'),
-          ('strategies.index', 'Strategies'),
-          ('generation.index', 'Generate'),
-          ('runs.index', 'Runs'),
-          ('validation.index', 'Validation'),
-          ('repairs.index', 'Repairs'),
-          ('learning.index', 'Learning'),
-          ('registry.index', 'Technology Registry'),
-          ('prompts.index', 'Prompt Manager'),
-          ('documents.index', 'Documents'),
-          ('exports.index', 'Exports'),
-          ('settings.index', 'Settings'),
-          ('audit.index', 'Audit'),
-          ('system.index', 'System'),
-        ] %}
-        {% for endpoint, label in items %}
-          <a class="nav-link {% if request.endpoint and request.endpoint.startswith(endpoint.split('.')[0]) %}active{% endif %}"
-             href="{{ url_for(endpoint) }}">{{ label }}</a>
-        {% endfor %}
+        <a class="nav-link {% if request.endpoint == 'dashboard.index' %}active{% endif %}"
+           href="{{ url_for('dashboard.index') }}">Dashboard</a>
+        <a class="nav-link nav-cta {% if request.endpoint and request.endpoint.startswith('create_resume.') %}active{% endif %}"
+           href="{{ url_for('create_resume.index') }}">+ Create Resume</a>
+        <div class="nav-section">People &amp; Jobs</div>
+        <a class="nav-link {% if request.endpoint and request.endpoint.startswith('candidates.') %}active{% endif %}"
+           href="{{ url_for('candidates.index') }}">Candidates</a>
+        <a class="nav-link {% if request.endpoint and request.endpoint.startswith('jobs.') %}active{% endif %}"
+           href="{{ url_for('jobs.index') }}">Jobs</a>
+        <a class="nav-link {% if request.endpoint and request.endpoint.startswith('matches.') %}active{% endif %}"
+           href="{{ url_for('matches.index') }}">Matches</a>
+        <a class="nav-link {% if request.endpoint and request.endpoint.startswith('resumes.') %}active{% endif %}"
+           href="{{ url_for('resumes.index') }}">Resumes</a>
+
+        <details class="nav-advanced" {% if '/advanced' in request.path or (request.endpoint or '') in [
+          'blueprints.index','strategies.index','validation.index','repairs.index','learning.index',
+          'registry.index','prompts.index','settings.index','audit.index','system.index',
+          'families.index','laya.index'
+        ] or (request.endpoint and request.endpoint.split('.')[0] in [
+          'blueprints','strategies','validation','repairs','learning','registry','prompts',
+          'settings','audit','system','families','laya','documents','exports','runs','generation','jd_workspace'
+        ]) %}open{% endif %}>
+          <summary>Advanced</summary>
+          <div class="nav-advanced-links">
+            <a class="nav-link" href="{{ url_for('families.index') }}">Families</a>
+            <a class="nav-link" href="{{ url_for('blueprints.index') }}">Blueprints</a>
+            <a class="nav-link" href="{{ url_for('strategies.index') }}">Strategies</a>
+            <a class="nav-link" href="{{ url_for('validation.index') }}">Validation</a>
+            <a class="nav-link" href="{{ url_for('repairs.index') }}">Repairs</a>
+            <a class="nav-link" href="{{ url_for('laya.index') }}">Laya</a>
+            <a class="nav-link" href="{{ url_for('learning.index') }}">Learning</a>
+            <a class="nav-link" href="{{ url_for('registry.index') }}">Technology Registry</a>
+            <a class="nav-link" href="{{ url_for('prompts.index') }}">Prompts</a>
+            <a class="nav-link" href="{{ url_for('settings.index') }}">Settings</a>
+            <a class="nav-link" href="{{ url_for('audit.index') }}">Audit</a>
+            <a class="nav-link" href="{{ url_for('system.index') }}">System</a>
+          </div>
+        </details>
       </nav>
       <div class="sidebar-foot">
         <div class="pill warn">River: SHADOW</div>
@@ -51,7 +66,7 @@
       <header class="topbar">
         <div>
           <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
-          <p class="page-sub">{% block page_sub %}Operator console{% endblock %}</p>
+          <p class="page-sub">{% block page_sub %}{% endblock %}</p>
         </div>
         <div class="top-actions">
           {% if auth_on %}
@@ -59,8 +74,6 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <button class="btn secondary" type="submit">Sign out</button>
           </form>
-          {% else %}
-          <span class="muted tiny">Auth disabled</span>
           {% endif %}
         </div>
       </header>
@@ -73,7 +86,7 @@
           </div>
         {% endif %}
       {% endwith %}
-      <section class="content">
+      <section class="content content-narrow">
         {% block content %}{% endblock %}
       </section>
     </div>

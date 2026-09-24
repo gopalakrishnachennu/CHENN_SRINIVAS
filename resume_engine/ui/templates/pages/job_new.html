@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Add Job · Resume Engine{% endblock %}
+{% block page_title %}Add Job{% endblock %}
+{% block page_sub %}Paste or upload a JD, then analyze{% endblock %}
+{% block content %}
+<div class="stack">
+<form method="post" enctype="multipart/form-data" class="card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+  <input type="hidden" name="action" value="analyze"/>
+  <div class="form-grid">
+    <div><label>Company</label><input type="text" name="company"/></div>
+    <div><label>Location</label><input type="text" name="location"/></div>
+    <div><label>Job URL</label><input type="url" name="job_url"/></div>
+    <div><label>Source</label><input type="text" name="source" placeholder="LinkedIn, referral, …"/></div>
+    <div class="full">
+      <label>Upload TXT / DOCX / PDF</label>
+      <input type="file" name="jd_file" accept=".txt,.md,.docx,.pdf"/>
+    </div>
+    <div class="full">
+      <label>Or paste JD</label>
+      <textarea name="jd_text" class="mono" placeholder="Paste the full job description…"></textarea>
+    </div>
+  </div>
+  <div class="actions" style="margin-top:1rem;">
+    <button class="btn xl" type="submit">Analyze Job</button>
+  </div>
+</form>
+</div>
+{% endblock %}

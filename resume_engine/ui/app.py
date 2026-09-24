@@ -254,15 +254,21 @@ def create_app() -> Flask:
         audit,
         blueprints,
         candidates,
+        create_resume,
         dashboard,
         documents,
         exports,
+        families,
         generation,
         jd_workspace,
+        jobs,
+        laya,
         learning,
+        matches,
         prompts,
         registry,
         repairs,
+        resumes,
         runs,
         settings,
         strategies,
@@ -270,14 +276,23 @@ def create_app() -> Flask:
         validation,
     )
 
+    # Primary pages
     for module in (
         dashboard,
-        jd_workspace,
-        blueprints,
+        create_resume,
         candidates,
+        jobs,
+        matches,
+        resumes,
+    ):
+        app.register_blueprint(module.bp)
+
+    # Advanced pages
+    for module in (
+        families,
+        laya,
+        blueprints,
         strategies,
-        generation,
-        runs,
         validation,
         repairs,
         learning,
@@ -291,6 +306,11 @@ def create_app() -> Flask:
     ):
         app.register_blueprint(module.bp)
 
+    # Legacy routes kept for backward compatibility
+    app.register_blueprint(jd_workspace.bp)
+    app.register_blueprint(generation.bp)
+    app.register_blueprint(runs.bp)
+
     return app
 
 
@@ -302,7 +322,7 @@ def main(host: str = "127.0.0.1", port: int = 8765, debug: bool = False) -> None
     ensure_storage_dirs()
     ensure_ui_schema()
     mode = "password-protected" if auth_enabled() else "open (no RESUME_ENGINE_UI_PASSWORD)"
-    print(f"Phase 3.1 Control Center ({mode}): http://{host}:{port}")
+    print(f"Resume Engine ({mode}): http://{host}:{port}")
     app.run(host=host, port=port, debug=debug)
 
 

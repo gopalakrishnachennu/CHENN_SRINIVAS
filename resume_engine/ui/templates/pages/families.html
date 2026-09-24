@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Families · Advanced{% endblock %}
+{% block page_title %}Family Registry{% endblock %}
+{% block page_sub %}Authoritative matching rules — Advanced{% endblock %}
+{% block content %}
+<div class="stack">
+  <div class="grid product">
+    {% for f in families %}
+    <div class="card">
+      <h3>{{ f.display_name }}</h3>
+      <div class="tiny muted">{{ f.family_id }}</div>
+      <div class="meta-row" style="margin-top:0.75rem;">
+        <div>Compatible: {{ f.compatible|join(', ') or '—' }}</div>
+        <div>Hybrid: {{ f.hybrid|join(', ') or '—' }}</div>
+        <div>Blocked: {{ f.blocked|join(', ') or '—' }}</div>
+      </div>
+      <a class="btn secondary" href="{{ url_for('families.detail', family_id=f.family_id) }}">Edit</a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

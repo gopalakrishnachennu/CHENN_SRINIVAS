@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Resumes · Resume Engine{% endblock %}
+{% block page_title %}Resumes{% endblock %}
+{% block page_sub %}Generated resume library{% endblock %}
+{% block content %}
+<div class="stack">
+  <div class="actions">
+    <a class="btn" href="{{ url_for('create_resume.index') }}">Create New Resume</a>
+  </div>
+  <form class="card filters" method="get">
+    <div><label>Candidate</label><input type="text" name="candidate" value="{{ filters.get('candidate','') }}"/></div>
+    <div><label>Status</label><input type="text" name="status" value="{{ filters.get('status','') }}"/></div>
+    <div><button class="btn secondary" type="submit">Filter</button></div>
+  </form>
+  {% if not items %}
+    <div class="empty">No resumes yet. Use Create Resume to generate one.</div>
+  {% else %}
+  <div class="card" style="padding:0; overflow:auto;">
+    <table>
+      <thead>
+        <tr><th>Candidate</th><th>Target Job</th><th>Match</th><th>Status</th><th>Created</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for i in items %}
+        <tr>
+          <td>{{ i.candidate }}</td>
+          <td>{{ i.job_title }}</td>
+          <td><span class="match-badge {{ (i.match_type or '')|lower|replace('_','') }}">{{ i.match_type or '—' }}</span></td>
+          <td>{{ i.status }}</td>
+          <td class="tiny muted">{{ i.created_at }}</td>
+          <td><a class="btn ghost" href="{{ url_for('resumes.detail', run_id=i.run_id) }}">Open</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

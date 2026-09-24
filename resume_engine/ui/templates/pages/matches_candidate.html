@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block page_title %}Matches for {{ candidate.name }}{% endblock %}
+{% block page_sub %}{{ candidate.primary_family_display }} · {{ matches|length }} matches{% endblock %}
+{% block content %}
+<div class="actions" style="margin-bottom:1rem;">
+  <a class="btn secondary" href="{{ url_for('matches.index') }}">← All Matches</a>
+  <a class="btn" href="{{ url_for('create_resume.select_job', candidate_id=candidate.id) }}">Create Resume</a>
+</div>
+
+{% if matches %}
+<div class="card">
+  <table>
+    <thead><tr><th>Job</th><th>Company</th><th>Job Family</th><th>Match</th><th>Score</th><th>Reason</th><th></th></tr></thead>
+    <tbody>
+    {% for m in matches %}
+      <tr>
+        <td><strong>{{ m.get('job_title', '—') }}</strong></td>
+        <td>{{ m.get('job_company', '—') }}</td>
+        <td>{{ m.get('job_primary_family', '—') }}</td>
+        <td><span class="pill {{ m.match_type }}">{{ m.match_type }}</span></td>
+        <td>{{ '%.0f'|format((m.score or 0)*100) }}%</td>
+        <td class="muted tiny">{{ m.get('reason','') }}</td>
+        <td>
+          {% if m.match_type != 'NO_MATCH' %}
+          <a class="btn secondary" href="{{ url_for('create_resume.options', candidate_id=candidate.id, job_id=m.job_id) }}">
+            Create Resume
+          </a>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card empty-state">
+  <h3>No matches computed</h3>
+  <p>Go to the <a href="{{ url_for('matches.index') }}">Matches page</a> and compute matches for this candidate.</p>
+</div>
+{% endif %}
+{% endblock %}

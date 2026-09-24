@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Resume {{ meta.run_id if meta else '' }} · Resume Engine{% endblock %}
+{% block page_title %}Resume Results{% endblock %}
+{% block page_sub %}{% if meta %}{{ meta.candidate }} · {{ meta.job_title }}{% endif %}{% endblock %}
+{% block content %}
+<div class="stack">
+  {% if not meta %}
+    <div class="empty">Resume run not found.</div>
+  {% else %}
+    <div class="card soft">
+      <div class="meta-row">
+        <div>Status: <strong>{{ meta.status }}</strong></div>
+        <div>Match: <span class="match-badge {{ (meta.match_type or '')|lower|replace('_','') }}">{{ meta.match_type }}</span></div>
+        <div class="tiny muted">Run {{ meta.run_id }}</div>
+      </div>
+    </div>
+
+    {% if variants %}
+    <div class="grid product">
+      {% for v in variants %}
+      <div class="card">
+        <h3>Resume {{ loop.index }}</h3>
+        <div class="pill {% if v.status == 'VALIDATED' %}ok{% else %}fail{% endif %}">{{ v.status }}</div>
+        <p class="tiny muted" style="margin-top:0.75rem; word-break:break-all;">{{ v.label }}</p>
+        <div class="actions">
+          <a class="btn secondary" href="{{ url_for('exports.index') }}">Exports</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+      <div class="empty">Artifacts not ready yet — or generation still running.</div>
+      {% if meta.job_id %}
+        <a class="btn secondary" href="{{ url_for('create_resume.progress', job_id=meta.job_id) }}">View Progress</a>
+      {% endif %}
+    {% endif %}
+
+    <details class="details-block" {% if show_details %}open{% endif %}>
+      <summary>View Details</summary>
+      <pre class="tiny">{{ artifacts | tojson(indent=2) if artifacts else 'No filesystem artifacts linked yet.' }}</pre>
+    </details>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block page_title %}Analyze JD{% endblock %}
+{% block page_sub %}Paste or upload a job description — Phase 1 analysis stores it in the JD library{% endblock %}
+{% block content %}
+<div class="card card-lg">
+  <form method="post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+
+    <label>Job Description Text</label>
+    <textarea name="jd_text" style="min-height:240px;" placeholder="Paste the full job description here…">{{ jd_text }}</textarea>
+
+    <div class="form-grid" style="margin-top:0.8rem;">
+      <div><label>Or upload file (.txt, .docx, .pdf)</label><input type="file" name="jd_file" accept=".txt,.docx,.pdf"/></div>
+      <div><label>Company (optional)</label><input name="company" placeholder="Acme Corp"/></div>
+      <div><label>Location (optional)</label><input name="location" placeholder="Remote / NYC"/></div>
+      <div><label>Job URL (optional)</label><input name="job_url" placeholder="https://..."/></div>
+    </div>
+
+    <div class="actions" style="margin-top:1rem;">
+      <button class="btn lg" type="submit" name="action" value="analyze">Analyze &amp; Save</button>
+      <button class="btn secondary" type="submit" name="action" value="load_example">Load Example</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

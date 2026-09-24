@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ job.title }} · Jobs{% endblock %}
+{% block page_title %}{{ job.title or 'Job' }}{% endblock %}
+{% block page_sub %}{{ job.company or '' }}{% if job.location %} · {{ job.location }}{% endif %}{% endblock %}
+{% block content %}
+<div class="stack">
+  <div class="card">
+    <div class="meta-row">
+      <div>Target Role: <strong>{{ public.target_role or job.title }}</strong></div>
+      <div>Seniority: <strong>{{ public.seniority or job.seniority or '—' }}</strong></div>
+      <div>Primary Family: <strong>{{ public.primary_family_display or job.primary_family_display }}</strong></div>
+      <div>Secondary Family: <strong>{{ public.secondary_family_display or job.secondary_family_display }}</strong></div>
+      <div>Candidates Matched: <strong>{{ matched_count }}</strong></div>
+    </div>
+
+    <h3>Must-Have Skills</h3>
+    <p>{% for s in public.must_have_skills or [] %}<span class="pill ok" style="margin:0.15rem;">{{ s if s is string else s }}</span> {% else %}<span class="muted">—</span>{% endfor %}</p>
+    <h3>Preferred Skills</h3>
+    <p>{% for s in public.preferred_skills or [] %}<span class="pill" style="margin:0.15rem;">{{ s if s is string else s }}</span> {% else %}<span class="muted">—</span>{% endfor %}</p>
+    <h3>Responsibilities</h3>
+    <ul>
+      {% for r in public.responsibilities or [] %}
+        <li>{{ r if r is string else r }}</li>
+      {% else %}
+        <li class="muted">—</li>
+      {% endfor %}
+    </ul>
+    <h3>Certifications</h3>
+    <p class="muted">{{ (public.certifications or [])|join(', ') or '—' }}</p>
+
+    <div class="actions" style="margin-top:1rem;">
+      <a class="btn" href="{{ url_for('create_resume.index', jd=job.id) }}">Create Resume</a>
+      <a class="btn ghost" href="{{ url_for('jobs.detail', job_id=job.id, advanced=1) if not show_advanced else url_for('jobs.detail', job_id=job.id) }}">
+        {% if show_advanced %}Hide Advanced Analysis{% else %}Advanced Analysis{% endif %}
+      </a>
+    </div>
+  </div>
+
+  {% if show_advanced %}
+  <div class="card">
+    <h2>Advanced Analysis</h2>
+    <div class="meta-row">
+      <div>Hybrid Probability: <strong>{{ advanced.hybrid_probability }}</strong></div>
+      <div>P1: {{ advanced.p1 }}</div>
+      <div>P2: {{ advanced.p2 }}</div>
+      <div>P3: {{ advanced.p3 }}</div>
+      <div>P4: {{ advanced.p4 }}</div>
+    </div>
+    <details open>
+      <summary>Raw blueprint JSON</summary>
+      <pre class="tiny" style="overflow:auto;max-height:320px;">{{ advanced.raw | tojson(indent=2) }}</pre>
+    </details>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -10,7 +10,7 @@ from typing import Any
 from resume_engine.config.settings import PROJECT_ROOT, SQLITE_DB_PATH, STORAGE_DIR
 from resume_engine.learning.online import config as online_config
 from resume_engine.learning.online.policy_store import load_metadata, policy_dir
-from resume_engine.ui.services.dashboard_service import system_status
+from resume_engine.ui.services.dashboard_service import system_status_lite as system_status
 
 
 def git_commit() -> str | None:

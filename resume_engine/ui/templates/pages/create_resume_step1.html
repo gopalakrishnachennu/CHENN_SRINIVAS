@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block page_title %}Create Resume{% endblock %}
+{% block page_sub %}Step 1: Select candidate{% endblock %}
+{% block content %}
+<div class="wizard-steps">
+  <span class="wizard-step active">1 Candidate</span>
+  <span class="wizard-arrow">→</span>
+  <span class="wizard-step">2 Job</span>
+  <span class="wizard-arrow">→</span>
+  <span class="wizard-step">3 Generate</span>
+</div>
+
+{% if candidates %}
+<div class="card">
+  <h3>Select a candidate</h3>
+  <table>
+    <thead><tr><th>Name</th><th>Primary Family</th><th>Companies</th><th></th></tr></thead>
+    <tbody>
+    {% for c in candidates %}
+      <tr>
+        <td><strong>{{ c.name }}</strong></td>
+        <td>{{ c.primary_family_display or '—' }}</td>
+        <td>{{ c.company_count }}</td>
+        <td><a class="btn" href="{{ url_for('create_resume.select_job', candidate_id=c.id) }}">Select →</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card empty-state">
+  <h3>No candidates</h3>
+  <p>Create a candidate first.</p>
+  <a class="btn" href="{{ url_for('candidates.create') }}">New Candidate</a>
+</div>
+{% endif %}
+{% endblock %}

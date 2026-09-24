@@ -1,35 +1,34 @@
 {% extends "base.html" %}
+{% block title %}Candidates · Resume Engine{% endblock %}
 {% block page_title %}Candidates{% endblock %}
-{% block page_sub %}Verified facts only — generated resumes never auto-become profile truth{% endblock %}
+{% block page_sub %}Family + companies + timeline only. The engine writes the resume content.{% endblock %}
 {% block content %}
-<div class="actions" style="margin-bottom:0.8rem;">
-  <a class="btn" href="{{ url_for('candidates.create') }}">Create</a>
-</div>
-<div class="card">
-  <table>
-    <thead><tr><th>Name</th><th>Status</th><th>Updated</th><th></th></tr></thead>
-    <tbody>
-    {% for p in profiles %}
-      <tr>
-        <td>{{ p.name }}</td>
-        <td><span class="pill">{{ p.status }}</span></td>
-        <td class="tiny">{{ p.updated_at }}</td>
-        <td class="actions">
-          <a href="{{ url_for('candidates.edit', profile_id=p.id) }}">Edit</a>
-          <form method="post" action="{{ url_for('candidates.duplicate', profile_id=p.id) }}" style="display:inline">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-            <button class="btn secondary" type="submit">Duplicate</button>
-          </form>
-          <form method="post" action="{{ url_for('candidates.archive', profile_id=p.id) }}" style="display:inline">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-            <button class="btn secondary" type="submit" data-confirm="Archive this profile?">Archive</button>
-          </form>
-        </td>
-      </tr>
-    {% else %}
-      <tr><td colspan="4" class="muted">No candidate profiles yet.</td></tr>
+<div class="stack">
+  <div class="actions">
+    <a class="btn" href="{{ url_for('candidates.create') }}">+ Add Candidate</a>
+  </div>
+  {% if not cards %}
+    <div class="empty">No candidates yet.</div>
+  {% else %}
+  <div class="grid product">
+    {% for c in cards %}
+    <div class="card person-card">
+      <div class="name">{{ c.name }}</div>
+      <div class="meta-row">
+        <div>Primary Family: <strong>{{ c.primary_family_display }}</strong></div>
+        <div>Secondary Family: <strong>{{ c.secondary_family_display }}</strong></div>
+        <div>Companies: <strong>{{ c.company_count }}</strong></div>
+        <div>Matching Jobs: <strong>{{ c.match_count }}</strong></div>
+        <div>Resumes: <strong>{{ c.resume_count }}</strong></div>
+      </div>
+      <div class="actions">
+        <a class="btn ghost" href="{{ url_for('candidates.view', profile_id=c.id) }}">View</a>
+        <a class="btn secondary" href="{{ url_for('matches.index', candidate=c.id) }}">Matches</a>
+        <a class="btn" href="{{ url_for('create_resume.index') }}">Create Resume</a>
+      </div>
+    </div>
     {% endfor %}
-    </tbody>
-  </table>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

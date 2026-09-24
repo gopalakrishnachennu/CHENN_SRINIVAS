@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block page_title %}Resume Progress{% endblock %}
+{% block page_sub %}{{ resume.id[:12] }}…{% endblock %}
+{% block content %}
+<div class="card card-lg">
+  <h2>Status: <span class="pill {{ resume.status }}">{{ resume.status }}</span></h2>
+  <table>
+    <tr><th>Resume ID</th><td class="mono">{{ resume.id }}</td></tr>
+    <tr><th>Candidate</th><td class="mono">{{ resume.candidate_id }}</td></tr>
+    <tr><th>Job</th><td class="mono">{{ resume.job_id }}</td></tr>
+    <tr><th>Provenance</th><td>{{ resume.provenance }}</td></tr>
+    <tr><th>Run ID</th><td class="mono">{{ resume.run_id or '—' }}</td></tr>
+    {% if resume.score is not none %}
+    <tr><th>Score</th><td>{{ '%.1f'|format(resume.score) }}</td></tr>
+    {% endif %}
+    {% if resume.result_path %}
+    <tr><th>Result</th><td>{{ resume.result_path }}</td></tr>
+    {% endif %}
+    <tr><th>Created</th><td>{{ resume.created_at }}</td></tr>
+    <tr><th>Updated</th><td>{{ resume.updated_at }}</td></tr>
+  </table>
+</div>
+
+{% if gen_job %}
+<details class="collapsible" style="margin-top:1rem;" open>
+  <summary>Generation Job Details</summary>
+  <div class="card" style="margin-top:0.5rem;">
+    <p><strong>Job ID:</strong> <span class="mono">{{ gen_job.job_id }}</span></p>
+    <p><strong>Status:</strong> <span class="pill">{{ gen_job.status }}</span> · {{ gen_job.stage }}</p>
+    {% if gen_job.error %}<div class="banner danger">{{ gen_job.error }}</div>{% endif %}
+    <details class="collapsible" style="margin-top:0.5rem;">
+      <summary>View Details (Advanced)</summary>
+      <pre id="job-status" class="json">{{ gen_job_json }}</pre>
+    </details>
+  </div>
+</details>
+{% endif %}
+
+<div class="actions" style="margin-top:1rem;">
+  <a class="btn secondary" href="{{ url_for('resumes.index') }}">← Resumes Library</a>
+</div>
+{% endblock %}
+
+{% if gen_job and gen_job.status in ['QUEUED','RUNNING'] %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/generation.js') }}"></script>
+<script>pollRunStatus({{ gen_job.job_id|tojson }}, "job-status");</script>
+{% endblock %}
+{% endif %}
