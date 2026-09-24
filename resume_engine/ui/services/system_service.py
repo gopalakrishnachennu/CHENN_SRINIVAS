@@ -26,6 +26,31 @@ def git_commit() -> str | None:
         return None
 
 
+def workflow_health() -> dict[str, Any]:
+    """Integrity snapshot for Advanced → System."""
+    from resume_engine.maintenance.reconcile import check_integrity
+
+    report = check_integrity()
+    return {
+        "jobs_total": report["jobs_total"],
+        "jobs_ready": report["jobs_ready"],
+        "jobs_needs_analysis": report["jobs_needs_analysis"],
+        "jobs_failed": report["jobs_failed"],
+        "missing_blueprints": sum(
+            1 for i in report["issues"] if i["code"] == "READY_MISSING_BLUEPRINT"
+        ),
+        "stale_blueprints": sum(
+            1 for i in report["issues"] if i["code"] == "STALE_BLUEPRINT_HASH"
+        ),
+        "candidates": report["candidates"],
+        "candidates_without_primary": report["candidates_without_primary"],
+        "stale_matches": report["stale_matches"],
+        "issue_count": report["issue_count"],
+        "ok": report["ok"],
+        "river_mode": "SHADOW",
+    }
+
+
 def system_info() -> dict[str, Any]:
     import river
 
@@ -62,8 +87,9 @@ def system_info() -> dict[str, Any]:
         versions["flask"] = None
 
     policy_path = policy_dir() / "policy.pkl"
+    integrity = workflow_health()
     return {
-        "app_version": "phase-3.1",
+        "app_version": "phase-3.2",
         "git_commit": git_commit(),
         "versions": versions,
         "sqlite_location": str(SQLITE_DB_PATH),
@@ -74,5 +100,6 @@ def system_info() -> dict[str, Any]:
         "policy_file_exists": policy_path.exists(),
         "openai_key_status": "CONFIGURED" if (os.getenv("OPENAI_API_KEY") or "").strip() and "PASTE" not in (os.getenv("OPENAI_API_KEY") or "").upper() else "NOT CONFIGURED",
         "health": system_status(),
+        "integrity": integrity,
         "river_active": "OFF",
     }

@@ -60,6 +60,9 @@
       <div class="sidebar-foot">
         <div class="pill warn">River: SHADOW</div>
         <div class="muted tiny">Active mode locked</div>
+        {% if not auth_on %}
+        <div class="muted tiny">Auth disabled</div>
+        {% endif %}
       </div>
     </aside>
     <div class="main">

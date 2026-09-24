@@ -33,6 +33,10 @@
       <div class="muted" style="margin-bottom:0.65rem;">{{ m.company or '—' }}{% if m.location %} · {{ m.location }}{% endif %}</div>
       <div style="margin-bottom:0.75rem;">
         <span class="match-badge {{ m.match_type|lower|replace('_','') }}">{{ m.match_type|replace('_',' ') }} MATCH</span>
+        {% set st = (m.analysis_status or 'NEEDS_ANALYSIS')|upper %}
+        {% if st == 'READY' %}<span class="pill pass">READY</span>
+        {% elif st == 'FAILED' %}<span class="pill fail">FAILED</span>
+        {% else %}<span class="pill warn">{{ st|replace('_',' ') }}</span>{% endif %}
       </div>
       <div class="meta-row">
         <div><strong>{{ m.primary_family_display }}</strong>{% if m.secondary_family %} + {{ m.secondary_family_display }}{% endif %}</div>

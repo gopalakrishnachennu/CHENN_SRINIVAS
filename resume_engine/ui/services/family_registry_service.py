@@ -99,6 +99,9 @@ def update_family(
             ),
         )
         conn.commit()
+    from resume_engine.ui.services import match_service
+
+    match_service.invalidate_all_matches()
     record_audit_event(
         action="family.update",
         actor=actor,

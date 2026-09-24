@@ -43,7 +43,10 @@ def get_job(job_id: str) -> dict[str, Any]:
 
 
 def _row_to_dict(row) -> dict[str, Any]:
-    return {
+    keys = set(row.keys())
+    from resume_engine.ui.services.blueprint_lifecycle import get_analysis_status
+
+    base = {
         "id": row["id"],
         "jd_hash": row["jd_hash"],
         "title": row["title"],
@@ -53,14 +56,20 @@ def _row_to_dict(row) -> dict[str, Any]:
         "source": row["source"],
         "seniority": row["seniority"],
         "primary_family": row["primary_family"],
-        "secondary_family": row["secondary_family"],
+        "secondary_family": row["secondary_family"] if row["secondary_family"] not in ("", "none", "null") else None,
         "status": row["status"],
         "blueprint_path": row["blueprint_path"],
         "jd_text": row["jd_text"],
         "metadata": json.loads(row["metadata_json"]) if row["metadata_json"] else {},
         "created_at": row["created_at"],
         "updated_at": row["updated_at"],
+        "analysis_status": row["analysis_status"] if "analysis_status" in keys else None,
+        "analysis_version": int(row["analysis_version"] or 0) if "analysis_version" in keys else 0,
+        "jd_content_hash": row["jd_content_hash"] if "jd_content_hash" in keys else None,
     }
+    # Effective readiness (validates blueprint file / staleness)
+    base["analysis_status"] = get_analysis_status(base)
+    return base
 
 
 def analyze_and_store(
@@ -105,19 +114,24 @@ def analyze_and_store(
 
     now = _now()
     ensure_ui_schema()
+    from resume_engine.ui.services.blueprint_lifecycle import ANALYSIS_READY, jd_content_hash
+
+    secondary_family = None if secondary_family in {"none", "null", None, ""} else secondary_family
     with connect_ui_db() as conn:
         conn.execute(
             """
             INSERT INTO jd_library(
               id, jd_hash, title, company, location, job_url, source,
               seniority, primary_family, secondary_family, status,
-              blueprint_path, jd_text, metadata_json, created_at, updated_at
-            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+              blueprint_path, jd_text, metadata_json, created_at, updated_at,
+              analysis_status, analysis_version, jd_content_hash
+            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             """,
             (
                 job_id, jd_hash, title, company, location, job_url, source,
                 seniority, primary_family, secondary_family, "active",
                 str(bp_path), jd_text, json.dumps(meta), now, now,
+                ANALYSIS_READY, 1, jd_content_hash(jd_text),
             ),
         )
         conn.commit()
@@ -146,36 +160,83 @@ def update_job(
     seniority = updates.get("seniority", existing["seniority"])
     pf = updates.get("primary_family", existing["primary_family"])
     sf = updates.get("secondary_family", existing["secondary_family"])
+    if sf in ("", "none", "null"):
+        sf = None
     status = updates.get("status", existing["status"])
+    new_jd_text = updates.get("jd_text")
+    jd_text_changed = new_jd_text is not None and (new_jd_text or "") != (existing.get("jd_text") or "")
 
     with connect_ui_db() as conn:
-        conn.execute(
-            """
-            UPDATE jd_library SET
-              title=?, company=?, location=?, seniority=?,
-              primary_family=?, secondary_family=?, status=?, updated_at=?
-            WHERE id=?
-            """,
-            (title, company, location, seniority, pf, sf, status, now, job_id),
-        )
+        if jd_text_changed:
+            from resume_engine.ui.services.blueprint_lifecycle import ANALYSIS_NEEDS
+
+            conn.execute(
+                """
+                UPDATE jd_library SET
+                  title=?, company=?, location=?, seniority=?,
+                  primary_family=?, secondary_family=?, status=?,
+                  jd_text=?, blueprint_path=NULL, analysis_status=?,
+                  jd_content_hash=NULL, updated_at=?
+                WHERE id=?
+                """,
+                (
+                    title, company, location, seniority, pf, sf, status,
+                    new_jd_text, ANALYSIS_NEEDS, now, job_id,
+                ),
+            )
+        else:
+            conn.execute(
+                """
+                UPDATE jd_library SET
+                  title=?, company=?, location=?, seniority=?,
+                  primary_family=?, secondary_family=?, status=?, updated_at=?
+                WHERE id=?
+                """,
+                (title, company, location, seniority, pf, sf, status, now, job_id),
+            )
         conn.commit()
+
+    from resume_engine.ui.services import match_service
+
+    family_changed = (
+        pf != existing.get("primary_family")
+        or sf != existing.get("secondary_family")
+        or jd_text_changed
+    )
+    if family_changed:
+        match_service.invalidate_matches_for_job(job_id)
+
     record_audit_event(
-        action="job.update", actor=actor, entity_type="jd_library", entity_id=job_id
+        action="job.update",
+        actor=actor,
+        entity_type="jd_library",
+        entity_id=job_id,
+        metadata={"jd_text_changed": jd_text_changed},
     )
     return get_job(job_id)
 
 
 def archive_job(job_id: str, *, actor: str | None = None) -> None:
     update_job(job_id, {"status": "archived"}, actor=actor)
+    from resume_engine.ui.services import match_service
+
+    match_service.invalidate_matches_for_job(job_id)
 
 
 def get_job_display(job_id: str) -> dict[str, Any]:
     """Return job data formatted for the normal (non-advanced) UI."""
     job = get_job(job_id)
     meta = job.get("metadata") or {}
-    must_have = meta.get("p1", []) + meta.get("p2", [])
-    preferred = meta.get("p3", [])
-    responsibilities = meta.get("full_blueprint", {}).get("responsibilities") or []
+    display = meta.get("display") or {}
+    must_have = display.get("must_have") or (meta.get("p1", []) + meta.get("p2", []))
+    preferred = display.get("preferred") or meta.get("p3", [])
+    responsibilities = (
+        display.get("responsibilities")
+        or meta.get("full_blueprint", {}).get("responsibilities")
+        or []
+    )
+    if isinstance(responsibilities, str):
+        responsibilities = [s.strip() for s in responsibilities.split(";") if s.strip()]
     certs = meta.get("full_blueprint", {}).get("certifications") or []
     return {
         **job,

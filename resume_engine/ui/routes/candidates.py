@@ -44,7 +44,7 @@ def _parse_payload():
         "location": request.form.get("location") or "",
         "linkedin": request.form.get("linkedin") or "",
         "primary_family": request.form.get("primary_family") or "",
-        "secondary_family": request.form.get("secondary_family") or "",
+        "secondary_family": request.form.get("secondary_family") or None,
         "companies": _parse_companies(),
         "education": education,
         "certifications": [c.strip() for c in certs.split(",") if c.strip()],

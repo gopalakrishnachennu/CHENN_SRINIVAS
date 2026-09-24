@@ -15,16 +15,18 @@ bp = Blueprint("matches", __name__, url_prefix="/matches")
 @require_auth
 def index():
     candidates = candidate_service.list_profiles()
-    candidate_id = request.args.get("candidate") or (candidates[0]["id"] if candidates else None)
+    candidate_id = (
+        request.args.get("candidate_id")
+        or request.args.get("candidate")
+        or (candidates[0]["id"] if candidates else None)
+    )
     selected = None
     matched = []
     if candidate_id:
         try:
             selected = candidate_service.get_profile(candidate_id)
             jobs = job_service.list_jobs(limit=2000)
-            matched = match_service.matches_for_candidate(
-                selected, jobs,
-            )
+            matched = match_service.list_matches_for_candidate(selected, jobs)
         except KeyError:
             selected = None
     return render_template(

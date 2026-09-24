@@ -1,40 +1,58 @@
 {% extends "base.html" %}
+{% block title %}Jobs · Resume Engine{% endblock %}
 {% block page_title %}Jobs{% endblock %}
-{% block page_sub %}JD Library — analysed job descriptions{% endblock %}
+{% block page_sub %}Job description library{% endblock %}
 {% block content %}
-<div class="actions" style="margin-bottom:1rem;">
-  <a class="btn" href="{{ url_for('jobs.analyze') }}">Analyze New JD</a>
-</div>
-{% if jobs %}
-<div class="card">
-  <table>
-    <thead><tr><th>Title</th><th>Company</th><th>Seniority</th><th>Primary Family</th><th>Secondary</th><th>Status</th><th>Added</th><th></th></tr></thead>
-    <tbody>
+<div class="stack">
+  <div class="actions">
+    <a class="btn" href="{{ url_for('jobs.create') }}">+ Add Job</a>
+    <form method="post" action="{{ url_for('jobs.analyze_pending') }}" style="display:inline;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+      <button class="btn secondary" type="submit">Analyze Pending Jobs</button>
+    </form>
+  </div>
+  <form class="card filters" method="get">
+    <div><label>Search</label><input type="text" name="q" value="{{ filters.get('q','') }}"/></div>
+    <div>
+      <label>Family</label>
+      <select name="family">
+        <option value="">All</option>
+        {% for fid, label in family_options %}
+          <option value="{{ fid }}" {% if filters.get('family')==fid %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div><label>Company</label><input type="text" name="company" value="{{ filters.get('company','') }}"/></div>
+    <div><label>Location</label><input type="text" name="location" value="{{ filters.get('location','') }}"/></div>
+    <div><button class="btn secondary" type="submit">Filter</button></div>
+  </form>
+
+  {% if not jobs %}
+    <div class="empty">No jobs yet. Add a JD to get started.</div>
+  {% else %}
+  <div class="grid product">
     {% for j in jobs %}
-      <tr>
-        <td><strong><a href="{{ url_for('jobs.detail', job_id=j.id) }}">{{ j.title or '—' }}</a></strong></td>
-        <td>{{ j.company or '—' }}</td>
-        <td>{{ j.seniority or '—' }}</td>
-        <td>{{ j.primary_family or '—' }}</td>
-        <td>{{ j.secondary_family or '—' }}</td>
-        <td><span class="pill">{{ j.status }}</span></td>
-        <td class="tiny muted">{{ j.created_at[:10] }}</td>
-        <td>
-          <form method="post" action="{{ url_for('jobs.archive', job_id=j.id) }}" style="display:inline">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-            <button class="btn secondary" type="submit">Archive</button>
-          </form>
-        </td>
-      </tr>
+    <div class="card">
+      <h3 style="margin-bottom:0.25rem;">{{ j.title or 'Untitled' }}</h3>
+      <div class="muted" style="margin-bottom:0.75rem;">{{ j.company or 'Company not set' }}</div>
+      <div class="meta-row">
+        <div><strong>{{ j.primary_family_display }}</strong>{% if j.secondary_family %} · Secondary: {{ j.secondary_family_display }}{% endif %}</div>
+        <div>{{ j.seniority or '—' }}{% if j.location %} · {{ j.location }}{% endif %}</div>
+        <div>Candidates Matched: <strong>{{ j.candidates_matched }}</strong></div>
+        <div>
+          {% set st = (j.analysis_status or 'NEEDS_ANALYSIS')|upper %}
+          {% if st == 'READY' %}<span class="pill pass">READY</span>
+          {% elif st == 'FAILED' %}<span class="pill fail">FAILED ANALYSIS</span>
+          {% elif st == 'ANALYZING' %}<span class="pill warn">ANALYZING</span>
+          {% else %}<span class="pill warn">NEEDS ANALYSIS</span>{% endif %}
+        </div>
+      </div>
+      <div class="actions">
+        <a class="btn secondary" href="{{ url_for('jobs.detail', job_id=j.id) }}">View</a>
+      </div>
+    </div>
     {% endfor %}
-    </tbody>
-  </table>
+  </div>
+  {% endif %}
 </div>
-{% else %}
-<div class="card empty-state">
-  <h3>No jobs in the library</h3>
-  <p>Paste or upload a job description to analyse it with Phase 1.</p>
-  <a class="btn" href="{{ url_for('jobs.analyze') }}">Analyze New JD</a>
-</div>
-{% endif %}
 {% endblock %}

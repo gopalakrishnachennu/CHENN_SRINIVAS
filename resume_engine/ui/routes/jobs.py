@@ -93,26 +93,61 @@ def analyze():
     return create()
 
 
+@bp.post("/analyze-pending")
+@require_auth
+@csrf_protect
+def analyze_pending():
+    from resume_engine.ui.services.blueprint_lifecycle import (
+        ANALYSIS_FAILED,
+        ANALYSIS_NEEDS,
+        ensure_job_blueprint,
+    )
+
+    jobs = job_service.list_jobs(limit=5000)
+    handled = 0
+    failed = 0
+    for job in jobs:
+        status = (job.get("analysis_status") or "").upper()
+        if status in {ANALYSIS_NEEDS, ANALYSIS_FAILED, ""}:
+            result = ensure_job_blueprint(job["id"], actor=_actor())
+            handled += 1
+            if not result.get("ok"):
+                failed += 1
+    if failed:
+        flash(f"Analyzed {handled} jobs ({failed} failed)", "error")
+    else:
+        flash(f"Analyzed {handled} pending jobs", "success")
+    return redirect(url_for("jobs.index"))
+
+
 @bp.get("/<job_id>")
 @require_auth
 def detail(job_id: str):
     job = _enrich(job_service.get_job(job_id))
     blueprint = job_service.load_blueprint(job) or {}
-    public = job_service.public_analysis(blueprint) if blueprint else {
-        "target_role": job.get("title"),
-        "seniority": job.get("seniority"),
-        "primary_family_display": job.get("primary_family_display"),
-        "secondary_family_display": job.get("secondary_family_display"),
-        "must_have_skills": [],
-        "preferred_skills": [],
-        "responsibilities": [],
-        "certifications": [],
-    }
-    # Prefer stored display when blueprint empty
-    if not public.get("primary_family_display"):
-        public["primary_family_display"] = job["primary_family_display"]
-        public["secondary_family_display"] = job["secondary_family_display"]
-    advanced = job_service.advanced_analysis(blueprint) if blueprint else {}
+    if blueprint:
+        public = job_service.public_analysis(blueprint)
+        advanced = job_service.advanced_analysis(blueprint)
+    else:
+        display = job_service.get_job_display(job_id)
+        public = {
+            "target_role": job.get("title"),
+            "seniority": job.get("seniority"),
+            "primary_family_display": job.get("primary_family_display"),
+            "secondary_family_display": job.get("secondary_family_display"),
+            "must_have_skills": display.get("must_have") or [],
+            "preferred_skills": display.get("preferred") or [],
+            "responsibilities": display.get("responsibilities") or [],
+            "certifications": display.get("certs") or [],
+        }
+        advanced = {
+            "hybrid_probability": None,
+            "p1": (job.get("metadata") or {}).get("p1") or [],
+            "p2": (job.get("metadata") or {}).get("p2") or [],
+            "p3": (job.get("metadata") or {}).get("p3") or [],
+            "p4": [],
+            "raw": job.get("metadata") or {},
+        }
     matched_count = job_service.count_candidates_matched(job, candidate_service.list_profiles())
     return render_template(
         "pages/job_detail.html",

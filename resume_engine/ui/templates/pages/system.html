@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block page_title %}System{% endblock %}
 {% block content %}
+{% set integ = info.integrity or {} %}
 <div class="grid two">
   <div class="card">
     <h2>Runtime</h2>
@@ -14,6 +15,7 @@
       <tr><th>Flask</th><td>{{ info.versions.flask or '—' }}</td></tr>
       <tr><th>OpenAI key</th><td>{{ info.openai_key_status }}</td></tr>
       <tr><th>River active</th><td><span class="pill fail">OFF</span></td></tr>
+      <tr><th>River mode</th><td>{{ integ.river_mode or 'SHADOW' }}</td></tr>
     </table>
   </div>
   <div class="card">
@@ -26,7 +28,26 @@
       <tr><th>Reward</th><td>{{ info.reward_schema_version }}</td></tr>
       <tr><th>Policy file</th><td>{{ 'present' if info.policy_file_exists else 'missing' }}</td></tr>
     </table>
-    <h3 style="margin-top:1rem;">Health</h3>
+    <h3 style="margin-top:1rem;">Workflow integrity
+      {% if integ.issue_count and integ.issue_count > 0 %}
+        <span class="pill fail">RED</span>
+      {% else %}
+        <span class="pill pass">OK</span>
+      {% endif %}
+    </h3>
+    <table>
+      <tr><th>Jobs total</th><td>{{ integ.jobs_total }}</td></tr>
+      <tr><th>Jobs READY</th><td>{{ integ.jobs_ready }}</td></tr>
+      <tr><th>Jobs NEEDS_ANALYSIS</th><td>{{ integ.jobs_needs_analysis }}</td></tr>
+      <tr><th>Jobs FAILED</th><td>{{ integ.jobs_failed }}</td></tr>
+      <tr><th>Missing blueprints</th><td>{{ integ.missing_blueprints }}</td></tr>
+      <tr><th>Stale blueprints</th><td>{{ integ.stale_blueprints }}</td></tr>
+      <tr><th>Candidates</th><td>{{ integ.candidates }}</td></tr>
+      <tr><th>Candidates without primary</th><td>{{ integ.candidates_without_primary }}</td></tr>
+      <tr><th>Stale matches</th><td>{{ integ.stale_matches }}</td></tr>
+      <tr><th>Integrity failures</th><td>{{ integ.issue_count }}</td></tr>
+    </table>
+    <h3 style="margin-top:1rem;">Legacy health</h3>
     <table>
       {% for k,v in info.health.items() %}
       <tr><th>{{ k }}</th><td>{{ v }}</td></tr>

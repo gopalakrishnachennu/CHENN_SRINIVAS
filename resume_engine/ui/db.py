@@ -182,6 +182,17 @@ CREATE INDEX IF NOT EXISTS idx_resume_lib_cand ON resume_library(candidate_id);
 CREATE INDEX IF NOT EXISTS idx_resume_lib_job ON resume_library(job_id);
 """
 
+# Columns added defensively after CREATE IF NOT EXISTS (SQLite ALTER)
+_UI_SCHEMA_ALTERS = [
+    "ALTER TABLE jd_library ADD COLUMN analysis_status TEXT DEFAULT 'NEEDS_ANALYSIS'",
+    "ALTER TABLE jd_library ADD COLUMN analysis_version INTEGER DEFAULT 0",
+    "ALTER TABLE jd_library ADD COLUMN jd_content_hash TEXT",
+    "ALTER TABLE candidate_profiles ADD COLUMN version INTEGER DEFAULT 1",
+    "ALTER TABLE match_cache ADD COLUMN candidate_version INTEGER DEFAULT 0",
+    "ALTER TABLE match_cache ADD COLUMN job_analysis_version INTEGER DEFAULT 0",
+    "ALTER TABLE match_cache ADD COLUMN family_registry_version TEXT",
+]
+
 # Engine family_id → display. Matching uses family_id; UI shows display_name.
 DEFAULT_FAMILIES: list[dict] = [
     {
@@ -293,6 +304,7 @@ def connect_ui_db() -> sqlite3.Connection:
     path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(path), check_same_thread=False)
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
 
@@ -333,6 +345,11 @@ def ensure_ui_schema(conn: sqlite3.Connection | None = None) -> None:
         conn = connect_ui_db()
     try:
         conn.executescript(UI_SCHEMA)
+        for stmt in _UI_SCHEMA_ALTERS:
+            try:
+                conn.execute(stmt)
+            except sqlite3.OperationalError:
+                pass  # column already exists
         seed_family_registry(conn)
         conn.commit()
     finally:

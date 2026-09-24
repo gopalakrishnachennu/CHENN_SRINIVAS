@@ -28,7 +28,7 @@ def _empty_profile() -> dict[str, Any]:
         "linkedin": "",
         "website": "",
         "primary_family": "",
-        "secondary_family": "",
+        "secondary_family": None,
         "companies": [],  # [{company, start_date, end_date}]
         "education": [],
         "certifications": [],
@@ -46,11 +46,17 @@ def normalize_payload(payload: dict[str, Any] | None) -> dict[str, Any]:
     for key in ("email", "phone", "location", "linkedin", "website"):
         data[key] = payload.get(key) or ""
     primary = families.resolve_family_id(payload.get("primary_family")) or payload.get("primary_family") or ""
-    secondary = families.resolve_family_id(payload.get("secondary_family")) or payload.get("secondary_family") or ""
-    if secondary in {"none", "null"}:
-        secondary = ""
+    secondary_raw = payload.get("secondary_family")
+    secondary = families.resolve_family_id(secondary_raw) if secondary_raw not in (None, "") else None
+    if secondary is None and secondary_raw not in (None, ""):
+        # resolve failed / sentinel
+        secondary = None
+    if isinstance(secondary, str) and secondary.lower() in {"none", "null", "n/a", ""}:
+        secondary = None
+    if primary and secondary and primary == secondary:
+        secondary = None  # normalize duplicate primary==secondary
     data["primary_family"] = primary
-    data["secondary_family"] = secondary
+    data["secondary_family"] = secondary  # None when absent — never ""
 
     companies = payload.get("companies")
     if companies is None and payload.get("experience"):
@@ -109,6 +115,7 @@ def list_profiles(*, include_archived: bool = False) -> list[dict[str, Any]]:
             "id": row["id"],
             "name": row["name"],
             "status": row["status"],
+            "version": int(row["version"] if "version" in row.keys() else 1),  # noqa: SIM118
             "updated_at": row["updated_at"],
             "created_at": row["created_at"],
             "payload": payload,
@@ -130,6 +137,7 @@ def get_profile(profile_id: str) -> dict[str, Any]:
         "id": row["id"],
         "name": row["name"],
         "status": row["status"],
+        "version": int(row["version"] if "version" in row.keys() else 1),  # noqa: SIM118
         "updated_at": row["updated_at"],
         "created_at": row["created_at"],
         "payload": payload,
@@ -144,10 +152,15 @@ def create_profile(payload: dict[str, Any] | None = None, *, actor: str | None =
     data = normalize_payload(payload)
     if not data.get("primary_family"):
         raise ValueError("Primary Job Family is required")
-    if not families.get_family(data["primary_family"]):
-        raise ValueError("Primary Job Family must be selected from the Family Registry")
-    if data.get("secondary_family") and not families.get_family(data["secondary_family"]):
-        raise ValueError("Secondary Job Family must be selected from the Family Registry")
+    try:
+        families.get_family(data["primary_family"])
+    except KeyError as exc:
+        raise ValueError("Primary Job Family must be selected from the Family Registry") from exc
+    if data.get("secondary_family"):
+        try:
+            families.get_family(data["secondary_family"])
+        except KeyError as exc:
+            raise ValueError("Secondary Job Family must be selected from the Family Registry") from exc
     profile_id = str(uuid.uuid4())
     name = data.get("candidate_name") or "Unnamed Candidate"
     now = _now()
@@ -186,9 +199,10 @@ def update_profile(profile_id: str, payload: dict[str, Any], *, actor: str | Non
         version = int(row["v"]) + 1
         conn.execute(
             """
-            UPDATE candidate_profiles SET name = ?, payload_json = ?, updated_at = ? WHERE id = ?
+            UPDATE candidate_profiles SET name = ?, payload_json = ?, updated_at = ?, version = ?
+            WHERE id = ?
             """,
-            (name, json.dumps(data), now, profile_id),
+            (name, json.dumps(data), now, version, profile_id),
         )
         conn.execute(
             """
@@ -198,6 +212,10 @@ def update_profile(profile_id: str, payload: dict[str, Any], *, actor: str | Non
             (profile_id, version, json.dumps(data), actor, now),
         )
         conn.commit()
+    from resume_engine.ui.services import match_service
+
+    match_service.invalidate_matches_for_candidate(profile_id)
+    match_service.recompute_and_cache_matches(profile_id, actor=actor)
     record_audit_event(
         action="candidate.update",
         actor=actor,
@@ -223,6 +241,9 @@ def archive_profile(profile_id: str, *, actor: str | None = None) -> None:
             (_now(), profile_id),
         )
         conn.commit()
+    from resume_engine.ui.services import match_service
+
+    match_service.invalidate_matches_for_candidate(profile_id)
     record_audit_event(action="candidate.archive", actor=actor, entity_type="candidate", entity_id=profile_id)
 
 

@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% block title %}Create Resume · Resume Engine{% endblock %}
 {% block page_title %}Create Resume{% endblock %}
-{% block page_sub %}Select a candidate and a matched job — the engine handles the rest.{% endblock %}
+{% block page_sub %}1. Candidate → 2. Matching Jobs → 3. Generate{% endblock %}
 {% block content %}
 <div class="stack">
-<form method="post" class="card">
+<form method="post" class="card" id="create-form">
   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
   <input type="hidden" name="action" value="generate"/>
 
-  <h3>1. Select Candidate</h3>
+  <h3>1. Candidate</h3>
   <select name="candidate_id" onchange="location.href='{{ url_for('create_resume.index') }}?candidate='+this.value{% if preselect_jd %}+'&jd={{ preselect_jd }}'{% endif %}">
     <option value="">Select…</option>
     {% for c in candidates %}
@@ -16,7 +16,7 @@
     {% endfor %}
   </select>
 
-  <h3 style="margin-top:1.25rem;">2. Matched Jobs Only</h3>
+  <h3 style="margin-top:1.25rem;">2. Matching Jobs</h3>
   {% if not selected %}
     <div class="empty">Choose a candidate first.</div>
   {% elif not matched %}
@@ -24,19 +24,48 @@
   {% else %}
     <div class="grid product">
       {% for m in matched %}
-      <label class="card" style="cursor:pointer;">
+      {% set status = (m.analysis_status or 'NEEDS_ANALYSIS')|upper %}
+      {% set ready = status == 'READY' %}
+      <label class="card {% if not ready %}dimmed{% endif %}" style="cursor:{% if ready %}pointer{% else %}default{% endif %};">
+        {% if ready %}
         <input type="radio" name="jd_id" value="{{ m.id }}"
-          {% if preselect_jd == m.id %}checked{% elif loop.first and not preselect_jd %}checked{% endif %}
-          required style="margin-bottom:0.5rem;"/>
+          {% if preselect_jd == m.id %}checked{% elif ready and not preselect_jd and m.id == first_ready_id %}checked{% endif %}
+          class="job-radio" data-ready="1"
+          style="margin-bottom:0.5rem;"/>
+        {% endif %}
         <div><strong>{{ m.title }}</strong></div>
         <div class="muted tiny">{{ m.company or '—' }}</div>
-        <div style="margin-top:0.45rem;"><span class="match-badge {{ m.match_type|lower|replace('_','') }}">{{ m.match_type|replace('_',' ') }}</span></div>
+        <div style="margin-top:0.45rem;">
+          <span class="match-badge {{ m.match_type|lower|replace('_','') }}">{{ m.match_type|replace('_',' ') }}</span>
+          {% if status == 'READY' %}
+            <span class="pill pass">READY</span>
+          {% elif status == 'ANALYZING' %}
+            <span class="pill warn">ANALYZING</span>
+          {% elif status == 'FAILED' or status == 'FAILED ANALYSIS' %}
+            <span class="pill fail">FAILED ANALYSIS</span>
+          {% elif status == 'ARCHIVED' %}
+            <span class="pill">ARCHIVED</span>
+          {% else %}
+            <span class="pill warn">NEEDS ANALYSIS</span>
+          {% endif %}
+        </div>
+        {% if not ready and status != 'ARCHIVED' %}
+          <div class="actions" style="margin-top:0.6rem;">
+            <button class="btn secondary" type="submit" name="action" value="prepare"
+              formaction="{{ url_for('create_resume.prepare') }}"
+              formmethod="post" formnovalidate
+              onclick="this.form.jd_id_prepare.value='{{ m.id }}'">
+              {% if status == 'FAILED' %}Retry Analysis{% else %}Analyze Now{% endif %}
+            </button>
+          </div>
+        {% endif %}
       </label>
       {% endfor %}
     </div>
+    <input type="hidden" name="jd_id_prepare" value=""/>
   {% endif %}
 
-  <h3 style="margin-top:1.25rem;">3. Options</h3>
+  <h3 style="margin-top:1.25rem;">3. Generate</h3>
   <div class="form-grid">
     <div>
       <label>Variants</label>
@@ -55,8 +84,29 @@
   </div>
 
   <div style="margin-top:1.5rem;">
-    <button class="btn xl" type="submit" {% if not selected or not matched %}disabled{% endif %}>Generate Resume</button>
+    <button class="btn xl" type="submit" id="generate-btn"
+      {% if not selected or not ready_count %}disabled{% endif %}>
+      Generate Resume
+    </button>
+    {% if selected and matched and not ready_count %}
+      <p class="muted tiny" style="margin-top:0.5rem;">Generate stays disabled until a matched job is READY.</p>
+    {% endif %}
   </div>
 </form>
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  var btn = document.getElementById('generate-btn');
+  var form = document.getElementById('create-form');
+  if (!btn || !form) return;
+  function sync() {
+    var ready = form.querySelector('input.job-radio[data-ready="1"]:checked');
+    btn.disabled = !ready;
+  }
+  form.addEventListener('change', sync);
+  sync();
+})();
+</script>
 {% endblock %}

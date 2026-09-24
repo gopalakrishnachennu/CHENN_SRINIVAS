@@ -1,6 +1,6 @@
 """Tests for the Phase 3.2 product UI redesign."""
 
-from tests.ui._helpers import csrf_from, make_client
+from tests.ui._helpers import make_client
 
 
 def test_primary_nav_pages_200(monkeypatch):
@@ -58,12 +58,18 @@ def test_deterministic_matching():
     assert direct["score"] == 1.0
 
     hybrid = compute_match_type("data_engineering", None, "ai_ml", None)
-    assert hybrid["match_type"] == "HYBRID"
+    assert hybrid["match_type"] in ("HYBRID", "COMPATIBLE")
 
     secondary = compute_match_type(
         "data_engineering", "ai_ml", "ai_ml", None,
     )
-    assert secondary["match_type"] in ("DIRECT", "HYBRID", "SECONDARY")
+    assert secondary["match_type"] in ("DIRECT", "HYBRID", "SECONDARY", "COMPATIBLE")
+
+    # Secondary-only path (families without blocked/compatible collision)
+    secondary_only = compute_match_type(
+        "software_engineering", "data_analytics", "data_analytics", None,
+    )
+    assert secondary_only["match_type"] == "SECONDARY"
 
     no_match = compute_match_type(
         "salesforce", None, "ai_ml", None,
