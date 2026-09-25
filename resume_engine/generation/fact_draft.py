@@ -88,6 +88,7 @@ def create_fact_draft(
     blueprint_path: str | Path | None = None,
     target_title: str | None = None,
     jd_hash: str | None = None,
+    jd_text: str | None = None,
     candidate_profile_path: str | Path,
     run_id: str,
     formats: list[str],
@@ -102,6 +103,8 @@ def create_fact_draft(
     resume, gaps = build_fact_draft(candidate, title, hash_value)
     paths = create_run_paths(hash_value, run_id=run_id)
     write_run_metadata(paths, {"generation_mode": "FACT_DRAFT", "openai_requests": 0})
+    if jd_text:
+        (paths.root / "source_jd.txt").write_text(jd_text, encoding="utf-8")
     source_path = save_resume_artifact(paths.raw_dir, "V01_fact_draft.json", resume)
     exports = []
     if formats:
@@ -124,6 +127,8 @@ def create_fact_draft(
         "candidate_profile": portable_path(candidate_profile_path),
         "blueprint": portable_path(blueprint_path) if blueprint_path else None,
         "target_title": title,
+        "source_jd": portable_path(paths.root / "source_jd.txt") if jd_text else None,
+        "scope": "Verified candidate facts with the JD title as the target; no requirement-level tailoring.",
         "run_root": portable_path(paths.root),
         "variants_processed": 1,
         "variant_results": [{

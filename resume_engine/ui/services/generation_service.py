@@ -153,6 +153,7 @@ def _run_job(job_id: str) -> None:
                 blueprint_path=blueprint,
                 target_title=payload.get("target_title"),
                 jd_hash=payload.get("jd_hash"),
+                jd_text=payload.get("jd_text"),
                 candidate_profile_path=candidate,
                 run_id=payload["run_id"],
                 formats=formats,

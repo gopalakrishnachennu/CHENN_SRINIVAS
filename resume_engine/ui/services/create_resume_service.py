@@ -229,7 +229,7 @@ def start_resume_creation(
     engine_profile = to_engine_candidate_profile(candidate)
     profile_dir = PROJECT_ROOT / "resume_engine" / "storage" / "ui" / "candidate_snapshots"
     profile_dir.mkdir(parents=True, exist_ok=True)
-    profile_path = profile_dir / f"{candidate_id}.json"
+    profile_path = profile_dir / f"{resume_id}.json"
     profile_path.write_text(json.dumps(engine_profile, indent=2), encoding="utf-8")
 
     payload = {
@@ -317,6 +317,82 @@ def start_resume_creation(
 
     from resume_engine.ui.services.generation_service import get_job as get_gen_job
 
+    return get_gen_job(gen_job["job_id"])
+
+
+def start_project_jd_draft(
+    *, candidate_id: str, jd_text: str, target_title: str,
+    actor: str | None = None,
+) -> dict[str, Any]:
+    """Create a library-backed local draft without registering an incomplete job."""
+    from resume_engine.ui.services.candidate_service import get_profile, to_engine_candidate_profile
+    from resume_engine.ui.services.generation_service import get_job as get_gen_job, start_generation_job
+
+    candidate = get_profile(candidate_id)
+    if (candidate.get("status") or "").lower() == "archived":
+        raise PreflightError("CANDIDATE_ARCHIVED", "Archived candidates cannot start a draft.")
+    if not candidate.get("payload", {}).get("companies"):
+        raise PreflightError("DRAFT_FACTS_MISSING", "Add company history to the candidate first.")
+    title = target_title.strip()
+    raw = jd_text.strip()
+    if not title or not raw:
+        raise PreflightError("PROJECT_JD_MISSING", "The project JD needs a title and description.")
+
+    jd_hash = hashlib.sha256(raw.encode("utf-8")).hexdigest()[:32]
+    source_id = f"project-jd:{jd_hash}"
+    resume_id = str(uuid.uuid4())
+    now = _now()
+    profile_dir = PROJECT_ROOT / "resume_engine" / "storage" / "ui" / "candidate_snapshots"
+    profile_dir.mkdir(parents=True, exist_ok=True)
+    profile_path = profile_dir / f"{resume_id}.json"
+    profile_path.write_text(
+        json.dumps(to_engine_candidate_profile(candidate), indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+    payload = {
+        "generation_mode": "FACT_DRAFT",
+        "candidate_profile_path": str(profile_path),
+        "target_title": title,
+        "jd_text": raw,
+        "jd_hash": jd_hash,
+        "source": "real_jd.txt",
+        "model": None,
+        "variant_count": 1,
+        "repair": False,
+        "use_laya": False,
+        "export_docx": True,
+        "export_pdf": True,
+        "resume_id": resume_id,
+        "candidate_id": candidate_id,
+        "job_id": source_id,
+        "match_type": "PROJECT_JD_DRAFT",
+        "online_mode": "shadow",
+    }
+    gen_job = create_generation_job(payload, actor=actor, start_immediately=False)
+    ensure_ui_schema()
+    with connect_ui_db() as conn:
+        conn.execute(
+            """INSERT INTO resume_library(
+                 id, candidate_id, job_id, status, provenance, run_id,
+                 payload_json, created_at, updated_at
+               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (resume_id, candidate_id, source_id, "generating", "VERIFIED_CANDIDATE_INPUT",
+             gen_job["run_id"], json.dumps(payload), now, now),
+        )
+        conn.execute(
+            """INSERT INTO resume_runs(
+                 run_id, candidate_id, jd_id, jd_hash, job_id, status, match_type,
+                 summary_json, created_at, updated_at
+               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (gen_job["run_id"], candidate_id, source_id, jd_hash, gen_job["job_id"],
+             "QUEUED", "PROJECT_JD_DRAFT", json.dumps({"resume_id": resume_id}), now, now),
+        )
+        conn.commit()
+    start_generation_job(gen_job["job_id"])
+    record_audit_event(
+        action="resume.project_jd_draft_start", actor=actor,
+        entity_type="resume_library", entity_id=resume_id,
+        metadata={"candidate_id": candidate_id, "source": "real_jd.txt", "jd_hash": jd_hash},
+    )
     return get_gen_job(gen_job["job_id"])
 
 
@@ -576,7 +652,7 @@ def list_resume_library(limit: int = 100) -> list[dict[str, Any]]:
 
             job_title = get_job(r["job_id"])["title"]
         except (KeyError, TypeError, OSError):
-            pass
+            job_title = (r.get("payload") or {}).get("target_title") or job_title
         out.append({
             "run_id": r.get("run_id") or r["id"],
             "candidate_id": r["candidate_id"],

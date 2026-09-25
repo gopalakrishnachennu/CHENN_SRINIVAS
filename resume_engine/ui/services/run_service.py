@@ -40,11 +40,13 @@ def get_run(jd_hash: str, run_id: str) -> dict[str, Any]:
         "exports": [relative_to_project(p) for p in sorted((root / "exports").glob("*"))] if (root / "exports").exists() else [],
         "reports": [relative_to_project(p) for p in sorted((root / "reports").rglob("*.json"))][:100] if (root / "reports").exists() else [],
     }
+    source_jd_path = root / "source_jd.txt"
     return {
         "jd_hash": jd_hash,
         "run_id": run_id,
         "summary": data,
         "artifacts": artifacts,
+        "source_jd": source_jd_path.read_text(encoding="utf-8") if source_jd_path.is_file() else None,
         "summary_path": relative_to_project(summary),
     }
 

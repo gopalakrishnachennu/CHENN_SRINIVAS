@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Project Sources · Resume Engine{% endblock %}
+{% block page_title %}Project Sources{% endblock %}
+{% block page_sub %}Review local source files before they enter a candidate, job, or resume run.{% endblock %}
+{% block content %}
+<div class="stack">
+  <div class="grid two">
+    <section class="card">
+      <div class="section-title">
+        <div>
+          <h2>Verified Candidate</h2>
+          <div class="muted tiny">candidate_profile.json</div>
+        </div>
+        <span class="pill {% if master %}ok{% else %}warn{% endif %}">{{ 'Available' if master else 'Missing' }}</span>
+      </div>
+      {% if profile_error %}<div class="banner danger">Candidate source could not be read: {{ profile_error }}</div>{% endif %}
+      {% if master %}
+        <div class="meta-row">
+          <div>Name: <strong>{{ master.candidate_name or 'Not stated' }}</strong></div>
+          <div>Companies: <strong>{{ (master.experience or [])|length }}</strong></div>
+          <div>Verified skills: <strong>{{ (master.technical_skills or [])|length }}</strong></div>
+        </div>
+        <details class="details-block">
+          <summary>Review company history</summary>
+          {% for item in master.experience or [] %}
+            <div class="source-history"><strong>{{ item.company }}</strong> · {{ item.title }} · {{ item.dates }}</div>
+          {% endfor %}
+        </details>
+        {% if existing %}
+          <div class="banner">Already imported. Changes to the project file are not applied automatically.</div>
+          <div class="actions"><a class="btn secondary" href="{{ url_for('candidates.view', profile_id=existing.id) }}">Review Candidate</a></div>
+          <form method="post" class="stack">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+            <label><input type="checkbox" name="confirm_refresh" required/> Replace the candidate's current facts with this project file</label>
+            <div class="actions"><button class="btn ghost" name="action" value="refresh_candidate">Refresh From File</button></div>
+          </form>
+        {% else %}
+          <form method="post" class="stack">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+            <div class="form-grid">
+              <div>
+                <label for="primary-family">Primary Family</label>
+                <select id="primary-family" name="primary_family" required>
+                  <option value="">Select verified specialty</option>
+                  {% for id, name in family_options %}<option value="{{ id }}">{{ name }}</option>{% endfor %}
+                </select>
+              </div>
+              <div>
+                <label for="secondary-family">Secondary Family</label>
+                <select id="secondary-family" name="secondary_family">
+                  <option value="">None</option>
+                  {% for id, name in family_options %}<option value="{{ id }}">{{ name }}</option>{% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="actions"><button class="btn" name="action" value="import_candidate">Import Verified Profile</button></div>
+          </form>
+        {% endif %}
+      {% else %}
+        <div class="empty">No project candidate file is available. Add a candidate in the app.</div>
+        <a class="btn secondary" href="{{ url_for('candidates.create') }}">Add Candidate</a>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <div>
+          <h2>Local Job Description</h2>
+          <div class="muted tiny">real_jd.txt</div>
+        </div>
+        <span class="pill {% if jd %}ok{% else %}warn{% endif %}">{{ 'Available' if jd else 'Missing' }}</span>
+      </div>
+      {% if jd_error %}<div class="banner danger">JD source could not be read: {{ jd_error }}</div>{% endif %}
+      {% if jd %}
+        <div class="meta-row">
+          <div>Title: <strong>{{ jd.title }}</strong></div>
+          <div>Location: <strong>{{ jd.location or 'Not stated' }}</strong></div>
+        </div>
+        <div class="banner">Company and JD URL are not in this source. It cannot become an active job until you supply them. A fact-only resume draft can still use its title and your verified history.</div>
+        <details class="details-block">
+          <summary>Review raw JD</summary>
+          <pre class="source-jd">{{ jd.jd_text }}</pre>
+        </details>
+        <form method="post" class="stack">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+          <div>
+            <label for="draft-candidate">Candidate</label>
+            <select id="draft-candidate" name="candidate_id" required>
+              <option value="">Select candidate</option>
+              {% for candidate in candidates %}<option value="{{ candidate.id }}" {% if existing and candidate.id == existing.id %}selected{% endif %}>{{ candidate.name }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="actions">
+            <button class="btn" name="action" value="create_draft" {% if not candidates %}disabled{% endif %}>Create Fact-Only Draft</button>
+            <a class="btn secondary" href="{{ url_for('jobs.create', from_project_jd=1) }}">Complete Job Intake</a>
+          </div>
+        </form>
+      {% else %}
+        <div class="empty">No local JD file is available. Paste a JD in the Jobs intake.</div>
+        <a class="btn secondary" href="{{ url_for('jobs.create') }}">Add Job</a>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

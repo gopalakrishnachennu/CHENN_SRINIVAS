@@ -34,8 +34,10 @@
     {% if profile.payload.verified_skills %}<p><strong>Verified skills:</strong> {{ profile.payload.verified_skills|join(', ') }}</p>{% endif %}
     {% if profile.payload.verified_summary %}<p>{{ profile.payload.verified_summary }}</p>{% endif %}
     {% if profile.payload.verified_projects %}<h3>Verified Projects</h3>{% for project in profile.payload.verified_projects %}<p><strong>{{ project.name }}</strong></p><ul>{% for item in project.facts %}<li>{{ item }}</li>{% endfor %}</ul>{% endfor %}{% endif %}
+    {% if profile.payload.education %}<h3>Education</h3><ul>{% for item in profile.payload.education %}<li>{% if item is mapping %}{{ item.description if item.description is defined else ([item.degree, item.school]|select|join(' - ')) }}{% else %}{{ item }}{% endif %}</li>{% endfor %}</ul>{% endif %}
+    {% if profile.payload.certifications %}<h3>Certifications</h3><ul>{% for item in profile.payload.certifications %}<li>{{ item }}</li>{% endfor %}</ul>{% endif %}
     <div class="actions" style="margin-top:1rem;">
-      <a class="btn" href="{{ url_for('create_resume.index') }}">Create Resume</a>
+      <a class="btn" href="{{ url_for('create_resume.index', candidate=profile.id) }}">Create Resume</a>
       <a class="btn secondary" href="{{ url_for('matches.index', candidate=profile.id) }}">Matches</a>
       <a class="btn ghost" href="{{ url_for('candidates.edit', profile_id=profile.id) }}">Edit</a>
     </div>

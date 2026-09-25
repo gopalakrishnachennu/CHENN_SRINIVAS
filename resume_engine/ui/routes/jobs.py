@@ -189,10 +189,15 @@ def create():
                 return redirect(url_for("jobs.detail", job_id=analysis["job"]["id"]))
             except Exception as exc:  # noqa: BLE001
                 flash(str(exc), "error")
+    form_values = payload if request.method == "POST" else {}
+    if request.method == "GET" and request.args.get("from_project_jd") == "1":
+        from resume_engine.ui.services.project_source_service import jd_source
+
+        form_values = jd_source() or {}
     return render_template(
         "pages/job_new.html",
         analysis=None,
-        form_values={},
+        form_values=form_values,
         required_missing=[],
         required_fields=job_service.REQUIRED_JOB_INTAKE_FIELDS,
     )

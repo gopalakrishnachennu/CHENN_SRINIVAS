@@ -111,7 +111,7 @@
     </div>
     <div class="full">
       <label>Education</label>
-      <textarea name="education" rows="3" placeholder="One entry per line">{% if profile %}{% for e in profile.payload.education %}{{ e.description if e is mapping and e.description is defined else e }}
+      <textarea name="education" rows="3" placeholder="One entry per line">{% if profile %}{% for e in profile.payload.education %}{% if e is mapping %}{{ e.description if e.description is defined else ([e.degree, e.school]|select|join(' - ')) }}{% else %}{{ e }}{% endif %}
 {% endfor %}{% endif %}</textarea>
     </div>
     <div class="full">

@@ -568,3 +568,5 @@ pre.json {
   .hero-panel h2 { font-size: 1.45rem; }
   .sidebar { padding: 0.85rem; }
 }
+.source-history { padding: .45rem 0; border-bottom: 1px solid var(--border, #d7deea); }
+.source-jd { max-height: 24rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: .85rem; }

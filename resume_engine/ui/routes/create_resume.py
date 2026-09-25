@@ -14,10 +14,73 @@ from resume_engine.ui.services import (
     match_service,
 )
 from resume_engine.ui.services import openai_command_service
+from resume_engine.ui.services import project_source_service
+from resume_engine.ui.services.family_registry_service import family_options
 from resume_engine.ui.services.blueprint_lifecycle import ensure_job_blueprint
 from resume_engine.ui.services.create_resume_service import PreflightError
 
 bp = Blueprint("create_resume", __name__, url_prefix="/create")
+
+
+@bp.route("/project-sources", methods=["GET", "POST"])
+@require_auth
+@csrf_protect
+def project_sources():
+    if request.method == "POST":
+        try:
+            action = request.form.get("action")
+            if action == "import_candidate":
+                profile = project_source_service.import_candidate(
+                    primary_family=request.form.get("primary_family") or "",
+                    secondary_family=request.form.get("secondary_family") or None,
+                    actor=session.get("username"),
+                )
+                flash("Verified project profile imported. Review the fact card before generation.", "success")
+                return redirect(url_for("candidates.view", profile_id=profile["id"]))
+            if action == "refresh_candidate":
+                if request.form.get("confirm_refresh") != "on":
+                    raise ValueError("Confirm that project-file facts should replace this candidate's current facts.")
+                profile = project_source_service.refresh_candidate(actor=session.get("username"))
+                flash("Candidate refreshed from the project file. Review the updated facts.", "success")
+                return redirect(url_for("candidates.view", profile_id=profile["id"]))
+            if action == "create_draft":
+                source = project_source_service.jd_source()
+                if source is None:
+                    raise ValueError("real_jd.txt is not available in this project.")
+                job = create_resume_service.start_project_jd_draft(
+                    candidate_id=request.form.get("candidate_id") or "",
+                    jd_text=source["jd_text"],
+                    target_title=source["title"],
+                    actor=session.get("username"),
+                )
+                return redirect(url_for("create_resume.progress", job_id=job["job_id"]))
+            raise ValueError("Choose an import or draft action.")
+        except (ValueError, KeyError, PreflightError) as exc:
+            flash(str(exc), "error")
+
+    profile_error = None
+    jd_error = None
+    try:
+        master = project_source_service.candidate_source()
+    except (OSError, ValueError) as exc:
+        master = None
+        profile_error = str(exc)
+    existing = project_source_service.existing_candidate(master) if master else None
+    try:
+        jd = project_source_service.jd_source()
+    except (OSError, ValueError) as exc:
+        jd = None
+        jd_error = str(exc)
+    return render_template(
+        "pages/project_sources.html",
+        master=master,
+        existing=existing,
+        jd=jd,
+        profile_error=profile_error,
+        jd_error=jd_error,
+        candidates=candidate_service.list_profiles(),
+        family_options=family_options(),
+    )
 
 
 def _matched_for(candidate_id: str | None):

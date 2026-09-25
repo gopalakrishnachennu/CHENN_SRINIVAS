@@ -14,6 +14,9 @@
         <div class="tiny muted">Run {{ meta.run_id }}</div>
       </div>
     </div>
+    {% if meta.match_type == 'PROJECT_JD_DRAFT' %}
+      <div class="banner">Fact-only draft from the project JD. It uses the target title and verified candidate facts; it does not claim requirement-level tailoring. Complete the missing job intake fields to analyze the full JD.</div>
+    {% endif %}
 
     {% if variants %}
     <div class="grid product">
@@ -35,6 +38,13 @@
       {% if meta.job_id %}
         <a class="btn secondary" href="{{ url_for('create_resume.progress', job_id=meta.job_id) }}">View Progress</a>
       {% endif %}
+    {% endif %}
+
+    {% if artifacts and artifacts.source_jd %}
+      <details class="details-block">
+        <summary>Source Job Description</summary>
+        <pre class="source-jd">{{ artifacts.source_jd }}</pre>
+      </details>
     {% endif %}
 
     <details class="details-block" {% if show_details %}open{% endif %}>
