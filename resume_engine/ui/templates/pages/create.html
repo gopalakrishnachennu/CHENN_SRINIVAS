@@ -29,13 +29,12 @@
       <div><strong>Required fields:</strong> Job Title, Company, Location, JD URL, and Raw JD must be filled.</div>
       <div><strong>Family match:</strong> Primary match, Secondary match, or Overlap match is required.</div>
       <div><strong>Job analysis:</strong> Build the JD blueprint first. Local Laya fallback runs when OpenAI is unavailable.</div>
-      <div><strong>Final resume:</strong> OpenAI credits/key are needed only when generating resume variants.</div>
+      <div><strong>AI tailoring:</strong> OpenAI credits are required for AI variants. Fact-only drafts use verified profile data and make zero OpenAI requests.</div>
     </div>
   </div>
 
   <form method="post" class="stack" id="create-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-    <input type="hidden" name="action" value="generate"/>
 
     <div class="grid two">
       <div class="card">
@@ -109,9 +108,13 @@
               {% endif %}
             </div>
           </div>
-          <button class="btn xl" type="submit" id="generate-btn"
+          <button class="btn secondary xl" type="submit" name="action" value="local_draft" id="draft-btn"
+            {% if not selected or not matched %}disabled{% endif %}>
+            Create Fact-Only Draft
+          </button>
+          <button class="btn xl" type="submit" name="action" value="generate" id="generate-btn"
             {% if not selected or not ready_count %}disabled{% endif %}>
-            Generate Resume
+            AI Tailor Resume
           </button>
         </div>
       </div>
@@ -121,7 +124,7 @@
       <div class="section-title">
         <div>
           <h3>Matching Jobs</h3>
-          <div class="muted tiny">Family matches appear immediately. A job must say Ready to Generate before resume creation starts.</div>
+          <div class="muted tiny">Any listed job can guide a fact-only draft. AI tailoring requires completed JD analysis.</div>
         </div>
         {% if selected %}<span class="pill">{{ matched|length }} family matches</span>{% endif %}
       </div>
@@ -134,12 +137,10 @@
           {% for m in matched %}
           {% set status = (m.analysis_status or 'NEEDS_ANALYSIS')|upper %}
           {% set ready = m.is_resume_ready %}
-          <label class="job-option card {% if not ready %}dimmed{% endif %}">
-            {% if ready %}
+          <label class="job-option card">
             <input type="radio" name="jd_id" value="{{ m.id }}"
-              {% if preselect_jd == m.id %}checked{% elif ready and not preselect_jd and m.id == first_ready_id %}checked{% endif %}
-              class="job-radio" data-ready="1"/>
-            {% endif %}
+              {% if preselect_jd == m.id %}checked{% elif not preselect_jd and m.id == (first_ready_id or matched[0].id) %}checked{% endif %}
+              class="job-radio" data-ready="{{ 1 if ready else 0 }}"/>
             <span class="job-option-body">
               <strong>{{ m.title }}</strong>
               <span class="muted tiny">{{ m.company or 'Company not set' }}</span>
@@ -196,16 +197,19 @@
 <script>
 (function () {
   var btn = document.getElementById('generate-btn');
+  var draftBtn = document.getElementById('draft-btn');
   var form = document.getElementById('create-form');
   var launchStatus = document.getElementById('launch-status');
   if (!btn || !form) return;
   function sync() {
-    var ready = form.querySelector('input.job-radio[data-ready="1"]:checked');
+    var selectedJob = form.querySelector('input.job-radio:checked');
+    var ready = selectedJob && selectedJob.dataset.ready === '1';
     btn.disabled = !ready;
+    if (draftBtn) draftBtn.disabled = !selectedJob;
     if (launchStatus) {
       launchStatus.textContent = ready
-        ? 'Ready: this run will generate, validate, repair, and export.'
-        : 'Select one ready matched job below to launch.';
+        ? 'Fact-only draft uses no OpenAI credits. AI tailoring uses one OpenAI request.'
+        : selectedJob ? 'Fact-only draft is available now; analyze this job to enable AI tailoring.' : 'Select a job below.';
     }
   }
   form.addEventListener('change', sync);

@@ -47,7 +47,7 @@ def index():
     if not candidate_id and candidates:
         candidate_id = candidates[0]["id"]
 
-    if request.method == "POST" and request.form.get("action") == "generate":
+    if request.method == "POST" and request.form.get("action") in {"generate", "local_draft"}:
         try:
             job = create_resume_service.start_create_resume(
                 candidate_id=request.form.get("candidate_id") or "",
@@ -58,6 +58,7 @@ def index():
                 export_docx=request.form.get("docx") == "on",
                 export_pdf=request.form.get("pdf") == "on",
                 model=request.form.get("model") or None,
+                local_draft=request.form.get("action") == "local_draft",
                 actor=session.get("username"),
             )
             return redirect(url_for("create_resume.progress", job_id=job["job_id"]))

@@ -23,6 +23,8 @@ class ResumeCertification(BaseModel):
 class ResumeExperience(BaseModel):
     company: str
     title: str
+    start_date: str = ""
+    end_date: str = ""
     bullets: list[str] = Field(default_factory=list)
     bullet_meta: list[ResumeBullet] = Field(default_factory=list)
 
@@ -67,6 +69,7 @@ class ResumeJSON(BaseModel):
     experience: list[ResumeExperience] = Field(default_factory=list)
     projects: list[ResumeProject] = Field(default_factory=list)
     certifications: list[str] = Field(default_factory=list)
+    education: list[str] = Field(default_factory=list)
     certification_records: list[ResumeCertification] = Field(default_factory=list)
     skill_provenance: list[SkillProvenance] = Field(default_factory=list)
     variant_id: str | None = None

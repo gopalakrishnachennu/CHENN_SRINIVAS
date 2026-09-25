@@ -19,6 +19,8 @@ def _parse_companies():
     names = request.form.getlist("company_name")
     starts = request.form.getlist("company_start")
     ends = request.form.getlist("company_end")
+    titles = request.form.getlist("company_title")
+    evidence = request.form.getlist("company_evidence")
     for i, name in enumerate(names):
         name = (name or "").strip()
         if not name:
@@ -27,6 +29,8 @@ def _parse_companies():
             "company": name,
             "start_date": (starts[i] if i < len(starts) else "") or "",
             "end_date": (ends[i] if i < len(ends) else "") or "",
+            "title": (titles[i] if i < len(titles) else "") or "",
+            "responsibilities": [line.strip() for line in (evidence[i] if i < len(evidence) else "").splitlines() if line.strip()],
         })
     return companies
 
@@ -46,6 +50,12 @@ def _parse_payload():
         "primary_family": request.form.get("primary_family") or "",
         "secondary_family": request.form.get("secondary_family") or None,
         "companies": _parse_companies(),
+        "verified_skills": request.form.get("verified_skills") or "",
+        "verified_summary": request.form.get("verified_summary") or "",
+        "verified_projects": [
+            {"name": name.strip(), "facts": [line.strip() for line in (request.form.getlist("project_facts")[i] if i < len(request.form.getlist("project_facts")) else "").splitlines() if line.strip()]}
+            for i, name in enumerate(request.form.getlist("project_name")) if name.strip()
+        ],
         "education": education,
         "certifications": [c.strip() for c in certs.split(",") if c.strip()],
     }

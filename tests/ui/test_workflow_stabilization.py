@@ -130,7 +130,7 @@ def test_removed_secondary_family_updates_matches(monkeypatch):
     assert ai["id"] in html or "resume-ready" in html.lower()
 
 
-def test_missing_blueprint_job_is_not_selectable(monkeypatch):
+def test_missing_blueprint_job_allows_draft_but_not_ai_generation(monkeypatch):
     _mock_analyze(monkeypatch)
     client = make_client(monkeypatch)
     cand = candidate_service.create_profile({
@@ -146,11 +146,13 @@ def test_missing_blueprint_job_is_not_selectable(monkeypatch):
             (ANALYSIS_NEEDS, job["id"]),
         )
         conn.commit()
-    # Visible as a family match, but not selectable for generation.
+    # A fact-only draft may use the title; AI generation still needs analysis.
     page = client.get(f"/create/?candidate={cand['id']}")
     html = page.data.decode()
     assert job["id"] in html
-    assert f'name="jd_id" value="{job["id"]}"' not in html
+    assert f'name="jd_id" value="{job["id"]}"' in html
+    assert 'data-ready="0"' in html
+    assert 'id="generate-btn"' in html
     matches = client.get(f"/matches/?candidate={cand['id']}")
     match_html = matches.data.decode()
     assert job["id"] in match_html

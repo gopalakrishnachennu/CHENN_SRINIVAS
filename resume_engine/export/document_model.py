@@ -54,6 +54,7 @@ class ResumeDocumentView:
     experience: list[dict[str, Any]]
     projects: list[dict[str, Any]]
     certifications: list[str]
+    education: list[str]
     variant_id: str | None = None
     source_blueprint_hash: str | None = None
 
@@ -84,6 +85,8 @@ def build_document_view(
             {
                 "company": job.company,
                 "title": job.title,
+                "start_date": job.start_date,
+                "end_date": job.end_date,
                 "bullets": list(job.bullets or []),
             }
         )
@@ -107,6 +110,7 @@ def build_document_view(
         experience=experience,
         projects=projects,
         certifications=certifications,
+        education=list(resume.education or []),
         variant_id=resume.variant_id,
         source_blueprint_hash=resume.source_blueprint_hash,
     )

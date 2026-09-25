@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
@@ -111,6 +112,7 @@ def start_create_resume(
     export_docx: bool = True,
     export_pdf: bool = True,
     model: str | None = None,
+    local_draft: bool = False,
     actor: str | None = None,
 ) -> dict[str, Any]:
     """Prepare blueprint if needed, preflight, then queue generation."""
@@ -121,6 +123,19 @@ def start_create_resume(
     )
 
     job = get_job(jd_id)
+    if local_draft:
+        return start_resume_creation(
+            candidate_id=candidate_id,
+            job_id=jd_id,
+            match_type="FACT_DRAFT",
+            variant_count=1,
+            use_laya=False,
+            repair=False,
+            export_docx=export_docx,
+            export_pdf=export_pdf,
+            local_draft=True,
+            actor=actor,
+        )
     required_missing = validate_required_intake(job)
     if required_missing:
         raise PreflightError(
@@ -155,6 +170,7 @@ def start_create_resume(
         export_docx=export_docx,
         export_pdf=export_pdf,
         model=model,
+        local_draft=local_draft,
         actor=actor,
     )
 
@@ -170,21 +186,42 @@ def start_resume_creation(
     export_docx: bool | None = None,
     export_pdf: bool | None = None,
     model: str | None = None,
+    local_draft: bool = False,
     actor: str | None = None,
 ) -> dict[str, Any]:
     from resume_engine.ui.services.candidate_service import to_engine_candidate_profile
 
     # Final hard gate
-    check = preflight_create_resume(candidate_id, job_id)
-    candidate = check["candidate"]
-    job = check["job"]
-    blueprint_path = check["blueprint_path"]
+    if local_draft:
+        from resume_engine.ui.services.candidate_service import get_profile
+        from resume_engine.ui.services.job_service import get_job
+
+        candidate = get_profile(candidate_id)
+        job = get_job(job_id)
+        if (candidate.get("status") or "").lower() == "archived" or (job.get("status") or "").lower() == "archived":
+            raise PreflightError("ARCHIVED_RECORD", "Archived candidates or jobs cannot start a draft.")
+        if not candidate.get("payload", {}).get("companies") or not job.get("title"):
+            raise PreflightError("DRAFT_FACTS_MISSING", "Candidate company history and job title are required.")
+        if match_service.match_candidate_to_job(candidate, job).match_type == MATCH_NONE:
+            raise PreflightError("FAMILY_NO_LONGER_MATCHES", "Candidate and job no longer match by family.")
+        blueprint_path = None
+    else:
+        check = preflight_create_resume(candidate_id, job_id)
+        candidate = check["candidate"]
+        job = check["job"]
+        blueprint_path = check["blueprint_path"]
 
     vc = variant_count or int(get_effective_setting("default_variant_count"))
     laya = use_laya if use_laya is not None else get_effective_setting("laya_default_enabled")
     rep = repair if repair is not None else get_effective_setting("repair_default_enabled")
     docx = export_docx if export_docx is not None else get_effective_setting("default_export_docx")
     pdf = export_pdf if export_pdf is not None else get_effective_setting("default_export_pdf")
+    if local_draft and not (docx or pdf):
+        raise PreflightError("DRAFT_FORMAT_MISSING", "Select DOCX or PDF for the fact-only draft.")
+    draft_hash = (
+        job.get("jd_hash")
+        or hashlib.sha256((job.get("jd_text") or job["title"]).encode("utf-8")).hexdigest()[:32]
+    ) if local_draft else job.get("jd_hash")
 
     resume_id = str(uuid.uuid4())
     now = _now()
@@ -197,11 +234,13 @@ def start_resume_creation(
 
     payload = {
         "blueprint_path": blueprint_path,
-        "generation_mode": "CANDIDATE",
+        "target_title": job.get("title"),
+        "jd_hash": draft_hash,
+        "generation_mode": "FACT_DRAFT" if local_draft else "CANDIDATE",
         "candidate_profile_path": str(profile_path),
         "variant_count": vc,
-        "single_call": vc == 1 and not bool(rep),
-        "model": model or get_effective_setting("openai_resume_generation_model") or get_effective_setting("default_openai_model"),
+        "single_call": not local_draft and vc == 1 and not bool(rep),
+        "model": None if local_draft else model or get_effective_setting("openai_resume_generation_model") or get_effective_setting("default_openai_model"),
         "use_laya": bool(laya),
         "repair": bool(rep),
         "export_docx": bool(docx),
@@ -209,11 +248,11 @@ def start_resume_creation(
         "resume_id": resume_id,
         "candidate_id": candidate_id,
         "job_id": job_id,
-        "match_type": match_type or check["match"]["match_type"],
+        "match_type": match_type if local_draft else match_type or check["match"]["match_type"],
         "online_mode": "shadow",
     }
 
-    gen_job = create_generation_job(payload, actor=actor)
+    gen_job = create_generation_job(payload, actor=actor, start_immediately=False)
 
     ensure_ui_schema()
     with connect_ui_db() as conn:
@@ -229,7 +268,7 @@ def start_resume_creation(
                 candidate_id,
                 job_id,
                 "generating",
-                "GENERATED_ROLE_POSITIONING",
+                "VERIFIED_CANDIDATE_INPUT" if local_draft else "GENERATED_ROLE_POSITIONING",
                 gen_job.get("run_id"),
                 json.dumps(payload),
                 now,
@@ -248,7 +287,7 @@ def start_resume_creation(
                 gen_job.get("run_id") or resume_id,
                 candidate_id,
                 job_id,
-                job.get("jd_hash"),
+                draft_hash,
                 gen_job["job_id"],
                 "QUEUED",
                 payload["match_type"],
@@ -258,6 +297,10 @@ def start_resume_creation(
             ),
         )
         conn.commit()
+
+    from resume_engine.ui.services.generation_service import start_generation_job
+
+    start_generation_job(gen_job["job_id"])
 
     record_audit_event(
         action="resume.create_start",
@@ -284,6 +327,7 @@ def friendly_progress(job: dict[str, Any]) -> dict[str, Any]:
     stage = (job.get("stage") or "").lower()
     payload = job.get("payload") or {}
     result = job.get("result") or {}
+    is_draft = payload.get("generation_mode") == "FACT_DRAFT"
     progress_message = result.get("progress_message") if isinstance(result, dict) else None
     progress_detail = result.get("progress_detail") if isinstance(result, dict) else {}
     created_at = job.get("created_at")
@@ -299,7 +343,9 @@ def friendly_progress(job: dict[str, Any]) -> dict[str, Any]:
 
     reached = "candidate"
     if status == "RUNNING":
-        if stage in {"queued", "preflight", "load_blueprint"}:
+        if is_draft and stage == "draft":
+            reached = "draft"
+        elif stage in {"queued", "preflight", "load_blueprint"}:
             reached = "jd"
         elif stage in {"strategy", "strategy_ready"}:
             reached = "strategy"
@@ -329,7 +375,7 @@ def friendly_progress(job: dict[str, Any]) -> dict[str, Any]:
     exports = exports if isinstance(exports, list) else []
     variant_results = result.get("variant_results") if isinstance(result, dict) else None
     variant_results = variant_results if isinstance(variant_results, list) else []
-    failed_variants = sum(1 for item in variant_results if not item.get("passed"))
+    failed_variants = sum(1 for item in variant_results if not item.get("passed") and item.get("status") != "FACT_DRAFT")
     usage = openai_command_service.usage_for_run(job.get("run_id"))
     artifacts_ready = status == "COMPLETED" and bool(exports)
     provider_blocked = any(
@@ -358,6 +404,14 @@ def friendly_progress(job: dict[str, Any]) -> dict[str, Any]:
         ("repair", repair_label),
         ("export", "Documents created" if artifacts_ready else "No artifacts created"),
     ]
+    if is_draft:
+        steps_def = [
+            ("candidate", "Verified candidate facts loaded"),
+            ("match", "Target job selected"),
+            ("jd", "Job context loaded"),
+            ("draft", "Fact-only draft assembled"),
+            ("export", "Draft exported" if artifacts_ready else "Draft export pending"),
+        ]
 
     if status == "COMPLETED":
         reached = "export"
@@ -374,7 +428,7 @@ def friendly_progress(job: dict[str, Any]) -> dict[str, Any]:
         steps.append({"key": key, "label": label, "done": done, "skipped": skipped, "current": current})
     headline = "Creating resume..."
     if status == "COMPLETED" and artifacts_ready:
-        headline = "RESUME READY"
+        headline = "FACT-ONLY DRAFT READY" if is_draft else "RESUME READY"
     elif status == "COMPLETED":
         headline = "RUN COMPLETED WITHOUT ARTIFACTS"
     elif status == "FAILED":
@@ -409,6 +463,8 @@ def friendly_progress(job: dict[str, Any]) -> dict[str, Any]:
                 "OpenAI did not return a usable response, so no resume artifact was created. "
                 "Check quota, API key, or rate limits, then retry."
             )
+    elif status == "COMPLETED" and is_draft:
+        current_message = "Fact-only draft is ready. Review the source facts before applying. No OpenAI request was made."
     if status == "RUNNING" and reached == "generate" and not usage["totals"].get("requests"):
         current_message = current_message + " Waiting for the first OpenAI response."
     return {
@@ -417,7 +473,9 @@ def friendly_progress(job: dict[str, Any]) -> dict[str, Any]:
         "steps": steps,
         "ready": artifacts_ready,
         "artifacts_ready": artifacts_ready,
-        "warning": status == "COMPLETED" and not artifacts_ready,
+        "warning": status == "COMPLETED" and (not artifacts_ready or bool(is_draft and result.get("evidence_gaps"))),
+        "draft": is_draft,
+        "evidence_gaps": result.get("evidence_gaps") if isinstance(result, dict) else [],
         "provider_blocked": provider_blocked,
         "failed_variants": failed_variants,
         "error": job.get("error"),
@@ -429,13 +487,13 @@ def friendly_progress(job: dict[str, Any]) -> dict[str, Any]:
         "progress_detail": progress_detail or {},
         "elapsed_seconds": elapsed,
         "updated_seconds_ago": updated_age,
-        "model": payload.get("model"),
+        "model": "Local facts" if is_draft else payload.get("model"),
         "variant_count": payload.get("variant_count"),
         "formats": formats,
         "artifact_label": ", ".join(formats) if artifacts_ready else "None",
         "repair": bool(payload.get("repair")),
         "laya": bool(payload.get("use_laya")),
-        "openai_key": openai_command_service.openai_key_status(),
+        "openai_key": {"label": "Not used"} if is_draft else openai_command_service.openai_key_status(),
         "openai_usage": usage,
         "payload_summary": {
             "candidate_id": payload.get("candidate_id"),
@@ -444,7 +502,7 @@ def friendly_progress(job: dict[str, Any]) -> dict[str, Any]:
             "online_mode": payload.get("online_mode"),
             "single_call": bool(payload.get("single_call")),
         },
-        "call_policy": "1 OpenAI call" if payload.get("single_call") else "Multi-step generation",
+        "call_policy": "0 OpenAI calls" if is_draft else "1 OpenAI call" if payload.get("single_call") else "Multi-step generation",
         "result": {
             "exports": exports,
             "summary_path": result.get("summary_path") if isinstance(result, dict) else None,
@@ -492,8 +550,19 @@ def get_resume(resume_id: str) -> dict[str, Any]:
 
 def list_resume_library(limit: int = 100) -> list[dict[str, Any]]:
     items = list_resumes(limit=limit)
+    run_ids = [item["run_id"] for item in items if item.get("run_id")]
+    run_meta = {}
+    if run_ids:
+        with connect_ui_db() as conn:
+            placeholders = ",".join("?" for _ in run_ids)
+            rows = conn.execute(
+                f"SELECT run_id, jd_hash, job_id FROM resume_runs WHERE run_id IN ({placeholders})",
+                run_ids,
+            ).fetchall()
+            run_meta = {row["run_id"]: dict(row) for row in rows}
     out = []
     for r in items:
+        linked_run = run_meta.get(r.get("run_id")) or {}
         cand_name = r.get("candidate_id")
         job_title = r.get("job_id")
         try:
@@ -514,11 +583,11 @@ def list_resume_library(limit: int = 100) -> list[dict[str, Any]]:
             "candidate": cand_name,
             "jd_id": r["job_id"],
             "job_title": job_title,
-            "jd_hash": None,
+            "jd_hash": linked_run.get("jd_hash"),
             "status": r["status"],
             "match_type": (r.get("payload") or {}).get("match_type"),
             "created_at": r["created_at"],
-            "job_id": (r.get("payload") or {}).get("job_id") or r.get("run_id"),
+            "job_id": linked_run.get("job_id"),
         })
     return out
 

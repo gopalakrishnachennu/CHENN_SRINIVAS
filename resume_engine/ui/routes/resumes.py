@@ -57,6 +57,10 @@ def detail(run_id: str):
             for path in (artifacts.get("artifacts") or {}).get("validated") or []:
                 variants.append({"label": path.split("/")[-1], "path": path, "status": "VALIDATED"})
             if not variants:
+                for path in (artifacts.get("artifacts") or {}).get("raw") or []:
+                    if path.endswith("_fact_draft.json"):
+                        variants.append({"label": path.split("/")[-1], "path": path, "status": "FACT DRAFT"})
+            if not variants:
                 for path in (artifacts.get("artifacts") or {}).get("rejected") or []:
                     variants.append({
                         "label": path.split("/")[-1],

@@ -1,7 +1,4 @@
-"""Candidate profiles — facts only: contact, families, companies/timeline, optional edu/certs.
-
-Generated titles, skills, bullets, and summaries are NEVER stored as candidate truth.
-"""
+"""Candidate profiles preserve explicitly verified facts, never generated claims."""
 
 from __future__ import annotations
 
@@ -30,6 +27,9 @@ def _empty_profile() -> dict[str, Any]:
         "primary_family": "",
         "secondary_family": None,
         "companies": [],  # [{company, start_date, end_date}]
+        "verified_skills": [],
+        "verified_summary": "",
+        "verified_projects": [],
         "education": [],
         "certifications": [],
         # Provenance marker — engine-generated content must not land here
@@ -38,7 +38,7 @@ def _empty_profile() -> dict[str, Any]:
 
 
 def normalize_payload(payload: dict[str, Any] | None) -> dict[str, Any]:
-    """Strip legacy generated-content fields; keep verified facts only."""
+    """Strip legacy generated fields while retaining explicitly verified evidence."""
     data = _empty_profile()
     if not payload:
         return data
@@ -84,13 +84,28 @@ def normalize_payload(payload: dict[str, Any] | None) -> dict[str, Any]:
             "company": (c.get("company") or "").strip(),
             "start_date": (c.get("start_date") or "").strip(),
             "end_date": (c.get("end_date") or "").strip(),
+            "title": (c.get("title") or "").strip(),
+            "responsibilities": [str(item).strip() for item in (c.get("responsibilities") or []) if str(item).strip()],
             "provenance": {
                 "company": "VERIFIED_CANDIDATE_INPUT",
                 "start_date": "VERIFIED_CANDIDATE_INPUT",
                 "end_date": "VERIFIED_CANDIDATE_INPUT",
-                "role_title": "NOT_PROVIDED",
+                "role_title": "VERIFIED_CANDIDATE_INPUT" if c.get("title") else "NOT_PROVIDED",
             },
         })
+    skills = payload.get("verified_skills") or []
+    if isinstance(skills, str):
+        skills = skills.split(",")
+    data["verified_skills"] = [str(skill).strip() for skill in skills if str(skill).strip()]
+    data["verified_summary"] = str(payload.get("verified_summary") or "").strip()
+    data["verified_projects"] = [
+        {
+            "name": str(project.get("name") or "").strip(),
+            "facts": [str(line).strip() for line in project.get("facts") or [] if str(line).strip()],
+        }
+        for project in payload.get("verified_projects") or []
+        if isinstance(project, dict) and str(project.get("name") or "").strip()
+    ]
     data["education"] = payload.get("education") or []
     certs = payload.get("certifications") or []
     if isinstance(certs, str):
@@ -248,21 +263,21 @@ def archive_profile(profile_id: str, *, actor: str | None = None) -> None:
 
 
 def to_engine_candidate_profile(profile: dict[str, Any]) -> dict[str, Any]:
-    """Map facts-only profile to engine candidate shape (companies without invented titles)."""
+    """Map verified candidate facts to the engine profile without inventing claims."""
     p = profile.get("payload") or profile
     experience = []
     for c in p.get("companies") or []:
         experience.append({
             "company": c.get("company"),
-            "title": "",  # engine generates positioning
+            "title": c.get("title") or "",
             "start_date": c.get("start_date"),
             "end_date": c.get("end_date"),
-            "responsibilities": [],
+            "responsibilities": c.get("responsibilities") or [],
             "provenance": c.get("provenance") or {
                 "company": "VERIFIED_CANDIDATE_INPUT",
                 "start_date": "VERIFIED_CANDIDATE_INPUT",
                 "end_date": "VERIFIED_CANDIDATE_INPUT",
-                "role_title": "GENERATED_ROLE_POSITIONING",
+                "role_title": "VERIFIED_CANDIDATE_INPUT" if c.get("title") else "NOT_PROVIDED",
             },
         })
     return {
@@ -277,9 +292,9 @@ def to_engine_candidate_profile(profile: dict[str, Any]) -> dict[str, Any]:
         "experience": experience,
         "education": p.get("education") or [],
         "certifications": p.get("certifications") or [],
-        "technical_skills": [],
-        "projects": [],
-        "target_background_summary": "",
+        "technical_skills": p.get("verified_skills") or [],
+        "projects": p.get("verified_projects") or [],
+        "target_background_summary": p.get("verified_summary") or "",
         "_facts_only": True,
     }
 

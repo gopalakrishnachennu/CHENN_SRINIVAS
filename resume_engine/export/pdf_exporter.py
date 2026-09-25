@@ -8,7 +8,7 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import LETTER
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
-from reportlab.platypus import ListFlowable, ListItem, Paragraph, SimpleDocTemplate, Spacer
+from reportlab.platypus import KeepTogether, ListFlowable, ListItem, PageBreak, Paragraph, SimpleDocTemplate, Spacer
 
 from resume_engine.export.document_model import ContactHeader, build_document_view
 from resume_engine.models.resume_schema import ResumeJSON
@@ -53,6 +53,7 @@ def _styles():
             spaceAfter=3,
             alignment=TA_LEFT,
             leading=13,
+            keepWithNext=True,
         ),
         "body": ParagraphStyle(
             "ResumeBody",
@@ -70,6 +71,7 @@ def _styles():
             spaceBefore=5,
             spaceAfter=2,
             leading=12,
+            keepWithNext=True,
         ),
     }
 
@@ -125,29 +127,37 @@ def export_resume_pdf(
 
     if view.experience:
         story.append(Paragraph("EXPERIENCE", styles["heading"]))
-        for job in view.experience:
-            story.append(
+        long_history = len(view.experience) >= 3 and sum(len(job.get("bullets") or []) for job in view.experience) > 16
+        for index, job in enumerate(view.experience):
+            if long_history and index == len(view.experience) - 1:
+                story.append(PageBreak())
+            heading = " - ".join(part for part in (job["title"], job["company"]) if part)
+            dates = " - ".join(part for part in (job.get("start_date"), job.get("end_date")) if part)
+            job_story = [
                 Paragraph(
-                    _escape(f"{job['title']} — {job['company']}"),
+                    _escape(heading),
                     styles["job"],
                 )
-            )
+            ]
+            if dates:
+                job_story.append(Paragraph(_escape(dates), styles["body"]))
             bullets = [
                 ListItem(Paragraph(_escape(bullet), styles["body"]), leftIndent=10)
                 for bullet in job.get("bullets") or []
             ]
             if bullets:
-                story.append(ListFlowable(bullets, bulletType="bullet", leftIndent=15))
+                job_story.append(ListFlowable(bullets, bulletType="bullet", leftIndent=15))
+            story.append(KeepTogether(job_story))
 
     if view.projects:
         story.append(Paragraph("PROJECTS", styles["heading"]))
         for project in view.projects:
-            story.append(Paragraph(_escape(project["name"]), styles["job"]))
+            project_story = [Paragraph(_escape(project["name"]), styles["job"])]
             if project.get("summary"):
-                story.append(Paragraph(_escape(project["summary"]), styles["body"]))
+                project_story.append(Paragraph(_escape(project["summary"]), styles["body"]))
             tech = project.get("technologies") or []
             if tech:
-                story.append(
+                project_story.append(
                     Paragraph(
                         f"<b>Technologies:</b> {_escape(', '.join(tech))}",
                         styles["body"],
@@ -158,7 +168,8 @@ def export_resume_pdf(
                 for bullet in project.get("bullets") or []
             ]
             if bullets:
-                story.append(ListFlowable(bullets, bulletType="bullet", leftIndent=15))
+                project_story.append(ListFlowable(bullets, bulletType="bullet", leftIndent=15))
+            story.append(KeepTogether(project_story))
 
     if view.certifications:
         story.append(Paragraph("CERTIFICATIONS", styles["heading"]))
@@ -167,6 +178,11 @@ def export_resume_pdf(
             for cert in view.certifications
         ]
         story.append(ListFlowable(bullets, bulletType="bullet", leftIndent=15))
+
+    if view.education:
+        story.append(Paragraph("EDUCATION", styles["heading"]))
+        for item in view.education:
+            story.append(Paragraph(_escape(item), styles["body"]))
 
     doc.build(story)
     return path

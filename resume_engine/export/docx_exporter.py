@@ -102,6 +102,7 @@ def export_resume_docx(
         _set_run_font(run, bold=True, size=11, color=ACCENT)
         p.paragraph_format.space_before = Pt(12)
         p.paragraph_format.space_after = Pt(3)
+        p.paragraph_format.keep_with_next = True
         _set_paragraph_bottom_border(p, color_hex="0F5C4C", size="6")
 
     if view.summary:
@@ -123,12 +124,23 @@ def export_resume_docx(
 
     if view.experience:
         add_heading("Experience")
-        for job in view.experience:
+        long_history = len(view.experience) >= 3 and sum(len(job.get("bullets") or []) for job in view.experience) > 16
+        for index, job in enumerate(view.experience):
             p = document.add_paragraph()
             p.paragraph_format.space_before = Pt(4)
             p.paragraph_format.space_after = Pt(1)
-            run = p.add_run(f"{job['title']} — {job['company']}")
+            p.paragraph_format.keep_with_next = True
+            if long_history and index == len(view.experience) - 1:
+                p.paragraph_format.page_break_before = True
+            run = p.add_run(" - ".join(part for part in (job["title"], job["company"]) if part))
             _set_run_font(run, bold=True, size=10, color=INK)
+            dates = " - ".join(part for part in (job.get("start_date"), job.get("end_date")) if part)
+            if dates:
+                date_paragraph = document.add_paragraph(dates)
+                date_paragraph.paragraph_format.space_after = Pt(2)
+                date_paragraph.paragraph_format.keep_with_next = True
+                for date_run in date_paragraph.runs:
+                    _set_run_font(date_run, size=9, color=MUTED)
             for bullet in job.get("bullets") or []:
                 bp = document.add_paragraph(bullet, style="List Bullet")
                 bp.paragraph_format.space_after = Pt(1)
@@ -162,6 +174,13 @@ def export_resume_docx(
         for cert in view.certifications:
             bp = document.add_paragraph(cert, style="List Bullet")
             for run in bp.runs:
+                _set_run_font(run, size=10, color=INK)
+
+    if view.education:
+        add_heading("Education")
+        for item in view.education:
+            paragraph = document.add_paragraph(item)
+            for run in paragraph.runs:
                 _set_run_font(run, size=10, color=INK)
 
     document.save(str(path))

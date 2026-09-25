@@ -23,7 +23,9 @@ def _now() -> str:
     return datetime.now(UTC).isoformat()
 
 
-def create_generation_job(payload: dict[str, Any], *, actor: str | None = None) -> dict[str, Any]:
+def create_generation_job(
+    payload: dict[str, Any], *, actor: str | None = None, start_immediately: bool = True
+) -> dict[str, Any]:
     ensure_storage_dirs()
     ensure_ui_schema()
     job_id = str(uuid.uuid4())
@@ -49,8 +51,13 @@ def create_generation_job(payload: dict[str, Any], *, actor: str | None = None) 
         entity_id=job_id,
         metadata={"run_id": run_id},
     )
-    _EXECUTOR.submit(_run_job, job_id)
+    if start_immediately:
+        start_generation_job(job_id)
     return get_job(job_id)
+
+
+def start_generation_job(job_id: str) -> None:
+    _EXECUTOR.submit(_run_job, job_id)
 
 
 def _update(job_id: str, *, status: str | None = None, stage: str | None = None, result: Any = None, error: str | None = None) -> None:
@@ -80,6 +87,22 @@ def _update(job_id: str, *, status: str | None = None, stage: str | None = None,
         conn.commit()
 
 
+def _sync_resume_records(payload: dict[str, Any], status: str, result: dict[str, Any] | None = None) -> None:
+    resume_id = payload.get("resume_id")
+    if not resume_id:
+        return
+    with connect_ui_db() as conn:
+        conn.execute(
+            "UPDATE resume_library SET status = ?, result_path = ?, updated_at = ? WHERE id = ?",
+            (status.lower(), (result or {}).get("summary_path"), _now(), resume_id),
+        )
+        conn.execute(
+            "UPDATE resume_runs SET status = ?, summary_json = ?, updated_at = ? WHERE run_id = ?",
+            (status, json.dumps(result or {}), _now(), payload.get("run_id")),
+        )
+        conn.commit()
+
+
 def _run_job(job_id: str) -> None:
     with _LOCK:
         pass
@@ -96,7 +119,7 @@ def _run_job(job_id: str) -> None:
         from resume_engine.pipeline.phase2_pipeline import run_phase2_pipeline
 
         blueprint = payload.get("blueprint_path")
-        if not blueprint:
+        if not blueprint and payload.get("generation_mode") != "FACT_DRAFT":
             raise ValueError("blueprint_path required")
         variant_count = int(payload.get("variant_count") or get_effective_setting("default_variant_count"))
         single_call = bool(payload.get("single_call", variant_count == 1 and not payload.get("repair")))
@@ -109,8 +132,8 @@ def _run_job(job_id: str) -> None:
         mode = (payload.get("generation_mode") or "TEMPLATE").upper()
         candidate = payload.get("candidate_profile_path")
         seed = payload.get("resume_seed_path") or str(PROJECT_ROOT / "resume_seed.json")
-        if mode == "CANDIDATE" and not candidate:
-            raise ValueError("candidate_profile_path required for CANDIDATE mode")
+        if mode in {"CANDIDATE", "FACT_DRAFT"} and not candidate:
+            raise ValueError("candidate_profile_path required for candidate resume mode")
 
         def progress_callback(stage: str, message: str, detail: dict[str, Any] | None = None) -> None:
             _update(
@@ -122,6 +145,22 @@ def _run_job(job_id: str) -> None:
                     "progress_detail": detail or {},
                 },
             )
+
+        if payload.get("generation_mode") == "FACT_DRAFT":
+            from resume_engine.generation.fact_draft import create_fact_draft
+
+            result = create_fact_draft(
+                blueprint_path=blueprint,
+                target_title=payload.get("target_title"),
+                jd_hash=payload.get("jd_hash"),
+                candidate_profile_path=candidate,
+                run_id=payload["run_id"],
+                formats=formats,
+                progress_callback=progress_callback,
+            )
+            _update(job_id, status="COMPLETED", stage="done", result=result)
+            _sync_resume_records(payload, "DRAFT", result)
+            return
 
         result = run_phase2_pipeline(
             blueprint_path=blueprint,
@@ -136,7 +175,16 @@ def _run_job(job_id: str) -> None:
             progress_callback=progress_callback,
             single_call=single_call,
         )
+        if not result.get("exports") and not any(v.get("passed") for v in result.get("variant_results") or []):
+            failure = next((v for v in result.get("variant_results") or [] if v.get("error_type")), {})
+            error = failure.get("error_message") or "No variant passed validation or produced an artifact."
+            if "credit_balance_exhausted" in error or "insufficient_quota" in error:
+                error = "OpenAI credits are exhausted. Create a fact-only draft now, or add API credits before retrying AI generation."
+            _update(job_id, status="FAILED", stage="error", result=result, error=error)
+            _sync_resume_records(payload, "FAILED", result)
+            return
         _update(job_id, status="COMPLETED", stage="done", result=result)
+        _sync_resume_records(payload, "COMPLETED", result)
     except Exception as exc:  # noqa: BLE001
         _update(
             job_id,
@@ -145,6 +193,10 @@ def _run_job(job_id: str) -> None:
             error=f"{type(exc).__name__}: {exc}",
             result={"traceback": traceback.format_exc()[-2000:]},
         )
+        try:
+            _sync_resume_records(get_job(job_id)["payload"], "FAILED")
+        except Exception:
+            pass
 
 
 def get_job(job_id: str) -> dict[str, Any]:

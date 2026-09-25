@@ -330,6 +330,8 @@ textarea { min-height: 170px; font-family: ui-monospace, SFMono-Regular, Menlo, 
   background: var(--panel);
   margin-bottom: 0.6rem;
 }
+.company-evidence { grid-column: 1 / -1; }
+.company-evidence textarea { min-height: 5.5rem; font-family: inherit; font-size: 0.9rem; }
 .job-option {
   display: flex;
   gap: 0.75rem;

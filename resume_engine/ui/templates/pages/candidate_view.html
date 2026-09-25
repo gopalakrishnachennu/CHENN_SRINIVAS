@@ -25,10 +25,15 @@
       <div class="muted" style="margin-bottom:0.35rem;">
         <strong style="color:var(--ink)">{{ c.company }}</strong>
         · {{ c.start_date or '?' }} – {{ c.end_date or '?' }}
+        {% if c.title %}· {{ c.title }}{% endif %}
       </div>
+      {% if c.responsibilities %}<ul>{% for item in c.responsibilities %}<li>{{ item }}</li>{% endfor %}</ul>{% endif %}
     {% else %}
       <div class="muted">No companies listed.</div>
     {% endfor %}
+    {% if profile.payload.verified_skills %}<p><strong>Verified skills:</strong> {{ profile.payload.verified_skills|join(', ') }}</p>{% endif %}
+    {% if profile.payload.verified_summary %}<p>{{ profile.payload.verified_summary }}</p>{% endif %}
+    {% if profile.payload.verified_projects %}<h3>Verified Projects</h3>{% for project in profile.payload.verified_projects %}<p><strong>{{ project.name }}</strong></p><ul>{% for item in project.facts %}<li>{{ item }}</li>{% endfor %}</ul>{% endfor %}{% endif %}
     <div class="actions" style="margin-top:1rem;">
       <a class="btn" href="{{ url_for('create_resume.index') }}">Create Resume</a>
       <a class="btn secondary" href="{{ url_for('matches.index', candidate=profile.id) }}">Matches</a>
@@ -36,7 +41,7 @@
     </div>
     <details class="details-block">
       <summary>Advanced provenance</summary>
-      <p class="tiny muted">Company and dates = VERIFIED_CANDIDATE_INPUT. Role titles are NOT provided by the candidate; generated resumes mark them as GENERATED_ROLE_POSITIONING.</p>
+      <p class="tiny muted">Only facts provided in this profile are treated as verified candidate evidence.</p>
     </details>
   </div>
 </div>

@@ -42,11 +42,16 @@
       </div>
     </div>
     <div class="actions" id="ready-actions" style="margin-top:1rem; {% if not progress.ready %}display:none;{% endif %}">
-      <a class="btn" id="open-resume-link" href="{{ url_for('resumes.detail', run_id=progress.run_id) }}">Open Resume</a>
+      <a class="btn" id="open-resume-link" href="{{ url_for('resumes.detail', run_id=progress.run_id) }}">{% if progress.draft %}Review Draft{% else %}Open Resume{% endif %}</a>
       <a class="btn secondary" href="{{ url_for('resumes.index') }}">Resume Library</a>
+      <span id="download-actions">{% for item in progress.result.exports or [] %}{% for format, path in (item.artifacts or {}).items() %}{% if path %}<a class="btn secondary" href="{{ url_for('exports.download', path=path) }}">Download {{ format|upper }}</a>{% endif %}{% endfor %}{% endfor %}</span>
     </div>
     <div class="banner {% if progress.error %}danger{% endif %}" id="error-banner" style="margin-top:1rem; {% if not progress.error and not progress.warning %}display:none;{% endif %}">
       {{ progress.error or (progress.current_message if progress.warning else '') }}
+    </div>
+    <div class="banner" id="evidence-gaps" style="margin-top:1rem; {% if not progress.evidence_gaps %}display:none;{% endif %}">
+      <strong>To strengthen this draft:</strong> <span id="gap-list">{{ (progress.evidence_gaps or [])|join(', ') }}</span>
+      {% if progress.payload_summary.candidate_id %}<a href="{{ url_for('candidates.edit', profile_id=progress.payload_summary.candidate_id) }}">Add verified evidence</a>{% endif %}
     </div>
   </div>
 
@@ -100,7 +105,7 @@ job_id={{ progress.job_id }}</pre>
     <div class="section-title">
       <div>
         <h3>OpenAI Activity</h3>
-        <div class="muted tiny">Requests and token counts appear here as soon as OpenAI responses return.</div>
+        <div class="muted tiny">{% if progress.draft %}No OpenAI requests are made for fact-only drafts.{% else %}Requests and token counts appear here as soon as OpenAI responses return.{% endif %}</div>
       </div>
       <span class="pill" id="cost-pill">${{ "%.4f"|format(progress.openai_usage.totals.estimated_cost_usd or 0) }} est.</span>
     </div>
@@ -118,7 +123,7 @@ job_id={{ progress.job_id }}</pre>
           <td>{{ "{:,}".format(row.total_tokens or 0) }}</td>
         </tr>
         {% else %}
-        <tr><td colspan="7" class="muted">No OpenAI response has returned yet. If the run is on generation, the app is waiting on the selected model.</td></tr>
+        <tr><td colspan="7" class="muted">{% if progress.draft %}Zero requests. This draft was assembled locally from verified facts.{% else %}No OpenAI response has returned yet. If the run is on generation, the app is waiting on the selected model.{% endif %}</td></tr>
         {% endfor %}
       </tbody>
     </table>
@@ -146,7 +151,9 @@ function renderEvents(events) {
   const tbody = document.getElementById('openai-events');
   if (!tbody) return;
   if (!events || !events.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="muted">No OpenAI response has returned yet. If the run is on generation, the app is waiting on the selected model.</td></tr>';
+    tbody.innerHTML = (document.getElementById('call-policy').textContent === '0 OpenAI calls')
+      ? '<tr><td colspan="7" class="muted">Zero requests. This draft was assembled locally from verified facts.</td></tr>'
+      : '<tr><td colspan="7" class="muted">No OpenAI response has returned yet. If the run is on generation, the app is waiting on the selected model.</td></tr>';
     return;
   }
   tbody.innerHTML = events.map((row) => `
@@ -192,6 +199,22 @@ function render(data) {
   document.getElementById('repair-enabled').textContent = data.repair ? 'ON' : 'OFF';
   document.getElementById('laya-enabled').textContent = data.laya ? 'ON' : 'OFF';
   document.getElementById('call-policy').textContent = data.call_policy || '-';
+  document.getElementById('open-resume-link').textContent = data.draft ? 'Review Draft' : 'Open Resume';
+  const gaps = document.getElementById('evidence-gaps');
+  gaps.style.display = data.evidence_gaps && data.evidence_gaps.length ? '' : 'none';
+  document.getElementById('gap-list').textContent = (data.evidence_gaps || []).join(', ');
+  const downloads = document.getElementById('download-actions');
+  downloads.replaceChildren();
+  for (const item of (data.result && data.result.exports) || []) {
+    for (const [format, path] of Object.entries(item.artifacts || {})) {
+      if (!path) continue;
+      const link = document.createElement('a');
+      link.className = 'btn secondary';
+      link.href = `/exports/download?path=${encodeURIComponent(path)}`;
+      link.textContent = `Download ${format.toUpperCase()}`;
+      downloads.appendChild(link);
+    }
+  }
   document.getElementById('technical-details').textContent = `status=${data.status}\nstage=${data.stage}\nrun_id=${data.run_id}\njob_id=${data.job_id}`;
   renderSteps(data.steps || []);
   renderEvents(data.openai_usage ? data.openai_usage.recent : []);
